@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바그다드 부동산 시세</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --hw-orange:#FF6100;
+    --hw-orange-light:#FFF3EA;
+    --hw-orange-dim:#FFDEC2;
+    --hw-ink:#232428;
+    --hw-ink-soft:#6B6D72;
+    --hw-gray-bg:#F5F5F6;
+    --hw-white:#FFFFFF;
+    --hw-border:#E7E7E9;
+    --hw-up:#E5484D;
+    --hw-down:#2F6FED;
+    --tier-high:#D94800;
+    --tier-mid:#FF8A3D;
+    --tier-low:#FFC896;
+    --verified:#1A8A3F;
+    --radius:10px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ font-family:'Pretendard', -apple-system, sans-serif; background:var(--hw-gray-bg); color:var(--hw-ink); -webkit-font-smoothing:antialiased; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+
+  .topbar{
+    background:var(--hw-white); color:var(--hw-ink); border-bottom:3px solid var(--hw-orange);
+    padding:0 32px; height:72px; display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:500;
+  }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{ width:34px; height:34px; background:var(--hw-orange); border-radius:7px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:16px; color:#fff; }
+  .brand-text .kr{ font-size:22px; font-weight:800; letter-spacing:-0.4px; color:var(--hw-ink); }
+  .brand-text .en{ font-size:11px; color:var(--hw-ink-soft); letter-spacing:0.6px; font-family:'IBM Plex Mono',monospace; margin-top:1px;}
+
+  .top-controls{ display:flex; align-items:center; gap:18px; }
+  .updated{ font-size:12px; color:var(--hw-ink-soft); font-family:'IBM Plex Mono',monospace; }
+  .toggle{ display:flex; background:var(--hw-gray-bg); border:1px solid var(--hw-border); border-radius:999px; padding:3px; gap:2px; }
+  .toggle button{ border:none; background:transparent; color:var(--hw-ink-soft); font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; padding:6px 14px; border-radius:999px; cursor:pointer; }
+  .toggle button.active{ background:var(--hw-orange); color:#fff; }
+
+  .disclaimer{ background:var(--hw-orange-light); border-bottom:1px solid var(--hw-orange-dim); text-align:center; font-size:12px; color:#9A4400; padding:8px 16px; line-height:1.6; }
+  .disclaimer b{ font-weight:700; }
+
+  .page{ max-width:1440px; margin:0 auto; padding:24px 32px 64px; }
+  .section-head{ display:flex; align-items:baseline; justify-content:space-between; margin:32px 0 14px; }
+  .section-head:first-of-type{ margin-top:6px; }
+  .section-title{ display:flex; align-items:center; gap:10px; }
+  .section-title .bar{ width:4px; height:18px; background:var(--hw-orange); border-radius:2px; }
+  .section-title h2{ font-size:19px; font-weight:700; letter-spacing:-0.2px; }
+  .section-title .sub-en{ font-size:11.5px; color:var(--hw-ink-soft); font-family:'IBM Plex Mono',monospace; margin-left:2px; }
+  .section-note{ font-size:12px; color:var(--hw-ink-soft); }
+
+  /* badges */
+  .badge{ font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:999px; display:inline-flex; align-items:center; gap:3px; }
+  .badge.verified{ background:#E8F6EC; color:var(--verified); }
+  .badge.estimate{ background:#F1F1F2; color:var(--hw-ink-soft); }
+
+  /* Bismayah cards — reduced vertical size */
+  .bismayah-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .unit-card{ background:var(--hw-white); border:1px solid var(--hw-border); border-radius:var(--radius); padding:13px 18px; position:relative; overflow:hidden; }
+  .unit-card::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--hw-orange); }
+  .unit-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .unit-type{ font-size:13.5px; font-weight:700; }
+  .unit-type span{ color:var(--hw-orange); }
+
+  .price-row{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+  .price-primary{ font-family:'IBM Plex Mono',monospace; font-size:21px; font-weight:700; letter-spacing:-0.4px; }
+  .price-primary .unit-label{ font-size:11px; font-weight:500; color:var(--hw-ink-soft); margin-left:3px; }
+  .price-secondary{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--hw-ink-soft); }
+  body.iqd-active .price-primary{ font-size:16px; color:var(--hw-ink-soft); }
+  body.iqd-active .price-secondary{ font-size:20px; font-weight:700; color:var(--hw-ink); }
+
+  .unit-meta{ display:flex; flex-wrap:wrap; gap:5px 12px; margin-top:9px; padding-top:8px; border-top:1px dashed var(--hw-border); font-size:10.8px; color:var(--hw-ink-soft); }
+  .unit-meta b{ color:var(--hw-ink); font-weight:600; }
+  .unit-source{ margin-top:6px; font-size:9.5px; color:var(--hw-ink-soft); }
+  .unit-source a{ color:var(--hw-ink-soft); }
+
+  /* districts + map */
+  .split{ display:grid; grid-template-columns:400px 1fr; gap:20px; align-items:stretch; }
+  .panel{ background:var(--hw-white); border:1px solid var(--hw-border); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column; }
+  .panel-head{ padding:14px 18px; border-bottom:1px solid var(--hw-border); display:flex; align-items:center; justify-content:space-between; }
+  .panel-head h3{ font-size:14px; font-weight:700; }
+  .panel-head .count{ font-size:11.5px; color:var(--hw-ink-soft); font-family:'IBM Plex Mono',monospace; }
+
+  .district-list{ max-height:680px; overflow-y:auto; }
+  .district-row{ display:grid; grid-template-columns:20px 1fr auto; gap:10px; align-items:start; padding:12px 16px; border-bottom:1px solid var(--hw-border); cursor:pointer; border-left:3px solid transparent; transition:background .12s, border-color .12s; }
+  .district-row:hover{ background:var(--hw-orange-light); }
+  .district-row.active{ background:var(--hw-orange-light); border-left:3px solid var(--hw-orange); }
+  .district-row:last-child{ border-bottom:none; }
+  .rank{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--hw-ink-soft); padding-top:2px;}
+  .district-info .name-kr{ font-size:13px; font-weight:700; }
+  .district-info .name-en{ font-size:10.2px; color:var(--hw-ink-soft); font-family:'IBM Plex Mono',monospace; margin-left:6px; }
+  .district-info .complex{ font-size:11px; color:var(--hw-orange); margin-top:3px; font-weight:600; }
+  .district-info .meta-line{ font-size:10.3px; color:var(--hw-ink-soft); margin-top:3px; }
+  .district-price{ text-align:right; white-space:nowrap; }
+  .district-price .usd{ font-family:'IBM Plex Mono',monospace; font-size:13.5px; font-weight:700; }
+  .district-price .iqd{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--hw-ink-soft); }
+  body.iqd-active .district-price .usd{ font-size:10.5px; font-weight:500; color:var(--hw-ink-soft); }
+  body.iqd-active .district-price .iqd{ font-size:13.5px; font-weight:700; color:var(--hw-ink); }
+  .district-badge{ margin-top:5px; text-align:right; }
+
+  #map{ flex:1; min-height:680px; }
+  .region-label{ font-family:'Pretendard',sans-serif; text-align:center; pointer-events:none; background:rgba(255,255,255,.92); border:1px solid rgba(0,0,0,.1); border-radius:4px; padding:1px 5px; box-shadow:0 1px 3px rgba(0,0,0,.2); white-space:nowrap; line-height:1.3; transition:.15s; }
+  .region-label .en{ font-weight:700; font-size:8.5px; letter-spacing:.2px; color:#232428; }
+  .region-label .price{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:9px; color:#B23D00; }
+  .region-label.selected{ padding:3px 8px; box-shadow:0 2px 8px rgba(255,97,0,.4); z-index:1000 !important; }
+  .region-label.selected .en{ font-size:10.5px; }
+  .region-label.selected .price{ font-size:11px; }
+  .cbd-label{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:9.5px; color:#fff; background:#232428; padding:2px 7px; border-radius:4px; white-space:nowrap; }
+  .map-legend{ background:rgba(255,255,255,.97); border:1px solid var(--hw-border); border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.85; box-shadow:0 2px 10px rgba(0,0,0,.08); }
+  .map-legend .sw{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px;}
+
+  .compare-panel{ background:var(--hw-white); border:1px solid var(--hw-border); border-radius:var(--radius); padding:22px 24px; }
+  .bar-row{ display:grid; grid-template-columns:150px 1fr 110px 60px; align-items:center; gap:12px; margin-bottom:12px; }
+  .bar-row:last-child{ margin-bottom:0; }
+  .bar-label{ font-size:12.5px; font-weight:600; }
+  .bar-label .en{ display:block; font-size:10px; color:var(--hw-ink-soft); font-family:'IBM Plex Mono',monospace; font-weight:400; }
+  .bar-track{ background:#EEF0F3; border-radius:5px; height:14px; position:relative; overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:5px; background:linear-gradient(90deg, var(--hw-orange-dim), var(--hw-orange)); }
+  .bar-fill.highlight{ background:linear-gradient(90deg,#FFB27A, var(--hw-orange)); }
+  .bar-value{ text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700; }
+
+  .footer-note{ margin-top:36px; font-size:11.5px; color:var(--hw-ink-soft); text-align:center; line-height:1.8; }
+  .footer-note b{ color:var(--hw-ink); }
+
+  @media (max-width:980px){
+    .bismayah-row{ grid-template-columns:1fr; }
+    .split{ grid-template-columns:1fr; }
+    #map{ min-height:420px; }
+    .district-list{ max-height:360px; }
+  }
+</style>
+</head>
+<body class="usd-active">
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">IQ</div>
+    <div class="brand-text">
+      <div class="kr">바그다드 부동산 시세</div>
+      <div class="en">BAGHDAD REALTY WATCH</div>
+    </div>
+  </div>
+  <div class="top-controls">
+    <div class="updated">LAST UPDATED · 2026.08.06</div>
+    <div class="toggle">
+      <button id="btn-iqd">IQD</button>
+      <button id="btn-usd" class="active">USD</button>
+    </div>
+  </div>
+</div>
+
+<div class="disclaimer">
+  ※ <b>비스마야</b>는 국가투자위원회·알라피다인 은행(Al-Rafidain Bank) 공식 발표가 기준입니다(검증됨). <b>바그다드 지역별 단가</b>는 만수르시티 등 일부만 실제 매물가로 확인되었고, 나머지는 조사 전 예시 데이터입니다(각각 배지로 구분). 환율은 1 USD ≈ 1,310 IQD 기준.
+</div>
+
+<div class="page">
+
+  <!-- BISMAYAH -->
+  <div class="section-head">
+    <div class="section-title">
+      <div class="bar"></div>
+      <h2>비스마야 세대별 시세</h2>
+      <span class="sub-en">BISMAYAH · PRICE PER M²</span>
+    </div>
+    <span class="badge verified">✓ 정부·은행 공식가</span>
+  </div>
+
+  <div class="bismayah-row">
+
+    <div class="unit-card">
+      <div class="unit-top"><div class="unit-type"><span>100</span> m² 형</div></div>
+      <div class="price-row">
+        <div class="price-primary"><span class="usd">750</span><span class="unit-label">USD/m²</span></div>
+        <div class="price-secondary"><span class="iqd">982,500</span> IQD/m²</div>
+      </div>
+      <div class="unit-meta"><span>총액 <b>$75,000</b> (약 98,250,000 IQD)</span></div>
+      <div class="unit-source">출처: 알라피다인 은행 공식 발표, 2025년 등록자 기준 · 964media.com (2024.1.18 보도)</div>
+    </div>
+
+    <div class="unit-card">
+      <div class="unit-top"><div class="unit-type"><span>120</span> m² 형</div></div>
+      <div class="price-row">
+        <div class="price-primary"><span class="usd">750</span><span class="unit-label">USD/m²</span></div>
+        <div class="price-secondary"><span class="iqd">982,500</span> IQD/m²</div>
+      </div>
+      <div class="unit-meta"><span>총액 <b>$90,000</b> (약 117,900,000 IQD)</span></div>
+      <div class="unit-source">출처: 알라피다인 은행 공식 발표, 2025년 등록자 기준 · 964media.com (2024.1.18 보도)</div>
+    </div>
+
+    <div class="unit-card">
+      <div class="unit-top"><div class="unit-type"><span>140</span> m² 형</div></div>
+      <div class="price-row">
+        <div class="price-primary"><span class="usd">750</span><span class="unit-label">USD/m²</span></div>
+        <div class="price-secondary"><span class="iqd">982,500</span> IQD/m²</div>
+      </div>
+      <div class="unit-meta"><span>총액 <b>$105,000</b> (약 137,550,000 IQD)</span></div>
+      <div class="unit-source">출처: 알라피다인 은행 공식 발표, 2025년 등록자 기준 · 964media.com (2024.1.18 보도)</div>
+    </div>
+
+  </div>
+  <div class="section-note" style="margin-top:8px;">참고: 등록 연도별로 단가가 상승해왔습니다 — 2023년 이전 $630/m² → 2024년 등록 $714/m² → 2025년 등록 $750/m². 2026년 신규가는 별도 확인 필요.</div>
+
+  <!-- DISTRICTS + MAP -->
+  <div class="section-head">
+    <div class="section-title">
+      <div class="bar"></div>
+      <h2>바그다드 지역별 비교</h2>
+      <span class="sub-en">BAGHDAD DISTRICTS</span>
+    </div>
+    <div class="section-note">지도/리스트 클릭 시 서로 연동됩니다 · 지도는 마우스 휠로 확대·축소</div>
+  </div>
+
+  <div class="split">
+    <div class="panel">
+      <div class="panel-head"><h3>지역별 단가</h3><div class="count">13 DISTRICTS</div></div>
+      <div class="district-list" id="district-list"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>지도로 보기</h3><div class="count">실제 경계 기반</div></div>
+      <div id="map"></div>
+    </div>
+  </div>
+
+  <!-- COMPARE CHART -->
+  <div class="section-head">
+    <div class="section-title">
+      <div class="bar"></div>
+      <h2>지역별 m² 단가 비교</h2>
+      <span class="sub-en">PRICE PER M² · USD</span>
+    </div>
+  </div>
+  <div class="compare-panel" id="compare-panel"></div>
+
+  <div class="footer-note">
+    본 화면은 <b>디자인 시안</b>입니다. 비스마야는 정부·은행 공식 발표가로 검증되었고, 바그다드 지역 중 <b>만수르(Mansour City)</b>는 실제 매물 가격(aiqarat.com, 2023.11 등록)으로 확인했습니다. 나머지 지역은 특정 대표 단지 조사가 아직 완료되지 않은 예시 데이터이며, 실 서비스 전 전수 조사로 교체가 필요합니다. 지역 경계는 사용자가 직접 트레이싱한 KML 좌표를 반영했습니다.
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+  const RATE = 1310; // 1 USD ≈ 1310 IQD
+  const tierColor = { high:"#D94800", mid:"#FF8A3D", low:"#FFC896" };
+
+  // districts: iqd = per-m² asking price in IQD. verified:true means real sourced data.
+  const districts = {
+    mansour: { nameKr:"알만수르", nameEn:"AL-MANSOUR", iqd:2485549, tier:"high", verified:true,
+      complex:"Mansour City (المنصور ستي)", source:"aiqarat.com 매물 등록가, 2023.11 (173㎡ 유닛 기준)",
+      centroid:[33.320317,44.355281],
+      coords:[[33.329776,44.353199],[33.324756,44.353456],[33.32533,44.33835],[33.315863,44.337406],[33.305462,44.340324],[33.30288,44.356031],[33.315105,44.365935],[33.317512,44.370622],[33.32031,44.365988],[33.32325,44.364443],[33.326047,44.361696],[33.328055,44.358005],[33.329776,44.353199]]
+    },
+    jadriya: { nameKr:"알자드리야", nameEn:"AL-JADRIYA", iqd:1310000, tier:"high", verified:false, complex:null,
+      centroid:[33.280201,44.385953],
+      coords:[[33.295171,44.399651],[33.294598,44.394329],[33.289862,44.381798],[33.287279,44.378365],[33.279817,44.370554],[33.276732,44.367636],[33.27257,44.367121],[33.268049,44.368065],[33.264317,44.370897],[33.262953,44.375618],[33.263599,44.38257],[33.268479,44.391582],[33.280248,44.406259],[33.284266,44.40377],[33.287279,44.403255],[33.293019,44.40008],[33.295171,44.399651]]
+    },
+    harthiya: { nameKr:"알하르씨야", nameEn:"AL-HARTHIYA", iqd:1255000, tier:"high", verified:false, complex:null,
+      centroid:[33.306314,44.369063],
+      coords:[[33.315105,44.365935],[33.304273,44.358253],[33.3037,44.362673],[33.301691,44.367437],[33.302193,44.371857],[33.303807,44.374088],[33.305529,44.376663],[33.305421,44.378723],[33.315105,44.365935]]
+    },
+    karrada: { nameKr:"알카라다", nameEn:"AL-KARRADA", iqd:1190000, tier:"mid", verified:false, complex:null,
+      centroid:[33.296341,44.418794],
+      coords:[[33.295171,44.399651],[33.292778,44.400654],[33.287756,44.403658],[33.284384,44.40443],[33.281084,44.406662],[33.28833,44.42297],[33.292133,44.436703],[33.292133,44.445372],[33.295577,44.450693],[33.304257,44.431553],[33.314729,44.426489],[33.311215,44.423571],[33.310282,44.419022],[33.299953,44.41782],[33.296509,44.411812],[33.295171,44.399651]]
+    },
+    yarmouk: { nameKr:"야르무크", nameEn:"AL-YARMOUK", iqd:1080000, tier:"mid", verified:false, complex:null,
+      centroid:[33.295233,44.335369],
+      coords:[[33.306978,44.323463],[33.290694,44.323034],[33.288756,44.333334],[33.285241,44.342003],[33.2856,44.345865],[33.302387,44.356422],[33.306978,44.323463]]
+    },
+    kadhimiya: { nameKr:"카지미야", nameEn:"AL-KADHIMIYA", iqd:1050000, tier:"mid", verified:false, complex:null,
+      centroid:[33.384361,44.340557],
+      coords:[[33.387913,44.322018],[33.366052,44.345278],[33.366698,44.346308],[33.366124,44.347853],[33.381033,44.360555],[33.38519,44.360727],[33.388415,44.35841],[33.390708,44.354118],[33.39164,44.350084],[33.389991,44.345278],[33.387053,44.339699],[33.385477,44.334892],[33.385405,44.332489],[33.387125,44.330772],[33.39121,44.329227],[33.390995,44.325279],[33.389561,44.325022],[33.387913,44.322018]]
+    },
+    zayouna: { nameKr:"자야우나", nameEn:"ZAYOUNA", iqd:980000, tier:"mid", verified:false, complex:null,
+      centroid:[33.325838,44.457855],
+      coords:[[33.340396,44.455409],[33.321464,44.433951],[33.309055,44.458842],[33.318451,44.469056],[33.325265,44.474463],[33.340396,44.455409]]
+    },
+    newbaghdad: { nameKr:"뉴바그다드", nameEn:"NEW BAGHDAD", iqd:915000, tier:"mid", verified:false, complex:null,
+      centroid:[33.305935,44.480956],
+      coords:[[33.318886,44.482774],[33.311068,44.477195],[33.309633,44.474019],[33.30827,44.470671],[33.305114,44.46947],[33.302747,44.46741],[33.301025,44.470328],[33.294497,44.489897],[33.29586,44.497622],[33.299303,44.508351],[33.318886,44.482774]]
+    },
+    amiriya: { nameKr:"알아미리야", nameEn:"AL-AMIRIYA", iqd:905000, tier:"mid", verified:false, complex:null,
+      centroid:[33.299216,44.286448],
+      coords:[[33.310259,44.302521],[33.306098,44.286986],[33.306959,44.276901],[33.304556,44.275742],[33.303624,44.275742],[33.302978,44.276343],[33.301866,44.274497],[33.299642,44.276858],[33.297562,44.276514],[33.294154,44.276386],[33.28845,44.277888],[33.282638,44.281922],[33.288235,44.294367],[33.290316,44.302006],[33.291535,44.309302],[33.307533,44.303122],[33.310259,44.302521]]
+    },
+    saydiya: { nameKr:"사이디야", nameEn:"AL-SAYDIYA", iqd:650000, tier:"low", verified:false, complex:null,
+      centroid:[33.256041,44.355001],
+      coords:[[33.267302,44.359941],[33.262421,44.34432],[33.258546,44.341573],[33.251799,44.345865],[33.235289,44.34535],[33.237586,44.372473],[33.255818,44.366121],[33.268306,44.359426],[33.267302,44.359941]]
+    },
+    jihad: { nameKr:"알지하드", nameEn:"HAYY AL-JIHAD", iqd:600000, tier:"low", verified:false, complex:null,
+      centroid:[33.271327,44.298972],
+      coords:[[33.289738,44.306366],[33.287299,44.29538],[33.282638,44.281922],[33.273378,44.281647],[33.26936,44.279759],[33.263619,44.2789],[33.255293,44.283364],[33.25759,44.28611],[33.258595,44.290573],[33.261035,44.298127],[33.262614,44.299843],[33.263188,44.302933],[33.264336,44.310143],[33.264336,44.319584],[33.264767,44.322331],[33.275101,44.317696],[33.284429,44.310143],[33.28816,44.309284],[33.289738,44.306366]]
+    },
+    sadrcity: { nameKr:"사드르시티", nameEn:"SADR CITY", iqd:520000, tier:"low", verified:false, complex:null,
+      centroid:[33.389194,44.468995],
+      coords:[[33.418059,44.456224],[33.389111,44.422235],[33.356999,44.463434],[33.359867,44.46721],[33.367609,44.471673],[33.374777,44.474763],[33.396277,44.508409],[33.409748,44.48987],[33.401436,44.479913],[33.418059,44.456224]]
+    },
+    bismayah: { nameKr:"비스마야 신도시", nameEn:"BISMAYAH NEW CITY", iqd:982500, tier:"low", verified:true,
+      complex:"Bismayah New City (정부 공식가)", source:"알라피다인 은행 공식 발표, 2025 등록자 기준",
+      centroid:[33.195289,44.619737],
+      coords:[[33.198195,44.596782],[33.187277,44.598413],[33.172192,44.625278],[33.180381,44.647337],[33.196687,44.647422],[33.205592,44.638668],[33.211337,44.621244],[33.207747,44.605709],[33.198195,44.596782]]
+    }
+  };
+
+  const greenZone = {
+    centroid:[33.306979,44.38523],
+    coords:[[33.31639,44.385824],[33.314525,44.388227],[33.313592,44.386425],[33.31223,44.385824],[33.311441,44.384022],[33.311297,44.380073],[33.309504,44.378185],[33.306706,44.377584],[33.305272,44.379215],[33.305128,44.376726],[33.304411,44.375353],[33.302259,44.372949],[33.301541,44.370117],[33.30147,44.367285],[33.303407,44.36265],[33.303981,44.358015],[33.303407,44.356985],[33.300681,44.356985],[33.290063,44.362135],[33.293004,44.366941],[33.297094,44.386339],[33.297524,44.394493],[33.296807,44.394493],[33.296233,44.401617],[33.29695,44.406509],[33.298959,44.411573],[33.300896,44.413719],[33.305487,44.413976],[33.311584,44.412603],[33.317968,44.408569],[33.324064,44.403334],[33.316963,44.393377],[33.318685,44.391575],[33.317681,44.389858],[33.31725,44.387712],[33.317394,44.386425],[33.31639,44.385824]]
+  };
+
+  function usdOf(iqd){ return Math.round(iqd / RATE); }
+  function fmt(n){ return n.toLocaleString('en-US'); }
+
+  // sort by price desc for list/chart ordering
+  const orderedKeys = Object.keys(districts).filter(k=>k!=='bismayah')
+    .sort((a,b)=>districts[b].iqd - districts[a].iqd);
+  orderedKeys.push('bismayah');
+
+  /* ---------- LIST ---------- */
+  const listEl = document.getElementById('district-list');
+  orderedKeys.forEach((key, i) => {
+    const d = districts[key];
+    const row = document.createElement('div');
+    row.className = 'district-row';
+    row.dataset.key = key;
+    row.innerHTML = `
+      <div class="rank">${String(i+1).padStart(2,'0')}</div>
+      <div class="district-info">
+        <span class="name-kr">${d.nameKr}</span><span class="name-en">${d.nameEn}</span>
+        ${d.complex ? `<div class="complex">${d.complex}</div>` : ''}
+        ${d.source ? `<div class="meta-line">${d.source}</div>` : ''}
+      </div>
+      <div>
+        <div class="district-price"><div class="usd">$${fmt(usdOf(d.iqd))}</div><div class="iqd">${fmt(d.iqd)} IQD</div></div>
+        <div class="district-badge">${d.verified ? '<span class="badge verified">✓ 검증됨</span>' : '<span class="badge estimate">예시</span>'}</div>
+      </div>
+    `;
+    row.addEventListener('click', () => selectDistrict(key));
+    listEl.appendChild(row);
+  });
+
+  /* ---------- COMPARE CHART ---------- */
+  const chartEl = document.getElementById('compare-panel');
+  const maxUsd = usdOf(districts[orderedKeys[0]].iqd);
+  orderedKeys.forEach(key => {
+    const d = districts[key];
+    const usd = usdOf(d.iqd);
+    const pct = Math.round((usd / maxUsd) * 100);
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `
+      <div class="bar-label">${d.nameKr}<span class="en">${d.nameEn}</span></div>
+      <div class="bar-track"><div class="bar-fill ${key==='bismayah'?'highlight':''}" style="width:${pct}%"></div></div>
+      <div class="bar-value">$${fmt(usd)}</div>
+      <div>${d.verified ? '<span class="badge verified">✓</span>' : '<span class="badge estimate">예시</span>'}</div>
+    `;
+    chartEl.appendChild(row);
+  });
+
+  /* ---------- MAP ---------- */
+  const map = L.map('map', { scrollWheelZoom:true });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom:18
+  }).addTo(map);
+
+  const polyLayers = {};
+  const labelLayers = {};
+
+  function addLabel(key, latlng, en, usd){
+    const marker = L.marker(latlng, {
+      icon: L.divIcon({ className:'', html:`<div class="region-label" id="lbl-${key}"><span class="en">${en}</span> <span class="price">$${fmt(usd)}</span></div>`, iconSize:null }),
+      interactive:false
+    }).addTo(map);
+    labelLayers[key] = marker;
+  }
+
+  Object.entries(districts).forEach(([key, d]) => {
+    const usd = usdOf(d.iqd);
+    const tooltipText = `<b>${d.nameEn}</b>${d.complex ? `<br>${d.complex}` : ''}<br>$${fmt(usd)} / ${fmt(d.iqd)} IQD per m²${d.verified ? ' <br>✓ 검증된 데이터' : '<br>(예시 데이터)'}`;
+    const poly = L.polygon(d.coords, {
+      color:'#fff', weight:1.5, fillColor: tierColor[d.tier], fillOpacity:0.62
+    }).addTo(map).bindTooltip(tooltipText, {sticky:true});
+    poly.on('click', () => selectDistrict(key));
+    polyLayers[key] = poly;
+    addLabel(key, d.centroid, d.nameEn, usd);
+  });
+
+  L.polygon(greenZone.coords, { color:'#232428', weight:1.5, dashArray:'5,4', fillColor:'#232428', fillOpacity:0.18, interactive:false }).addTo(map);
+  L.marker(greenZone.centroid, {
+    icon: L.divIcon({ className:'', html:`<div class="cbd-label">GREEN ZONE · CBD</div>`, iconSize:null }), interactive:false
+  }).addTo(map);
+
+  const allCoords = Object.values(districts).flatMap(d => d.coords).concat(greenZone.coords);
+  const fullBounds = L.latLngBounds(allCoords);
+  map.fitBounds(fullBounds, { padding:[24,24] });
+
+  const legend = L.control({position:'topright'});
+  legend.onAdd = function(){
+    const div = L.DomUtil.create('div','map-legend');
+    div.innerHTML = `
+      <b>m² 당 호가 수준 (USD)</b><br>
+      <span class="sw" style="background:#D94800"></span>$915 이상<br>
+      <span class="sw" style="background:#FF8A3D"></span>$687 – $914<br>
+      <span class="sw" style="background:#FFC896"></span>$687 미만<br>
+      <span class="sw" style="background:#232428"></span>그린존 (CBD 기준)
+    `;
+    return div;
+  };
+  legend.addTo(map);
+
+  /* ---------- SYNC: list <-> map ---------- */
+  function selectDistrict(key){
+    const d = districts[key];
+    if(!d) return;
+
+    Object.entries(polyLayers).forEach(([k, poly]) => {
+      poly.setStyle({ weight: k===key ? 3 : 1.5 });
+      if(k===key) poly.bringToFront();
+    });
+    Object.keys(labelLayers).forEach(k => {
+      const el = document.getElementById(`lbl-${k}`);
+      if(el) el.classList.toggle('selected', k===key);
+    });
+
+    document.querySelectorAll('.district-row').forEach(r => r.classList.toggle('active', r.dataset.key === key));
+    const row = document.querySelector(`.district-row[data-key="${key}"]`);
+    if(row) row.scrollIntoView({ block:'nearest', behavior:'smooth' });
+
+    map.flyToBounds(polyLayers[key].getBounds(), { padding:[60,60], maxZoom:14, duration:0.6 });
+    polyLayers[key].openTooltip();
+  }
+
+  /* ---------- CURRENCY TOGGLE ---------- */
+  const btnIqd = document.getElementById('btn-iqd');
+  const btnUsd = document.getElementById('btn-usd');
+  btnIqd.addEventListener('click', () => {
+    document.body.classList.add('iqd-active'); document.body.classList.remove('usd-active');
+    btnIqd.classList.add('active'); btnUsd.classList.remove('active');
+  });
+  btnUsd.addEventListener('click', () => {
+    document.body.classList.remove('iqd-active'); document.body.classList.add('usd-active');
+    btnUsd.classList.add('active'); btnIqd.classList.remove('active');
+  });
+</script>
+
+</body>
+</html>
