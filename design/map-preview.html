@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Map Preview v3 — All Traced Districts</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'Inter',sans-serif; background:#F5F5F6; }
+  .wrap{ max-width:1150px; margin:24px auto; }
+  h1{ font-size:16px; margin-bottom:10px; color:#232428; }
+  h1 span{ color:#6B6D72; font-weight:400; font-size:12px; }
+  #map{ height:760px; border-radius:10px; border:1px solid #E7E7E9; }
+  .legend{
+    background:#fff; border:1px solid #E7E7E9; border-radius:8px; padding:10px 13px;
+    font-size:11px; line-height:1.9;
+  }
+  .legend .sw{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px;}
+
+  /* readable label: compact chip, dark text, small footprint so it doesn't cover the map */
+  .region-label{
+    font-family:'Inter',sans-serif; text-align:center; pointer-events:none;
+    background:rgba(255,255,255,.92); border:1px solid rgba(0,0,0,.1);
+    border-radius:4px; padding:1px 5px; box-shadow:0 1px 3px rgba(0,0,0,.2);
+    white-space:nowrap; line-height:1.25;
+  }
+  .region-label .en{ font-weight:700; font-size:8.5px; letter-spacing:.2px; color:#232428; }
+  .region-label .price{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:9px; color:#B23D00; }
+  .cbd-label{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:9.5px; color:#fff; background:#232428; padding:2px 7px; border-radius:4px; white-space:nowrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>지도 미리보기 v3 · 전체 13개 지역 반영 + 라벨 가독성 수정 <span>(사용자 제공 KML 기준, 신규 6개 지역은 예시 단가)</span></h1>
+  <div id="map"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+  const tierColor = { high:"#D94800", mid:"#FF8A3D", low:"#FFC896" };
+
+  const districts = {
+    mansour: { nameKr:"알만수르", nameEn:"AL-MANSOUR", price:"1,420,000", tier:"high", complex:"Baghdad Gate Residence",
+      centroid:[33.320317,44.355281],
+      coords:[[33.329776,44.353199],[33.324756,44.353456],[33.32533,44.33835],[33.315863,44.337406],[33.305462,44.340324],[33.30288,44.356031],[33.315105,44.365935],[33.317512,44.370622],[33.32031,44.365988],[33.32325,44.364443],[33.326047,44.361696],[33.328055,44.358005],[33.329776,44.353199]]
+    },
+    jadriya: { nameKr:"알자드리야", nameEn:"AL-JADRIYA", price:"1,310,000", tier:"high", complex:"Jadriya Towers",
+      centroid:[33.280201,44.385953],
+      coords:[[33.295171,44.399651],[33.294598,44.394329],[33.289862,44.381798],[33.287279,44.378365],[33.279817,44.370554],[33.276732,44.367636],[33.27257,44.367121],[33.268049,44.368065],[33.264317,44.370897],[33.262953,44.375618],[33.263599,44.38257],[33.268479,44.391582],[33.280248,44.406259],[33.284266,44.40377],[33.287279,44.403255],[33.293019,44.40008],[33.295171,44.399651]]
+    },
+    harthiya: { nameKr:"알하르씨야", nameEn:"AL-HARTHIYA", price:"1,255,000", tier:"high", complex:"Harthiya Business Tower Res.",
+      centroid:[33.306314,44.369063],
+      coords:[[33.315105,44.365935],[33.304273,44.358253],[33.3037,44.362673],[33.301691,44.367437],[33.302193,44.371857],[33.303807,44.374088],[33.305529,44.376663],[33.305421,44.378723],[33.315105,44.365935]]
+    },
+    karrada: { nameKr:"알카라다", nameEn:"AL-KARRADA", price:"1,190,000", tier:"mid", complex:"Karrada Central Residence",
+      centroid:[33.296341,44.418794],
+      coords:[[33.295171,44.399651],[33.292778,44.400654],[33.287756,44.403658],[33.284384,44.40443],[33.281084,44.406662],[33.28833,44.42297],[33.292133,44.436703],[33.292133,44.445372],[33.295577,44.450693],[33.304257,44.431553],[33.314729,44.426489],[33.311215,44.423571],[33.310282,44.419022],[33.299953,44.41782],[33.296509,44.411812],[33.295171,44.399651]]
+    },
+    yarmouk: { nameKr:"야르무크", nameEn:"AL-YARMOUK", price:"1,080,000", tier:"mid", complex:null,
+      centroid:[33.295233,44.335369],
+      coords:[[33.306978,44.323463],[33.290694,44.323034],[33.288756,44.333334],[33.285241,44.342003],[33.2856,44.345865],[33.302387,44.356422],[33.306978,44.323463]]
+    },
+    kadhimiya: { nameKr:"카지미야", nameEn:"AL-KADHIMIYA", price:"1,050,000", tier:"mid", complex:null,
+      centroid:[33.384361,44.340557],
+      coords:[[33.387913,44.322018],[33.366052,44.345278],[33.366698,44.346308],[33.366124,44.347853],[33.381033,44.360555],[33.38519,44.360727],[33.388415,44.35841],[33.390708,44.354118],[33.39164,44.350084],[33.389991,44.345278],[33.387053,44.339699],[33.385477,44.334892],[33.385405,44.332489],[33.387125,44.330772],[33.39121,44.329227],[33.390995,44.325279],[33.389561,44.325022],[33.387913,44.322018]]
+    },
+    zayouna: { nameKr:"자야우나", nameEn:"ZAYOUNA", price:"980,000", tier:"mid", complex:"Zayouna Garden Apartments",
+      centroid:[33.325838,44.457855],
+      coords:[[33.340396,44.455409],[33.321464,44.433951],[33.309055,44.458842],[33.318451,44.469056],[33.325265,44.474463],[33.340396,44.455409]]
+    },
+    newbaghdad: { nameKr:"뉴바그다드", nameEn:"NEW BAGHDAD", price:"915,000", tier:"mid", complex:null,
+      centroid:[33.305935,44.480956],
+      coords:[[33.318886,44.482774],[33.311068,44.477195],[33.309633,44.474019],[33.30827,44.470671],[33.305114,44.46947],[33.302747,44.46741],[33.301025,44.470328],[33.294497,44.489897],[33.29586,44.497622],[33.299303,44.508351],[33.318886,44.482774]]
+    },
+    amiriya: { nameKr:"알아미리야", nameEn:"AL-AMIRIYA", price:"905,000", tier:"mid", complex:"Amiriya Heights",
+      centroid:[33.299216,44.286448],
+      coords:[[33.310259,44.302521],[33.306098,44.286986],[33.306959,44.276901],[33.304556,44.275742],[33.303624,44.275742],[33.302978,44.276343],[33.301866,44.274497],[33.299642,44.276858],[33.297562,44.276514],[33.294154,44.276386],[33.28845,44.277888],[33.282638,44.281922],[33.288235,44.294367],[33.290316,44.302006],[33.291535,44.309302],[33.307533,44.303122],[33.310259,44.302521]]
+    },
+    saydiya: { nameKr:"사이디야", nameEn:"AL-SAYDIYA", price:"650,000", tier:"low", complex:null,
+      centroid:[33.256041,44.355001],
+      coords:[[33.267302,44.359941],[33.262421,44.34432],[33.258546,44.341573],[33.251799,44.345865],[33.235289,44.34535],[33.237586,44.372473],[33.255818,44.366121],[33.268306,44.359426],[33.267302,44.359941]]
+    },
+    jihad: { nameKr:"알지하드", nameEn:"HAYY AL-JIHAD", price:"600,000", tier:"low", complex:null,
+      centroid:[33.271327,44.298972],
+      coords:[[33.289738,44.306366],[33.287299,44.29538],[33.282638,44.281922],[33.273378,44.281647],[33.26936,44.279759],[33.263619,44.2789],[33.255293,44.283364],[33.25759,44.28611],[33.258595,44.290573],[33.261035,44.298127],[33.262614,44.299843],[33.263188,44.302933],[33.264336,44.310143],[33.264336,44.319584],[33.264767,44.322331],[33.275101,44.317696],[33.284429,44.310143],[33.28816,44.309284],[33.289738,44.306366]]
+    },
+    sadrcity: { nameKr:"사드르시티", nameEn:"SADR CITY", price:"520,000", tier:"low", complex:null,
+      centroid:[33.389194,44.468995],
+      coords:[[33.418059,44.456224],[33.389111,44.422235],[33.356999,44.463434],[33.359867,44.46721],[33.367609,44.471673],[33.374777,44.474763],[33.396277,44.508409],[33.409748,44.48987],[33.401436,44.479913],[33.418059,44.456224]]
+    },
+    bismayah: { nameKr:"비스마야 신도시", nameEn:"BISMAYAH NEW CITY", price:"778,000", tier:"low", complex:"Bismayah New City (전체 평균)",
+      centroid:[33.195289,44.619737],
+      coords:[[33.198195,44.596782],[33.187277,44.598413],[33.172192,44.625278],[33.180381,44.647337],[33.196687,44.647422],[33.205592,44.638668],[33.211337,44.621244],[33.207747,44.605709],[33.198195,44.596782]]
+    }
+  };
+
+  const greenZone = {
+    centroid:[33.306979,44.38523],
+    coords:[[33.31639,44.385824],[33.314525,44.388227],[33.313592,44.386425],[33.31223,44.385824],[33.311441,44.384022],[33.311297,44.380073],[33.309504,44.378185],[33.306706,44.377584],[33.305272,44.379215],[33.305128,44.376726],[33.304411,44.375353],[33.302259,44.372949],[33.301541,44.370117],[33.30147,44.367285],[33.303407,44.36265],[33.303981,44.358015],[33.303407,44.356985],[33.300681,44.356985],[33.290063,44.362135],[33.293004,44.366941],[33.297094,44.386339],[33.297524,44.394493],[33.296807,44.394493],[33.296233,44.401617],[33.29695,44.406509],[33.298959,44.411573],[33.300896,44.413719],[33.305487,44.413976],[33.311584,44.412603],[33.317968,44.408569],[33.324064,44.403334],[33.316963,44.393377],[33.318685,44.391575],[33.317681,44.389858],[33.31725,44.387712],[33.317394,44.386425],[33.31639,44.385824]]
+  };
+
+  const map = L.map('map', { scrollWheelZoom:true });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom:18
+  }).addTo(map);
+
+  function addLabel(latlng, en, price){
+    L.marker(latlng, {
+      icon: L.divIcon({
+        className:'',
+        html:`<div class="region-label"><span class="en">${en}</span> <span class="price">${price}</span></div>`,
+        iconSize:null
+      }),
+      interactive:false
+    }).addTo(map);
+  }
+
+  // districts (choropleth fill, real traced shape)
+  Object.entries(districts).forEach(([key, d]) => {
+    const tooltipText = d.complex
+      ? `<b>${d.nameEn}</b><br>${d.complex}<br>${d.price} IQD/m²`
+      : `<b>${d.nameEn}</b><br>${d.price} IQD/m²`;
+    L.polygon(d.coords, {
+      color:'#fff', weight:1.5,
+      fillColor: tierColor[d.tier], fillOpacity:0.62
+    }).addTo(map).bindTooltip(tooltipText, {sticky:true});
+    addLabel(d.centroid, d.nameEn, d.price);
+  });
+
+  // green zone (CBD reference, distinct style — no price)
+  L.polygon(greenZone.coords, {
+    color:'#232428', weight:1.5, dashArray:'5,4',
+    fillColor:'#232428', fillOpacity:0.18
+  }).addTo(map);
+  L.marker(greenZone.centroid, {
+    icon: L.divIcon({ className:'', html:`<div class="cbd-label">GREEN ZONE · CBD</div>`, iconSize:null }),
+    interactive:false
+  }).addTo(map);
+
+  // fit the view so every district (including Bismayah) is visible at the tightest possible zoom
+  const allCoords = Object.values(districts).flatMap(d => d.coords).concat(greenZone.coords);
+  map.fitBounds(L.latLngBounds(allCoords), { padding:[24,24] });
+
+  // legend
+  const legend = L.control({position:'bottomleft'});
+  legend.onAdd = function(){
+    const div = L.DomUtil.create('div','legend');
+    div.innerHTML = `
+      <b>m² 당 호가 수준</b><br>
+      <span class="sw" style="background:#D94800"></span>1,200,000 IQD 이상<br>
+      <span class="sw" style="background:#FF8A3D"></span>900,000 – 1,199,999<br>
+      <span class="sw" style="background:#FFC896"></span>900,000 미만 (비스마야 포함)<br>
+      <span class="sw" style="background:#232428"></span>그린존 (CBD 기준)
+    `;
+    return div;
+  };
+  legend.addTo(map);
+</script>
+</body>
+</html>
