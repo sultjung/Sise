@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "period": null,
+  "generated_at": null,
+  "collection_date": null,
+  "price_basis": "private-market public asking prices; not completed transactions",
+  "price_basis_code": "private_resale_asking_price",
+  "includes_nic_direct_allocation_price": false,
+  "iqd_per_usd": 1310,
+  "minimum_publish_samples": 3,
+  "districts": {},
+  "complexes": {},
+  "collection": {
+    "status": "pending_first_collection",
+    "source_names": ["aiqarat.com"],
+    "listing_count": 0,
+    "request_error_count": 0,
+    "errors": []
+  }
+}

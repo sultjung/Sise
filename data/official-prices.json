@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "price_basis_code": "nic_coordinated_direct_allocation",
+  "title_kr": "비스마야 NIC 직접분양 기준가격",
+  "market_price": false,
+  "current_reference": {
+    "registration_year": 2025,
+    "price_per_m2_usd": 750,
+    "price_per_m2_iqd": 990000,
+    "sizes_m2": [100, 120, 140],
+    "source_label": "알라피다인 은행 공문을 인용한 964media 보도 · 2024-01-18",
+    "source_url": "https://964media.com/296624/",
+    "status": "published_reference_price"
+  },
+  "price_history": [
+    {
+      "registration_group": "기존 등록가격",
+      "price_per_m2_usd": 630,
+      "price_per_m2_iqd": 756000,
+      "iqd_source_date": "2021-04-09",
+      "source_url": "https://ina.iq/ar/local/123364--.html"
+    },
+    {
+      "registration_group": "2024년 등록자",
+      "price_per_m2_usd": 714,
+      "price_per_m2_iqd": 942480,
+      "source_date": "2024-01-18",
+      "source_url": "https://964media.com/296624/"
+    },
+    {
+      "registration_group": "2025년 등록자",
+      "price_per_m2_usd": 750,
+      "price_per_m2_iqd": 990000,
+      "source_date": "2024-01-18",
+      "source_url": "https://964media.com/296624/"
+    }
+  ],
+  "update_policy": "공식 NIC 또는 금융기관 고지가 확인될 때만 변경하며 민간시장 월간 호가와 합산하지 않는다."
+}
