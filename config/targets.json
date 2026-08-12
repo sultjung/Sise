@@ -1,22 +1,22 @@
 {
   "schema_version": 1,
   "districts": [
-    {"key":"bismayah","name_kr":"비스마야","queries":["بسماية شقة للبيع","بسمايه شقة للبيع"],"aliases":["بسماية","بسمايه"]},
-    {"key":"mansour","name_kr":"알만수르","queries":["المنصور بغداد شقة للبيع"],"aliases":["المنصور"]},
+    {"key":"bismayah","name_kr":"비스마야","queries":["بسماية شقة للبيع","بسمايه شقة للبيع"],"seed_urls":["https://aiqarat.com/city/بسماية/"],"aliases":["بسماية","بسمايه"]},
+    {"key":"mansour","name_kr":"알만수르","queries":["المنصور بغداد شقة للبيع"],"seed_urls":["https://aiqarat.com/city/حي-المنصور/"],"aliases":["المنصور"]},
     {"key":"jadriya","name_kr":"알자드리야","queries":["الجادرية بغداد شقة للبيع"],"aliases":["الجادرية"]},
     {"key":"harthiya","name_kr":"알하르씨야","queries":["الحارثية بغداد شقة للبيع"],"aliases":["الحارثية"]},
     {"key":"karrada","name_kr":"알카라다","queries":["الكرادة بغداد شقة للبيع"],"aliases":["الكرادة"]},
     {"key":"yarmouk","name_kr":"야르무크","queries":["اليرموك بغداد شقة للبيع"],"aliases":["اليرموك"]},
     {"key":"kadhimiya","name_kr":"카지미야","queries":["الكاظمية بغداد شقة للبيع"],"aliases":["الكاظمية"]},
-    {"key":"zayouna","name_kr":"자야우나","queries":["زيونة بغداد شقة للبيع"],"aliases":["زيونة","الزيونة"]},
-    {"key":"newbaghdad","name_kr":"뉴바그다드","queries":["بغداد الجديدة شقة للبيع"],"aliases":["بغداد الجديدة"]},
+    {"key":"zayouna","name_kr":"자야우나","queries":["زيونة بغداد شقة للبيع"],"seed_urls":["https://aiqarat.com/city/زيونة/"],"aliases":["زيونة","الزيونة"]},
+    {"key":"newbaghdad","name_kr":"뉴바그다드","queries":["بغداد الجديدة شقة للبيع"],"seed_urls":["https://aiqarat.com/city/بغداد-الجديدة/"],"aliases":["بغداد الجديدة"]},
     {"key":"amiriya","name_kr":"알아미리야","queries":["العامرية بغداد شقة للبيع"],"aliases":["العامرية"]},
-    {"key":"saydiya","name_kr":"사이디야","queries":["السيدية بغداد شقة للبيع"],"aliases":["السيدية"]},
+    {"key":"saydiya","name_kr":"사이디야","queries":["السيدية بغداد شقة للبيع"],"seed_urls":["https://aiqarat.com/city/السيدية/"],"aliases":["السيدية"]},
     {"key":"jihad","name_kr":"알지하드","queries":["حي الجهاد بغداد شقة للبيع"],"aliases":["حي الجهاد","الجهاد"]},
     {"key":"sadrcity","name_kr":"사드르시티","queries":["مدينة الصدر شقة للبيع"],"aliases":["مدينة الصدر"]}
   ],
   "complexes": [
-    {"key":"bismayah","name_kr":"비스마야 신도시","district_key":"bismayah","queries":["مجمع بسماية السكني للبيع","مدينة بسماية السكنية للبيع"],"aliases":["بسماية","بسمايه"]},
+    {"key":"bismayah","name_kr":"비스마야 신도시","district_key":"bismayah","queries":["مجمع بسماية السكني للبيع","مدينة بسماية السكنية للبيع"],"seed_urls":["https://aiqarat.com/city/بسماية/"],"aliases":["بسماية","بسمايه"]},
     {"key":"mansour_city","name_kr":"만수르 시티","district_key":"mansour","queries":["مجمع المنصور ستي شقة للبيع"],"aliases":["المنصور ستي","منصور ستي"]},
     {"key":"iraq_gate","name_kr":"이라크 게이트","district_key":"mansour","queries":["مجمع بوابة العراق شقة للبيع"],"aliases":["بوابة العراق"]},
     {"key":"baghdad_marina","name_kr":"바그다드 마리나","district_key":null,"queries":["بغداد مارينا شقة للبيع"],"aliases":["بغداد مارينا"]},
