@@ -1,204 +1,416 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-aiqarat.com에서 여러 지역/단지의 아파트 '매매' 호가를 매일 검색·수집해서
-data/history.json 에 지역별·날짜별로 누적 저장하는 스크립트.
+"""Collect monthly Baghdad apartment asking prices from public listing pages.
 
-동작 방식
----------
-1. TARGET_AREAS 에 등록된 지역/단지 이름을 하나씩 워드프레스 기본 검색
-   (`https://aiqarat.com/?s=검색어`)에 넣어서 검색결과 페이지를 가져온다.
-2. 결과 페이지에서 `/property/` 링크를 전부 뽑는다.
-3. 각 매물 상세페이지를 열어서 '매매(للبيع)'만 통과시키고 '임대'는 제외,
-   면적/가격을 추출해 m²당 단가를 계산한다.
-4. 매물 제목/본문에서 "مجمع ..." 패턴으로 단지명을 최대한 추출한다
-   (없으면 지역명만으로 그룹핑).
-5. 지역별로 당일 평균/최소/최대/표본수를 계산해서 history.json에 append.
-
-⚠️ 검증 필요 (1회만 해주시면 됩니다)
-------------------------------------
-`https://aiqarat.com/?s=...` 가 실제로 매물 검색결과를 돌려주는지, 아니면
-Houzez 테마의 전용 검색 폼(`/property-search/?...`)을 써야 하는지는 브라우저로
-직접 한 번 확인해주세요:
-  1) https://aiqarat.com 에서 "بسماية" 로 검색
-  2) 결과 페이지 주소창의 URL을 복사
-  3) 그 URL의 패턴을 아래 SEARCH_URL_TEMPLATE 에 반영 (예: 쿼리 파라미터명이
-     다르면 그에 맞게 수정)
-바로 안 맞더라도, 매물 상세페이지 파싱 로직(면적/가격/매매판별)은 그대로
-재사용할 수 있습니다.
+The collector deliberately publishes samples and source URLs, not a single opaque
+"market price".  A district value is eligible to replace the website's example
+value only when at least three fresh, non-outlier apartment listings remain.
 """
 
+from __future__ import annotations
+
+import argparse
+import datetime as dt
 import json
+import math
 import re
+import statistics
 import sys
 import time
-import datetime
 from pathlib import Path
-from urllib.parse import urljoin, quote
+from typing import Any
+from urllib.parse import quote, urljoin, urlsplit, urlunsplit
 
 import requests
 from bs4 import BeautifulSoup
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
-# ---------------------------------------------------------------------------
-# 설정
-# ---------------------------------------------------------------------------
+ROOT = Path(__file__).resolve().parents[1]
+TARGETS_PATH = ROOT / "config" / "targets.json"
+LATEST_PATH = ROOT / "data" / "latest.json"
+HISTORY_PATH = ROOT / "data" / "history.json"
+LISTINGS_PATH = ROOT / "data" / "listings-latest.json"
 
-# 워드프레스 기본 검색 URL 패턴. 브라우저로 검증 후 필요하면 수정하세요.
-SEARCH_URL_TEMPLATE = "https://aiqarat.com/?s={query}"
+SEARCH_URL = "https://aiqarat.com/?s={query}"
+SOURCE_NAME = "aiqarat.com"
+MAX_LINKS_PER_TARGET = 24
+MAX_SEARCH_PAGES = 2
+REQUEST_DELAY_SECONDS = 1.2
+MAX_LISTING_AGE_DAYS = 395
+MIN_PUBLISH_SAMPLES = 3
+DEFAULT_IQD_PER_USD = 1310
 
-# 검색할 지역/단지 목록. "query"는 검색창에 넣을 키워드,
-# "district_key"/"district_kr"는 대시보드 쪽 지역 id와 맞춰주면 연동이 쉬움.
-TARGET_AREAS = [
-    {"district_key": "bismayah", "district_kr": "비스마야",  "query": "بسماية شقة"},
-    {"district_key": "mansour",  "district_kr": "알만수르",  "query": "المنصور شقة"},
-    {"district_key": "jadriya",  "district_kr": "알자드리야", "query": "الجادرية شقة"},
-    {"district_key": "harthiya", "district_kr": "알하르씨야", "query": "الحارثية شقة"},
-    {"district_key": "karrada",  "district_kr": "알카라다",  "query": "الكرادة شقة"},
-    {"district_key": "yarmouk",  "district_kr": "야르무크",  "query": "اليرموك شقة"},
-    {"district_key": "kadhimiya","district_kr": "카지미야",  "query": "الكاظمية شقة"},
-    {"district_key": "zayouna",  "district_kr": "자야우나",  "query": "زيونة شقة"},
-    {"district_key": "amiriya",  "district_kr": "알아미리야", "query": "العامرية شقة"},
-    # 필요하면 여기에 지역/단지를 계속 추가하면 됩니다.
-]
-
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (compatible; BaghdadPriceTracker/1.0; "
-                  "+https://example.com/about-this-bot)",
-    "Accept-Language": "ar,en;q=0.8",
+ARABIC_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789")
+ARABIC_MONTHS = {
+    "يناير": 1, "كانون الثاني": 1, "فبراير": 2, "شباط": 2,
+    "مارس": 3, "آذار": 3, "ابريل": 4, "أبريل": 4, "نيسان": 4,
+    "مايو": 5, "أيار": 5, "يونيو": 6, "حزيران": 6,
+    "يوليو": 7, "تموز": 7, "اغسطس": 8, "أغسطس": 8, "آب": 8,
+    "سبتمبر": 9, "أيلول": 9, "اكتوبر": 10, "أكتوبر": 10, "تشرين الأول": 10,
+    "نوفمبر": 11, "تشرين الثاني": 11, "ديسمبر": 12, "كانون الأول": 12,
 }
-
-REQUEST_DELAY_SEC = 2.0
-MAX_LISTINGS_PER_AREA = 40   # 지역당 너무 많이 긁지 않도록 상한
-HISTORY_PATH = Path(__file__).resolve().parent.parent / "data" / "history.json"
-
-SALE_KEYWORDS = ["للبيع"]
-RENT_KEYWORDS = ["للايجار", "للإيجار", "ايجار", "إيجار"]
-
-COMPLEX_NAME_PATTERN = re.compile(r"مجمع\s+[^\d,،\.\n]{2,30}")
+SALE_WORDS = ("للبيع", "حالة العقار للبيع", "الغرض بيع")
+RENT_WORDS = ("للايجار", "للإيجار", "ايجار", "إيجار", "شهريا", "سنويا")
+APARTMENT_WORDS = ("شقة", "شقق", "apartment")
+EXCLUDED_TYPES = ("ارض", "أرض", "دار للبيع", "بيت للبيع", "فيلا", "عمارة", "تجاري")
 
 
-# ---------------------------------------------------------------------------
-# 파싱 유틸
-# ---------------------------------------------------------------------------
-
-def fetch(url: str) -> str:
-    resp = requests.get(url, headers=HEADERS, timeout=20)
-    resp.raise_for_status()
-    return resp.text
+def normalized(value: str) -> str:
+    value = value.translate(ARABIC_DIGITS)
+    value = value.replace("٬", ",").replace("٫", ".").replace("ـ", "")
+    return re.sub(r"\s+", " ", value).strip()
 
 
-def search_area(query: str) -> list[str]:
-    url = SEARCH_URL_TEMPLATE.format(query=quote(query))
+def canonical_url(url: str) -> str:
+    parts = urlsplit(url)
+    return urlunsplit((parts.scheme, parts.netloc.lower(), parts.path.rstrip("/") + "/", "", ""))
+
+
+def first_number(raw: str) -> float | None:
+    match = re.search(r"\d[\d,.]*", normalized(raw))
+    if not match:
+        return None
+    token = match.group(0).replace(",", "")
     try:
-        html = fetch(url)
-    except requests.RequestException as e:
-        print(f"[경고] 검색 실패: {query} → {url} ({e})", file=sys.stderr)
-        return []
-    soup = BeautifulSoup(html, "html.parser")
-    links = {urljoin(url, a["href"]) for a in soup.select("a[href*='/property/']") if a.get("href")}
-    return sorted(links)[:MAX_LISTINGS_PER_AREA]
-
-
-def parse_property_page(html: str, url: str) -> dict | None:
-    soup = BeautifulSoup(html, "html.parser")
-    text = soup.get_text(" ", strip=True)
-
-    is_rent = any(kw in text for kw in RENT_KEYWORDS)
-    is_sale = any(kw in text for kw in SALE_KEYWORDS)
-    if is_rent or not is_sale:
+        return float(token)
+    except ValueError:
         return None
 
-    area_match = re.search(r"(\d{2,4})\s*(?:متر مربع|م٢|م²)", text)
-    if not area_match:
-        return None
-    area = int(area_match.group(1))
-    if area < 30 or area > 1000:   # 아파트가 아닌 토지/농장 등 오인 방지 (러프 필터)
-        return None
 
-    price_match = re.search(r"([\d,]{6,})\s*IQD", text)
-    if not price_match:
-        return None
-    price_iqd = int(price_match.group(1).replace(",", ""))
-    if price_iqd < 15_000_000:
-        return None
-
-    complex_match = COMPLEX_NAME_PATTERN.search(text)
-    complex_name = complex_match.group(0).strip() if complex_match else None
-
-    return {
-        "url": url,
-        "area_m2": area,
-        "price_iqd": price_iqd,
-        "price_per_m2_iqd": round(price_iqd / area),
-        "complex_name": complex_name,
-    }
+def parse_area(text: str) -> int | None:
+    text = normalized(text)
+    patterns = (
+        r"(?:حجم العقار|المساحة|مساحة|Area Size|area)\s*[:\-]?\s*(\d{2,4})\s*(?:متر مربع|م2|م²|م٢|sqm)?",
+        r"(\d{2,4})\s*(?:متر مربع|م2|م²|م٢|sqm)",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            area = int(match.group(1))
+            if 50 <= area <= 400:
+                return area
+    return None
 
 
-# ---------------------------------------------------------------------------
-# 메인 로직
-# ---------------------------------------------------------------------------
+def parse_price_iqd(text: str, iqd_per_usd: int) -> int | None:
+    text = normalized(text)
+    # Prefer explicitly labelled total prices.  "per metre" offers are excluded.
+    windows = re.findall(
+        r"(?:السعر(?: الكلي| البيع)?|سعرها الكلي|price)\s*[:\-]?\s*([^\n|]{1,80})",
+        text,
+        flags=re.IGNORECASE,
+    )
+    windows.append(text[:2500])
+    candidates: list[int] = []
+    for window in windows:
+        for match in re.finditer(r"([\d,.]+)\s*(مليون|مليار)?\s*(IQD|دينار(?: عراقي)?|دولار|USD|\$)", window, re.IGNORECASE):
+            snippet = window[max(0, match.start() - 20): match.end() + 30]
+            if any(term in snippet for term in ("للمتر", "للمتر المربع", "/ للمتر", "per m")):
+                continue
+            number = first_number(match.group(1))
+            if number is None:
+                continue
+            scale = match.group(2)
+            currency = match.group(3).lower()
+            if scale == "مليون":
+                number *= 1_000_000
+            elif scale == "مليار":
+                number *= 1_000_000_000
+            if currency in ("دولار", "usd", "$"):
+                number *= iqd_per_usd
+            value = round(number)
+            if 20_000_000 <= value <= 2_000_000_000:
+                candidates.append(value)
+        if candidates:
+            break
+    return candidates[0] if candidates else None
 
-def collect_area(area_cfg: dict) -> list[dict]:
-    links = search_area(area_cfg["query"])
-    time.sleep(REQUEST_DELAY_SEC)
 
-    results = []
-    for link in links:
+def parse_listing_date(text: str) -> dt.date | None:
+    text = normalized(text)
+    iso = re.search(r"(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})", text)
+    if iso:
         try:
-            html = fetch(link)
-        except requests.RequestException as e:
-            print(f"[경고] 매물 페이지 요청 실패: {link} ({e})", file=sys.stderr)
-            continue
-        parsed = parse_property_page(html, link)
-        if parsed:
-            results.append(parsed)
-        time.sleep(REQUEST_DELAY_SEC)
-    return results
+            return dt.date(int(iso.group(1)), int(iso.group(2)), int(iso.group(3)))
+        except ValueError:
+            pass
+    for month_name, month in sorted(ARABIC_MONTHS.items(), key=lambda item: -len(item[0])):
+        match = re.search(rf"(?:تحديث في|نشر في)?\s*(\d{{1,2}})\s+{re.escape(month_name)}\s+(20\d{{2}})", text)
+        if match:
+            try:
+                return dt.date(int(match.group(2)), month, int(match.group(1)))
+            except ValueError:
+                return None
+    return None
 
 
-def summarize(listings: list[dict]) -> dict:
-    if not listings:
-        return {
-            "avg_price_per_m2_iqd": None, "min_price_per_m2_iqd": None,
-            "max_price_per_m2_iqd": None, "sample_count": 0, "complexes_seen": [],
-        }
-    prices = [x["price_per_m2_iqd"] for x in listings]
-    complexes = sorted({x["complex_name"] for x in listings if x["complex_name"]})
+def page_title(soup: BeautifulSoup) -> str:
+    for selector in ("h1", ".page-title", ".property-title", "title"):
+        node = soup.select_one(selector)
+        if node and node.get_text(strip=True):
+            return normalized(node.get_text(" ", strip=True))
+    return ""
+
+
+def target_matches(text: str, aliases: list[str]) -> bool:
+    return any(normalized(alias) in text for alias in aliases)
+
+
+def parse_property(html: str, url: str, target: dict[str, Any], today: dt.date, iqd_per_usd: int) -> dict[str, Any] | None:
+    soup = BeautifulSoup(html, "html.parser")
+    title = page_title(soup)
+    text = normalized(soup.get_text(" ", strip=True))
+    compact = f"{title} {text}"
+
+    if not target_matches(compact, target["aliases"]):
+        return None
+    if not any(word in compact for word in SALE_WORDS) or any(word in compact for word in RENT_WORDS):
+        return None
+    if not any(word.lower() in compact.lower() for word in APARTMENT_WORDS):
+        return None
+    if any(word in title for word in EXCLUDED_TYPES):
+        return None
+
+    area = parse_area(compact)
+    price = parse_price_iqd(compact, iqd_per_usd)
+    if not area or not price:
+        return None
+    unit_price = round(price / area)
+    if not 100_000 <= unit_price <= 10_000_000:
+        return None
+
+    listing_date = parse_listing_date(compact)
+    age_days = (today - listing_date).days if listing_date else None
+    if age_days is not None and (age_days < -7 or age_days > MAX_LISTING_AGE_DAYS):
+        return None
+
+    property_id = None
+    match = re.search(r"(?:معرف العقار|Property ID)\s*[:\-]?\s*([A-Za-z]+-?\d+)", compact, re.IGNORECASE)
+    if match:
+        property_id = match.group(1)
     return {
-        "avg_price_per_m2_iqd": round(sum(prices) / len(prices)),
-        "min_price_per_m2_iqd": min(prices),
-        "max_price_per_m2_iqd": max(prices),
-        "sample_count": len(prices),
-        "complexes_seen": complexes,
+        "source": SOURCE_NAME,
+        "url": canonical_url(url),
+        "property_id": property_id,
+        "title": title[:240],
+        "target_key": target["key"],
+        "area_m2": area,
+        "price_iqd": price,
+        "price_per_m2_iqd": unit_price,
+        "listing_date": listing_date.isoformat() if listing_date else None,
+        "age_days": age_days,
     }
 
 
-def append_history(entry: dict) -> None:
-    HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
-    history = json.loads(HISTORY_PATH.read_text(encoding="utf-8")) if HISTORY_PATH.exists() else []
-    history.append(entry)
-    HISTORY_PATH.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
+def build_session() -> requests.Session:
+    session = requests.Session()
+    retry = Retry(total=3, connect=3, read=3, backoff_factor=1, status_forcelist=(429, 500, 502, 503, 504))
+    session.mount("https://", HTTPAdapter(max_retries=retry))
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (compatible; BaghdadRealtyWatch/2.0; +https://sultjung.github.io/Sise/)",
+        "Accept-Language": "ar,en;q=0.8",
+    })
+    return session
 
 
-def main():
-    today = datetime.date.today().isoformat()
-    print(f"[{today}] 지역별 매매 매물 수집 시작 ({len(TARGET_AREAS)}개 지역)…")
+def fetch(session: requests.Session, url: str) -> str:
+    response = session.get(url, timeout=30)
+    response.raise_for_status()
+    time.sleep(REQUEST_DELAY_SECONDS)
+    return response.text
 
-    by_district = {}
-    for area_cfg in TARGET_AREAS:
-        key = area_cfg["district_key"]
-        print(f"  → {area_cfg['district_kr']} ({area_cfg['query']}) 검색 중…")
-        listings = collect_area(area_cfg)
-        summary = summarize(listings)
-        summary["district_kr"] = area_cfg["district_kr"]
-        by_district[key] = summary
-        print(f"     매매 {summary['sample_count']}건, 평균 {summary['avg_price_per_m2_iqd']} IQD/m²")
 
-    entry = {"date": today, "source": "aiqarat.com", "by_district": by_district}
-    append_history(entry)
-    print(f"\n→ {HISTORY_PATH} 에 저장 완료")
+def discover_links(session: requests.Session, queries: list[str]) -> tuple[list[str], list[str]]:
+    links: set[str] = set()
+    errors: list[str] = []
+    for query in queries:
+        for page in range(1, MAX_SEARCH_PAGES + 1):
+            base = SEARCH_URL.format(query=quote(query))
+            url = base if page == 1 else f"https://aiqarat.com/page/{page}/?s={quote(query)}"
+            try:
+                soup = BeautifulSoup(fetch(session, url), "html.parser")
+            except requests.RequestException as exc:
+                errors.append(f"{query}: {type(exc).__name__}")
+                break
+            before = len(links)
+            for anchor in soup.select("a[href*='/property/']"):
+                href = anchor.get("href")
+                if href:
+                    links.add(canonical_url(urljoin(url, href)))
+            if len(links) == before:
+                break
+            if len(links) >= MAX_LINKS_PER_TARGET:
+                break
+    return sorted(links)[:MAX_LINKS_PER_TARGET], errors
+
+
+def remove_outliers(listings: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], int]:
+    if len(listings) < 4:
+        return listings, 0
+    values = sorted(item["price_per_m2_iqd"] for item in listings)
+    lower_half = values[: len(values) // 2]
+    upper_half = values[(len(values) + 1) // 2:]
+    q1 = statistics.median(lower_half)
+    q3 = statistics.median(upper_half)
+    iqr = q3 - q1
+    low, high = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+    kept = [item for item in listings if low <= item["price_per_m2_iqd"] <= high]
+    return kept, len(listings) - len(kept)
+
+
+def summarize(listings: list[dict[str, Any]], previous: dict[str, Any] | None = None) -> dict[str, Any]:
+    filtered, excluded = remove_outliers(listings)
+    if not filtered:
+        return {"sample_count": 0, "confidence": "none", "publishable": False, "outliers_excluded": excluded}
+    values = [item["price_per_m2_iqd"] for item in filtered]
+    count = len(values)
+    median = round(statistics.median(values))
+    confidence = "high" if count >= 8 else "medium" if count >= MIN_PUBLISH_SAMPLES else "low"
+    review_required = False
+    previous_price = (previous or {}).get("published_price_per_m2_iqd")
+    if previous_price and abs(median - previous_price) / previous_price > 0.45 and count < 8:
+        review_required = True
+    publishable = count >= MIN_PUBLISH_SAMPLES and not review_required
+    return {
+        "observed_median_price_per_m2_iqd": median,
+        "observed_average_price_per_m2_iqd": round(statistics.mean(values)),
+        "min_price_per_m2_iqd": min(values),
+        "max_price_per_m2_iqd": max(values),
+        "published_price_per_m2_iqd": median if publishable else previous_price,
+        "sample_count": count,
+        "confidence": confidence,
+        "publishable": publishable,
+        "review_required": review_required,
+        "outliers_excluded": excluded,
+        "source_count": 1,
+        "source_names": [SOURCE_NAME],
+        "source_urls": [item["url"] for item in filtered[:10]],
+        "newest_listing_date": max((item["listing_date"] for item in filtered if item["listing_date"]), default=None),
+    }
+
+
+def read_json(path: Path, default: Any) -> Any:
+    if not path.exists():
+        return default
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return default
+
+
+def write_json(path: Path, value: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def collect_target(session: requests.Session, target: dict[str, Any], today: dt.date, iqd_per_usd: int, cache: dict[str, str]) -> tuple[list[dict[str, Any]], list[str]]:
+    links, errors = discover_links(session, target["queries"])
+    parsed: dict[str, dict[str, Any]] = {}
+    for url in links:
+        try:
+            html = cache.get(url)
+            if html is None:
+                html = fetch(session, url)
+                cache[url] = html
+            item = parse_property(html, url, target, today, iqd_per_usd)
+        except requests.RequestException as exc:
+            errors.append(f"{url}: {type(exc).__name__}")
+            continue
+        if item:
+            dedupe_key = item["property_id"] or item["url"]
+            parsed[dedupe_key] = item
+    return list(parsed.values()), errors
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--date", help="Override collection date (YYYY-MM-DD), useful for tests")
+    parser.add_argument("--iqd-per-usd", type=int, default=DEFAULT_IQD_PER_USD)
+    args = parser.parse_args()
+    today = dt.date.fromisoformat(args.date) if args.date else dt.date.today()
+    period = today.strftime("%Y-%m")
+
+    config = read_json(TARGETS_PATH, {})
+    if not config.get("districts") or not config.get("complexes"):
+        print("targets.json is missing district/complex targets", file=sys.stderr)
+        return 2
+
+    previous_latest = read_json(LATEST_PATH, {})
+    session = build_session()
+    html_cache: dict[str, str] = {}
+    all_listings: list[dict[str, Any]] = []
+    all_errors: list[str] = []
+    result_groups: dict[str, dict[str, Any]] = {"districts": {}, "complexes": {}}
+
+    for group_name in ("districts", "complexes"):
+        for target in config[group_name]:
+            print(f"[{group_name}] {target['name_kr']} 수집 중…")
+            listings, errors = collect_target(session, target, today, args.iqd_per_usd, html_cache)
+            all_listings.extend({**item, "target_type": group_name[:-1]} for item in listings)
+            all_errors.extend(errors)
+            previous = previous_latest.get(group_name, {}).get(target["key"], {})
+            summary = summarize(listings, previous)
+            summary.update({"name_kr": target["name_kr"], "district_key": target.get("district_key")})
+            if group_name == "complexes" and target["key"] == "bismayah":
+                by_size: dict[str, Any] = {}
+                for size in (100, 120, 140):
+                    size_items = [item for item in listings if item["area_m2"] == size]
+                    by_size[str(size)] = summarize(size_items, previous.get("by_size_m2", {}).get(str(size), {}))
+                summary["by_size_m2"] = by_size
+            result_groups[group_name][target["key"]] = summary
+            print(f"  표본 {summary['sample_count']}건 · 신뢰도 {summary['confidence']}")
+
+    # A Bismayah listing, for example, legitimately contributes to both the
+    # Bismayah district and complex statistics.  Store it once in the audit file
+    # while retaining every target it matched.
+    consolidated: dict[str, dict[str, Any]] = {}
+    for item in all_listings:
+        dedupe_key = item.get("property_id") or item["url"]
+        match = {"type": item.pop("target_type"), "key": item.pop("target_key")}
+        if dedupe_key not in consolidated:
+            item["matched_targets"] = [match]
+            consolidated[dedupe_key] = item
+        elif match not in consolidated[dedupe_key]["matched_targets"]:
+            consolidated[dedupe_key]["matched_targets"].append(match)
+    all_listings = list(consolidated.values())
+
+    generated_at = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
+    latest = {
+        "schema_version": 2,
+        "period": period,
+        "generated_at": generated_at,
+        "collection_date": today.isoformat(),
+        "price_basis": "public asking prices; not completed transactions",
+        "iqd_per_usd": args.iqd_per_usd,
+        "minimum_publish_samples": MIN_PUBLISH_SAMPLES,
+        "districts": result_groups["districts"],
+        "complexes": result_groups["complexes"],
+        "collection": {
+            "source_names": [SOURCE_NAME],
+            "listing_count": len(all_listings),
+            "request_error_count": len(all_errors),
+            "errors": all_errors[:30],
+        },
+    }
+    write_json(LATEST_PATH, latest)
+    write_json(LISTINGS_PATH, {"generated_at": generated_at, "listings": all_listings})
+
+    history = read_json(HISTORY_PATH, [])
+    if not isinstance(history, list):
+        history = []
+    snapshot = {k: v for k, v in latest.items() if k != "collection"}
+    history = [entry for entry in history if entry.get("period") != period]
+    history.append(snapshot)
+    history.sort(key=lambda entry: entry.get("period") or entry.get("date", ""))
+    write_json(HISTORY_PATH, history)
+
+    print(f"완료: 매물 {len(all_listings)}건, 요청 오류 {len(all_errors)}건")
+    # Do not erase old values during a temporary source outage, but fail a totally
+    # empty first collection so Actions clearly reports that no market data arrived.
+    if not all_listings and not previous_latest.get("districts"):
+        return 3
+    return 0
 
 
 if __name__ == "__main__":
-    main()
-
+    raise SystemExit(main())
