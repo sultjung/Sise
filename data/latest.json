@@ -1,0 +1,18 @@
+{
+  "schema_version": 2,
+  "period": null,
+  "generated_at": null,
+  "collection_date": null,
+  "price_basis": "public asking prices; not completed transactions",
+  "iqd_per_usd": 1310,
+  "minimum_publish_samples": 3,
+  "districts": {},
+  "complexes": {},
+  "collection": {
+    "status": "pending_first_collection",
+    "source_names": ["aiqarat.com"],
+    "listing_count": 0,
+    "request_error_count": 0,
+    "errors": []
+  }
+}
