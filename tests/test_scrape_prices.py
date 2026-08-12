@@ -39,6 +39,10 @@ class PriceParserTests(unittest.TestCase):
         self.assertTrue(summary["publishable"])
         self.assertEqual(summary["published_price_per_m2_iqd"], 820_000)
 
+    def test_history_period_normalizes_legacy_seed(self):
+        self.assertEqual(scraper.history_period({"date": "2026-08-06"}), "2026-08")
+        self.assertEqual(scraper.history_period({"period": "2026-09"}), "2026-09")
+
 
 if __name__ == "__main__":
     unittest.main()

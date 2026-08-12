@@ -24,10 +24,18 @@ def main() -> None:
 
     if data.get("schema_version") != 2:
         fail("unsupported schema_version")
-    if not data.get("period") or not data.get("generated_at"):
-        fail("period/generated_at missing")
+    if data.get("price_basis_code") != "private_resale_asking_price":
+        fail("latest data must be explicitly marked as private-market asking prices")
+    if data.get("includes_nic_direct_allocation_price") is not False:
+        fail("NIC direct-allocation prices must not be mixed into market data")
     if not isinstance(data.get("districts"), dict) or not isinstance(data.get("complexes"), dict):
         fail("districts/complexes must be objects")
+    pending_first_collection = data.get("collection", {}).get("status") == "pending_first_collection"
+    if not data.get("period") or not data.get("generated_at"):
+        if pending_first_collection and not data.get("period") and not data.get("generated_at"):
+            print("[validate] OK · pending first collection")
+            return
+        fail("period/generated_at missing")
 
     warnings = 0
     for group_name in ("districts", "complexes"):

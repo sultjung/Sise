@@ -312,6 +312,11 @@ def write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def history_period(entry: dict[str, Any]) -> str | None:
+    """Return YYYY-MM for both the legacy seed and current history schema."""
+    return entry.get("period") or (entry.get("date") or "")[:7] or None
+
+
 def collect_target(session: requests.Session, target: dict[str, Any], today: dt.date, iqd_per_usd: int, cache: dict[str, str]) -> tuple[list[dict[str, Any]], list[str]]:
     links, errors = discover_links(session, target)
     parsed: dict[str, dict[str, Any]] = {}
@@ -389,7 +394,9 @@ def main() -> int:
         "period": period,
         "generated_at": generated_at,
         "collection_date": today.isoformat(),
-        "price_basis": "public asking prices; not completed transactions",
+        "price_basis": "private-market public asking prices; not completed transactions",
+        "price_basis_code": "private_resale_asking_price",
+        "includes_nic_direct_allocation_price": False,
         "iqd_per_usd": args.iqd_per_usd,
         "minimum_publish_samples": MIN_PUBLISH_SAMPLES,
         "districts": result_groups["districts"],
@@ -408,7 +415,9 @@ def main() -> int:
     if not isinstance(history, list):
         history = []
     snapshot = {k: v for k, v in latest.items() if k != "collection"}
-    history = [entry for entry in history if entry.get("period") != period]
+    # The original seed used `date` instead of `period`. Replace a legacy seed
+    # from the same month so it cannot appear beside the validated result.
+    history = [entry for entry in history if history_period(entry) != period]
     history.append(snapshot)
     history.sort(key=lambda entry: entry.get("period") or entry.get("date", ""))
     write_json(HISTORY_PATH, history)
