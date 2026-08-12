@@ -1,0 +1,60 @@
+name: Monthly Baghdad apartment prices
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 매월 1일 03:20 UTC = 바그다드 06:20 / 한국 12:20
+    - cron: "20 3 1 * *"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/scrape_prices.py"
+      - "scripts/validate_prices.py"
+      - "config/targets.json"
+      - "requirements.txt"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: monthly-baghdad-prices
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run parser tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Collect current asking prices
+        run: python scripts/scrape_prices.py
+
+      - name: Validate generated data
+        run: python scripts/validate_prices.py
+
+      - name: Commit monthly data
+        run: |
+          if git diff --quiet -- data/latest.json data/history.json data/listings-latest.json; then
+            echo "No market data changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/latest.json data/history.json data/listings-latest.json
+          git commit -m "Update Baghdad apartment prices $(date -u +%Y-%m)"
+          git pull --rebase origin main
+          git push origin HEAD:main
