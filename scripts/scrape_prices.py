@@ -220,10 +220,19 @@ def fetch(session: requests.Session, url: str) -> str:
     return response.text
 
 
-def discover_links(session: requests.Session, queries: list[str]) -> tuple[list[str], list[str]]:
+def discover_links(session: requests.Session, target: dict[str, Any]) -> tuple[list[str], list[str]]:
     links: set[str] = set()
     errors: list[str] = []
-    for query in queries:
+    for seed_url in target.get("seed_urls", []):
+        try:
+            soup = BeautifulSoup(fetch(session, seed_url), "html.parser")
+            for anchor in soup.select("a[href*='/property/']"):
+                href = anchor.get("href")
+                if href:
+                    links.add(canonical_url(urljoin(seed_url, href)))
+        except requests.RequestException as exc:
+            errors.append(f"{seed_url}: {type(exc).__name__}")
+    for query in target["queries"]:
         for page in range(1, MAX_SEARCH_PAGES + 1):
             base = SEARCH_URL.format(query=quote(query))
             url = base if page == 1 else f"https://aiqarat.com/page/{page}/?s={quote(query)}"
@@ -304,7 +313,7 @@ def write_json(path: Path, value: Any) -> None:
 
 
 def collect_target(session: requests.Session, target: dict[str, Any], today: dt.date, iqd_per_usd: int, cache: dict[str, str]) -> tuple[list[dict[str, Any]], list[str]]:
-    links, errors = discover_links(session, target["queries"])
+    links, errors = discover_links(session, target)
     parsed: dict[str, dict[str, Any]] = {}
     for url in links:
         try:
