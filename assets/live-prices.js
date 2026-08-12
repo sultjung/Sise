@@ -97,7 +97,9 @@
     if (value) value.textContent = `$${fmt(priceUsd)}`;
   });
 
-  const complexes = Object.values(data.complexes || {}).filter(item => item.sample_count > 0);
+  // Show every configured complex, including zero-result searches, so an
+  // unconfirmed price is visible as "미확인" instead of silently disappearing.
+  const complexes = Object.values(data.complexes || {});
   if (complexes.length) {
     const section = document.createElement('section');
     const rows = complexes.sort((a,b) => (b.observed_median_price_per_m2_iqd || 0) - (a.observed_median_price_per_m2_iqd || 0)).map(item => {
