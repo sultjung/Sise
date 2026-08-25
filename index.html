@@ -57,10 +57,18 @@
   .section-title .sub-en{ font-size:11.5px; color:var(--hw-ink-soft); font-family:'IBM Plex Mono',monospace; margin-left:2px; }
   .section-note{ font-size:12px; color:var(--hw-ink-soft); }
 
+  .view-switch{ display:flex; align-items:center; gap:4px; padding:4px; background:var(--hw-white); border:1px solid var(--hw-border); border-radius:9px; box-shadow:0 1px 3px rgba(35,36,40,.04); }
+  .view-switch button{ border:0; background:transparent; color:var(--hw-ink-soft); border-radius:6px; padding:8px 14px; font-family:'Pretendard',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:.15s; }
+  .view-switch button:hover{ color:var(--hw-ink); background:var(--hw-gray-bg); }
+  .view-switch button.active{ color:#fff; background:var(--hw-ink); }
+  .view-switch .view-count{ margin-left:4px; font-family:'IBM Plex Mono',monospace; font-size:9px; opacity:.72; }
+
   /* badges */
   .badge{ font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:999px; display:inline-flex; align-items:center; gap:3px; }
   .badge.verified{ background:#E8F6EC; color:var(--verified); }
   .badge.estimate{ background:#F1F1F2; color:var(--hw-ink-soft); }
+  .badge.sample{ background:#EAF1FF; color:#315EBA; }
+  .badge.single{ background:#FFF2D9; color:#9A5B00; }
 
   /* Bismayah cards — reduced vertical size */
   .bismayah-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
@@ -105,6 +113,21 @@
   body.iqd-active .district-price .usd{ font-size:10.5px; font-weight:500; color:var(--hw-ink-soft); }
   body.iqd-active .district-price .iqd{ font-size:13.5px; font-weight:700; color:var(--hw-ink); }
   .district-badge{ margin-top:5px; text-align:right; }
+  .complex-row{ padding-top:14px; padding-bottom:14px; }
+  .complex-row .district-info .name-kr{ font-size:13.5px; }
+  .complex-row .district-info .name-en{ display:block; margin:2px 0 0; }
+  .complex-row .complex-location{ margin-top:5px; color:var(--hw-orange); font-size:10.8px; font-weight:650; }
+  .complex-row .complex-facts{ display:flex; flex-wrap:wrap; gap:4px 10px; margin-top:5px; font-size:10.3px; color:var(--hw-ink-soft); }
+  .complex-row .complex-facts b{ color:var(--hw-ink); font-weight:650; }
+  .complex-row .price-method{ margin-top:4px; font-size:10px; color:var(--hw-ink-soft); line-height:1.4; }
+  .source-details{ grid-column:2 / 4; margin-top:-2px; }
+  .source-details summary{ width:max-content; max-width:100%; color:#875000; font-size:10.3px; font-weight:700; cursor:pointer; list-style:none; }
+  .source-details summary::-webkit-details-marker{ display:none; }
+  .source-details summary::before{ content:'↗'; margin-right:4px; }
+  .source-links{ display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; padding:8px; background:#FAFAFB; border:1px solid var(--hw-border); border-radius:6px; }
+  .source-links a{ color:#315EBA; font-size:9.8px; text-decoration:none; border-bottom:1px solid #BFD0F2; }
+  .source-links a:hover{ color:#183E8F; }
+  .source-note{ flex-basis:100%; color:var(--hw-ink-soft); font-size:9.4px; line-height:1.45; }
 
   #map{ flex:1; min-height:680px; }
   .price-callout-icon{ background:transparent; border:0; }
@@ -115,6 +138,10 @@
   .region-label{ min-width:78px; font-family:'Pretendard',sans-serif; text-align:center; background:rgba(255,255,255,.96); border:1px solid var(--pin-color); border-radius:6px; padding:5px 8px; box-shadow:0 1px 5px rgba(0,0,0,.2); white-space:nowrap; line-height:1.15; transition:.15s; }
   .region-label .name{ display:block; font-weight:750; font-size:10.5px; letter-spacing:-.1px; color:#232428; }
   .region-label .price{ display:block; margin-top:2px; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:12.5px; color:#9E3500; }
+  .region-label .place{ display:block; margin-top:2px; color:var(--hw-ink-soft); font-size:8.5px; font-weight:550; }
+  .region-callout.complex .region-label{ min-width:112px; padding:6px 9px; }
+  .region-callout.complex .region-label .name{ font-size:10.8px; }
+  .region-callout.complex .region-label .price{ font-size:12.2px; }
   .region-callout.selected .region-label{ padding:5px 9px; box-shadow:0 2px 9px rgba(255,97,0,.45); }
   .region-callout.selected .region-label .name{ font-size:11.5px; }
   .region-callout.selected .region-label .price{ font-size:13.5px; }
@@ -122,6 +149,14 @@
   .cbd-label{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:9.5px; color:#fff; background:#232428; padding:2px 7px; border-radius:4px; white-space:nowrap; }
   .map-legend{ background:rgba(255,255,255,.97); border:1px solid var(--hw-border); border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.85; box-shadow:0 2px 10px rgba(0,0,0,.08); }
   .map-legend .sw{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px;}
+  .map-legend .dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin:0 8px 0 2px; vertical-align:0; }
+
+  .leaflet-popup-content{ margin:14px 16px; min-width:220px; }
+  .map-popup .popup-place{ color:var(--hw-orange); font-size:10.5px; font-weight:700; }
+  .map-popup h4{ margin:3px 0 8px; font-size:14px; }
+  .map-popup .popup-price{ font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:750; color:#9E3500; }
+  .map-popup .popup-meta{ margin-top:7px; color:var(--hw-ink-soft); font-size:10.5px; line-height:1.55; }
+  .map-popup a{ display:inline-block; margin-top:8px; color:#315EBA; font-size:10.5px; font-weight:700; }
 
   .compare-panel{ background:var(--hw-white); border:1px solid var(--hw-border); border-radius:var(--radius); padding:22px 24px; }
   .bar-row{ display:grid; grid-template-columns:150px 1fr 110px 60px; align-items:center; gap:12px; margin-bottom:12px; }
@@ -141,6 +176,22 @@
     .split{ grid-template-columns:1fr; }
     #map{ min-height:420px; }
     .district-list{ max-height:360px; }
+    .section-head{ align-items:flex-start; gap:12px; flex-wrap:wrap; }
+    .view-switch{ width:100%; }
+    .view-switch button{ flex:1; }
+  }
+  @media (max-width:620px){
+    .topbar{ height:auto; min-height:72px; padding:12px 16px; gap:12px; align-items:flex-start; }
+    .brand-text .kr{ font-size:18px; }
+    .top-controls{ gap:8px; flex-direction:column; align-items:flex-end; }
+    .updated{ font-size:9px; }
+    .page{ padding:18px 14px 48px; }
+    .split{ gap:12px; }
+    .district-row{ grid-template-columns:18px minmax(0,1fr) auto; padding-left:10px; padding-right:10px; }
+    .source-details{ grid-column:2 / 4; }
+    .bar-row{ grid-template-columns:105px 1fr 76px 32px; gap:7px; }
+    .bar-label{ font-size:11px; }
+    .bar-value{ font-size:10px; }
   }
 </style>
 </head>
@@ -155,7 +206,7 @@
     </div>
   </div>
   <div class="top-controls">
-    <div class="updated">LAST UPDATED · 2026.08.06</div>
+    <div class="updated">LAST UPDATED · 2026.08.25</div>
     <div class="toggle">
       <button id="btn-iqd">IQD</button>
       <button id="btn-usd" class="active">USD</button>
@@ -164,7 +215,7 @@
 </div>
 
 <div class="disclaimer">
-  ※ <b>비스마야</b>는 국가투자위원회·알라피다인 은행(Al-Rafidain Bank) 공식 발표가 기준입니다(검증됨). <b>바그다드 지역별 단가</b>는 만수르시티 등 일부만 실제 매물가로 확인되었고, 나머지는 조사 전 예시 데이터입니다(각각 배지로 구분). 환율은 1 USD ≈ 1,310 IQD 기준.
+  ※ <b>단지별 시세</b>는 공개 원문이 있는 자료만 수록했습니다. 가격은 공식 공표가 또는 공개 매물 <b>호가</b>이며 실거래가가 아닙니다. 각 카드에서 가격 유형·표본 수·확인일·원문을 확인할 수 있습니다. 일반 환산은 1 USD ≈ 1,310 IQD 기준이며, 비스마야는 원문에 병기된 금액을 그대로 표시합니다.
 </div>
 
 <div class="page">
@@ -185,52 +236,56 @@
       <div class="unit-top"><div class="unit-type"><span>100</span> m² 형</div></div>
       <div class="price-row">
         <div class="price-primary"><span class="usd">750</span><span class="unit-label">USD/m²</span></div>
-        <div class="price-secondary"><span class="iqd">982,500</span> IQD/m²</div>
+        <div class="price-secondary"><span class="iqd">990,000</span> IQD/m²</div>
       </div>
-      <div class="unit-meta"><span>총액 <b>$75,000</b> (약 98,250,000 IQD)</span></div>
-      <div class="unit-source">출처: 알라피다인 은행 공식 발표, 2025년 등록자 기준 · 964media.com (2024.1.18 보도)</div>
+      <div class="unit-meta"><span>총액 <b>$75,000</b> (99,000,000 IQD)</span></div>
+      <div class="unit-source">출처: 알라피다인 은행 공문 인용 · <a href="https://964media.com/296624/" target="_blank" rel="noopener">964media (2024.1.18 원문)</a></div>
     </div>
 
     <div class="unit-card">
       <div class="unit-top"><div class="unit-type"><span>120</span> m² 형</div></div>
       <div class="price-row">
         <div class="price-primary"><span class="usd">750</span><span class="unit-label">USD/m²</span></div>
-        <div class="price-secondary"><span class="iqd">982,500</span> IQD/m²</div>
+        <div class="price-secondary"><span class="iqd">990,000</span> IQD/m²</div>
       </div>
-      <div class="unit-meta"><span>총액 <b>$90,000</b> (약 117,900,000 IQD)</span></div>
-      <div class="unit-source">출처: 알라피다인 은행 공식 발표, 2025년 등록자 기준 · 964media.com (2024.1.18 보도)</div>
+      <div class="unit-meta"><span>총액 <b>$90,000</b> (118,800,000 IQD)</span></div>
+      <div class="unit-source">출처: 알라피다인 은행 공문 인용 · <a href="https://964media.com/296624/" target="_blank" rel="noopener">964media (2024.1.18 원문)</a></div>
     </div>
 
     <div class="unit-card">
       <div class="unit-top"><div class="unit-type"><span>140</span> m² 형</div></div>
       <div class="price-row">
         <div class="price-primary"><span class="usd">750</span><span class="unit-label">USD/m²</span></div>
-        <div class="price-secondary"><span class="iqd">982,500</span> IQD/m²</div>
+        <div class="price-secondary"><span class="iqd">990,000</span> IQD/m²</div>
       </div>
-      <div class="unit-meta"><span>총액 <b>$105,000</b> (약 137,550,000 IQD)</span></div>
-      <div class="unit-source">출처: 알라피다인 은행 공식 발표, 2025년 등록자 기준 · 964media.com (2024.1.18 보도)</div>
+      <div class="unit-meta"><span>총액 <b>$105,000</b> (138,600,000 IQD)</span></div>
+      <div class="unit-source">출처: 알라피다인 은행 공문 인용 · <a href="https://964media.com/296624/" target="_blank" rel="noopener">964media (2024.1.18 원문)</a></div>
     </div>
 
   </div>
-  <div class="section-note" style="margin-top:8px;">참고: 등록 연도별로 단가가 상승해왔습니다 — 2023년 이전 $630/m² → 2024년 등록 $714/m² → 2025년 등록 $750/m². 2026년 신규가는 별도 확인 필요.</div>
+  <div class="section-note" style="margin-top:8px;">참고: 원문 공표 기준 — 2023년 이전 $630/m² → 2024년 등록 $714/m² → 2025년 등록 $750/m². 2026년 신규 공식가는 공개 원문을 확인하지 못해 2025 공표가를 유지 표시합니다.</div>
 
   <!-- DISTRICTS + MAP -->
   <div class="section-head">
     <div class="section-title">
       <div class="bar"></div>
-      <h2>바그다드 지역별 비교</h2>
-      <span class="sub-en">BAGHDAD DISTRICTS</span>
+      <h2 id="view-section-title">바그다드 지역별 비교</h2>
+      <span class="sub-en" id="view-section-sub">BAGHDAD DISTRICTS</span>
     </div>
-    <div class="section-note">지도/리스트 클릭 시 서로 연동됩니다 · 지도는 마우스 휠로 확대·축소</div>
+    <div class="view-switch" role="group" aria-label="시세 보기 기준">
+      <button id="btn-region-view" class="active" aria-pressed="true">지역별 <span class="view-count">13</span></button>
+      <button id="btn-complex-view" aria-pressed="false">아파트 단지별 <span class="view-count">8</span></button>
+    </div>
   </div>
+  <div class="section-note" id="view-section-note" style="margin:-7px 0 12px;">지도/리스트 클릭 시 서로 연동됩니다 · 지도는 마우스 휠로 확대·축소</div>
 
   <div class="split">
     <div class="panel">
-      <div class="panel-head"><h3>지역별 단가</h3><div class="count">13 DISTRICTS</div></div>
+      <div class="panel-head"><h3 id="list-panel-title">지역별 단가</h3><div class="count" id="list-panel-count">13 DISTRICTS</div></div>
       <div class="district-list" id="district-list"></div>
     </div>
     <div class="panel">
-      <div class="panel-head"><h3>지도로 보기</h3><div class="count">실제 경계 기반</div></div>
+      <div class="panel-head"><h3>지도로 보기</h3><div class="count" id="map-panel-count">실제 경계 기반</div></div>
       <div id="map"></div>
     </div>
   </div>
@@ -239,14 +294,14 @@
   <div class="section-head">
     <div class="section-title">
       <div class="bar"></div>
-      <h2>지역별 m² 단가 비교</h2>
-      <span class="sub-en">PRICE PER M² · USD</span>
+      <h2 id="chart-title">지역별 m² 단가 비교</h2>
+      <span class="sub-en" id="chart-subtitle">PRICE PER M² · USD</span>
     </div>
   </div>
   <div class="compare-panel" id="compare-panel"></div>
 
   <div class="footer-note">
-    본 화면은 <b>디자인 시안</b>입니다. 비스마야는 정부·은행 공식 발표가로 검증되었고, 바그다드 지역 중 <b>만수르(Mansour City)</b>는 실제 매물 가격(aiqarat.com, 2023.11 등록)으로 확인했습니다. 나머지 지역은 특정 대표 단지 조사가 아직 완료되지 않은 예시 데이터이며, 실 서비스 전 전수 조사로 교체가 필요합니다. 지역 경계는 사용자가 직접 트레이싱한 KML 좌표를 반영했습니다.
+    <b>가격 해석:</b> ‘공식가’는 기관 공표값, ‘매물 중앙값’은 표시된 공개 매물 호가의 중앙값, ‘단일 매물’은 해당 원문 1건의 ㎡ 환산값입니다. 거래 완료 가격을 뜻하지 않습니다. 지역별 보기의 미검증 값은 기존 예시 데이터이며 배지로 구분했습니다. 단지 위치는 공개 주소와 OpenStreetMap 기반 좌표를 사용했습니다.
   </div>
 
 </div>
@@ -307,10 +362,131 @@
       centroid:[33.389194,44.468995],
       coords:[[33.418059,44.456224],[33.389111,44.422235],[33.356999,44.463434],[33.359867,44.46721],[33.367609,44.471673],[33.374777,44.474763],[33.396277,44.508409],[33.409748,44.48987],[33.401436,44.479913],[33.418059,44.456224]]
     },
-    bismayah: { nameKr:"비스마야 신도시", nameEn:"BISMAYAH NEW CITY", iqd:982500, tier:"low", verified:true,
-      complex:"Bismayah New City (정부 공식가)", source:"알라피다인 은행 공식 발표, 2025 등록자 기준",
+    bismayah: { nameKr:"비스마야 신도시", nameEn:"BISMAYAH NEW CITY", iqd:990000, sourceUsd:750, tier:"low", verified:true,
+      complex:"Bismayah New City (은행 공표가)", source:"알라피다인 은행 공문 인용, 2025 등록자 기준",
       centroid:[33.195289,44.619737],
       coords:[[33.198195,44.596782],[33.187277,44.598413],[33.172192,44.625278],[33.180381,44.647337],[33.196687,44.647422],[33.205592,44.638668],[33.211337,44.621244],[33.207747,44.605709],[33.198195,44.596782]]
+    }
+  };
+
+  /* Apartment-complex prices: only public source material is included.
+     Multi-listing values are medians of asking prices, not completed transactions. */
+  const complexes = {
+    mansour_city: {
+      nameKr:"만수르 시티", nameEn:"MANSOUR CITY", nameAr:"المنصور ستي", district:"알바이지야 · 만수르",
+      iqd:1880000, sourceKind:"sample", priceMethod:"공개 매물 호가 5건 중앙값", sampleCount:5, checked:"2026.08.25",
+      units:null, unitsLabel:"세대수 미공개", buildings:"25개동 · 각 32층", sizes:"표본 169–176m²", centroid:[33.33522,44.35553],
+      sources:[
+        {label:"Raqi · 173m² / 325M IQD",url:"https://raqi.app/ar/posts/7693285-%D8%A7%D9%84%D9%85%D9%86%D8%B5%D9%88%D8%B1-%D8%B3%D9%8A%D8%AA%D9%8A-%D8%B4%D9%82%D8%A9-%D9%A1%D9%A7%D9%A3%D9%85"},
+        {label:"Raqi · 173m² / 320M IQD",url:"https://www.raqi.app/ar/posts/8758743-%D9%85%D8%B3%D8%AA%D8%AD%D9%8A%D9%84-%D8%AA%D9%84%D9%83%D8%A9-%D8%A7%D9%86%D8%B3%D8%A8-%D9%85%D9%86-%D9%87%D9%84-%D8%B3%D8%B9%D8%B1-%D8%B4%D9%82%D8%A9-%D8%B2%D9%8A%D8%B1%D9%88-%D9%84%D9%84%D8%A8%D9%8A%D8%B9-%D9%81%D9%8A-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%85%D9%86%D8%B5%D9%88%D8%B1-%D8%B3%D8%AA%D9%8A-%D9%85%D8%B3%D8%A7%D8%AD%D8%A9-1"},
+        {label:"AiQarat · 169m² / 340M IQD",url:"https://aiqarat.com/property/%D8%B4%D9%82%D8%A9-%D9%84%D9%84%D8%A8%D9%8A%D8%B9-%D9%81%D9%8A-%D8%A7%D9%84%D8%A8%D9%8A%D8%AC%D9%8A%D8%A9%D9%AC%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%85%D9%86%D8%B5%D9%88%D8%B1-%D8%B3%D8%AA%D9%8A/"},
+        {label:"AiQarat · 176m² / 350M IQD",url:"https://aiqarat.com/property/%D8%B4%D9%82%D8%A9-%D9%84%D9%84%D8%A8%D9%8A%D8%B9-%D9%81%D9%8A-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%85%D9%86%D8%B5%D9%88%D8%B1-%D8%B3%D8%AA%D9%8A%D8%AC%D8%A7%D9%84%D8%A8%D9%8A%D8%AC%D9%8A%D8%A9/"},
+        {label:"AiQarat · 172m² / $1,400·m²",url:"https://aiqarat.com/property/%D8%B4%D9%82%D8%A9-%D9%84%D9%84%D8%A8%D9%8A%D8%B9-%D9%81%D9%8A-%D8%A7%D9%84%D9%85%D9%86%D8%B5%D9%88%D8%B1-%D9%A1%D9%A7%D9%A2%D9%85%C2%B2-%D8%A7%D9%84%D8%B3%D8%B9%D8%B1-%D9%A1%D9%A4%D9%A0%D9%A0/"}
+      ],
+      infoSources:[
+        {label:"단지 기본정보 · Riadi",url:"https://riadi.iq/en/al-mansour-city-towers-complex/"},
+        {label:"위치 · OpenStreetMap",url:"https://mapcarta.com/W1434588091"}
+      ],
+      sourceNote:"5개 표본을 ㎡당 가격으로 환산한 뒤 중앙값을 1만 IQD 단위로 반올림했습니다."
+    },
+    iraq_gate: {
+      nameKr:"이라크 게이트", nameEn:"IRAQ GATE", nameAr:"بوابة العراق", district:"다마스쿠스 거리 · 자우라 공원 앞",
+      iqd:2450000, sourceKind:"single", priceMethod:"최근 공개 매물 1건 환산", sampleCount:1, checked:"2026.08.25",
+      units:4750, unitsLabel:"4,750세대(계획)", buildings:"49개동", sizes:"표본 228m²", centroid:[33.31931,44.37463],
+      sources:[
+        {label:"Raqi · 228m² / 558.75M IQD",url:"https://raqi.app/ar/posts/9921273-%D8%B4%D9%82%D8%A9-%D9%A2%D9%A2%D9%A8%D9%85-%D8%A8%D9%88%D8%A7%D8%A8%D8%A9-%D8%A7%D9%84%D8%B9%D8%B1%D8%A7%D9%82-%D8%A7%D9%84%D8%B3%D9%83%D9%86%D9%8A"},
+        {label:"사업자 제시 시작가 · 2.5M IQD/m²",url:"https://www.instagram.com/reel/DZkQXVphCtV/"}
+      ],
+      infoSources:[
+        {label:"계획 세대수 · 2025 연구 PDF",url:"https://jjce.just.edu.jo/Download.ashx?f=AogHw1U60EFM43aJXljIgZprb9RM4EZaecxnPRfhoUg%3D"},
+        {label:"위치 · Waze",url:"https://www.waze.com/live-map/directions/iq/baghdad-governorate/baghdad/iraq-gate-apartment-complex?to=place.ChIJZSiOrhZ_VxURX9LTqi9eT3M"}
+      ],
+      sourceNote:"대표 단가는 최근 매물 228m²의 호가를 환산했습니다. 사업자 시작가는 비교용으로 함께 제공합니다."
+    },
+    palm_towers: {
+      nameKr:"팜 타워스", nameEn:"PALM TOWERS", nameAr:"أبراج النخلة", district:"알무탄나 · 만수르",
+      iqd:2150000, sourceKind:"sample", priceMethod:"최근 공개 매물 3건 중앙값", sampleCount:3, checked:"2026.08.25",
+      units:null, unitsLabel:"세대수 미공개", buildings:"20개 주거 타워", sizes:"표본 221–224m²", centroid:[33.32939,44.36235],
+      sources:[
+        {label:"Raqi · 최근 3개 비교 매물",url:"https://www.raqi.app/ar/posts/10479028-%D9%85%D8%AC%D9%85%D8%B9-%D8%A3%D8%A8%D8%B1%D8%A7%D8%AC-%D8%A7%D9%84%D9%86%D8%AE%D9%84%D8%A9-%D9%A2%D9%A2%D9%A4%D9%85-%D8%B4%D9%82%D8%A9-%D8%B1%D9%83%D9%86%D9%8A%D8%A9"},
+        {label:"추가 공개 매물 목록 · Arazu",url:"https://www.arazu.iq/copy-of-royal-city-complex"}
+      ],
+      infoSources:[
+        {label:"단지 공식 사이트 · 20개 타워",url:"https://palmtowersiq.com/"},
+        {label:"위치 좌표 · Iraqi Geological Journal",url:"https://igj-iraq.org/igj/index.php/igj/article/download/1316/1106/15297"}
+      ],
+      sourceNote:"Raqi 페이지에 함께 노출된 최근 221–224m² 매물 3건을 환산해 중앙값을 사용했습니다."
+    },
+    royal_city: {
+      nameKr:"로열 시티", nameEn:"ROYAL CITY", nameAr:"رويال ستي", district:"알바이지야 · 만수르",
+      iqd:1840000, sourceKind:"sample", priceMethod:"최근 공개 매물 3건 중앙값", sampleCount:3, checked:"2026.08.25",
+      units:226, unitsLabel:"226세대", buildings:"부분 준공", sizes:"표본 163–198m²", centroid:[33.33786,44.35001],
+      sources:[
+        {label:"Raqi · 181m² / 370M IQD",url:"https://raqi.app/ar/posts/7686772-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D8%B1%D9%88%D9%8A%D8%A7%D9%84-%D8%B3%D8%AA%D9%8A-%D9%A1%D9%A8%D9%A1%D9%85-%D8%BA%D8%B1%D9%81%D8%AA%D9%8A%D9%86-%D9%86%D9%88%D9%85"},
+        {label:"Raqi 비교 매물 · 198m² / 358M",url:"https://raqi.app/ar/posts/7693285-%D8%A7%D9%84%D9%85%D9%86%D8%B5%D9%88%D8%B1-%D8%B3%D9%8A%D8%AA%D9%8A-%D8%B4%D9%82%D8%A9-%D9%A1%D9%A7%D9%A3%D9%85"},
+        {label:"Raqi 비교 매물 · 163m² / 300M",url:"https://raqi.app/ar/posts/9157775-%D8%B4%D9%82%D8%A9-%D9%84%D9%84%D8%A8%D9%8A%D8%B9-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%85%D9%86%D8%B5%D9%88%D8%B1-%D8%B3%D9%8A%D8%AA%D9%8A-%D8%B4%D9%82%D8%A9-%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF-%D8%B4%D9%82%D8%A9-%D9%81%D8%A7%D8%AE%D8%B1%D8%A9-%D8%B9%D9%82%D8%A7%D8%B1-%D9%84%D9%84%D8%A8%D9%8A%D8%B9-%D8%B4"}
+      ],
+      infoSources:[
+        {label:"세대수 · Diyarna",url:"https://diyarna.com/"},
+        {label:"위치 · OpenStreetMap",url:"https://mapcarta.com/W1145007792"}
+      ],
+      sourceNote:"3개 표본의 ㎡당 호가 중앙값을 1만 IQD 단위로 반올림했습니다."
+    },
+    baghdad_marina: {
+      nameKr:"바그다드 마리나", nameEn:"BAGHDAD MARINA", nameAr:"بغداد مارينا", district:"사이디야 · 자드리야 교량 인근",
+      iqd:2000000, sourceKind:"sample", priceMethod:"최근 공개 매물 5건 중앙값", sampleCount:5, checked:"2026.08.25",
+      units:3000, unitsLabel:"3,000세대 이상", buildings:"29개동 · 18–19층", sizes:"표본 145–205m²", centroid:[33.25991,44.36628],
+      sources:[
+        {label:"Raqi · 205m² / 445M IQD",url:"https://raqi.app/ar/posts/5361380-%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF-%D9%85%D8%A7%D8%B1%D9%8A%D9%86%D8%A7-%D9%A2%D9%A0%D9%A5%D9%85-%D9%A3-%D8%BA%D8%B1%D9%81"},
+        {label:"Raqi · 145m² / 275M IQD",url:"https://raqi.app/ar/posts/6782793-%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF-%D9%85%D8%A7%D8%B1%D9%8A%D9%86%D8%A7-%D9%A1%D9%A4%D9%A5%D9%85-%D8%B7%D8%A7%D8%A8%D9%82-%D8%B9%D8%A7%D9%84%D9%8A"},
+        {label:"Raqi · 180m² / 360M IQD",url:"https://raqi.app/ar/posts/7121359-%D9%A1%D9%A8%D9%A0%D9%85-%D9%A3-%D8%BA%D8%B1%D9%81"},
+        {label:"Raqi · 200m² / 400M IQD",url:"https://raqi.app/ar/posts/9921273-%D8%B4%D9%82%D8%A9-%D9%A2%D9%A2%D9%A8%D9%85-%D8%A8%D9%88%D8%A7%D8%A8%D8%A9-%D8%A7%D9%84%D8%B9%D8%B1%D8%A7%D9%82-%D8%A7%D9%84%D8%B3%D9%83%D9%86%D9%8A"},
+        {label:"Raqi · 205m² / 460M IQD",url:"https://raqi.app/ar/posts/6910213-%D9%85%D8%AC%D9%85%D8%B9-%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF-%D9%85%D8%A7%D8%B1%D9%8A%D9%86%D8%A7-%D9%A2%D9%A0%D9%A5%D9%85-%D9%85%D8%A4%D8%AB%D8%AB%D8%A9"}
+      ],
+      infoSources:[
+        {label:"세대수·동수 · Riadi",url:"https://riadi.iq/en/baghdad-marina-residential-complex/"},
+        {label:"위치 · OpenStreetMap",url:"https://iq.geoview.info/bghdad_maryna%2C11665593423n"}
+      ],
+      sourceNote:"가구 포함 매물도 있어 내부 상태에 따른 가격 차이가 큽니다. 5건의 중앙값만 대표값으로 사용했습니다."
+    },
+    jawahir_dijla: {
+      nameKr:"자와히르 디즐라", nameEn:"JAWAHIR DIJLA", nameAr:"جواهر دجلة", district:"카지미야 · 알무히트 거리",
+      iqd:2610000, sourceKind:"single", priceMethod:"공개 매물 1건 환산", sampleCount:1, checked:"2026.08.25",
+      units:1500, unitsLabel:"1,500세대", buildings:"15개동", sizes:"표본 138m²", centroid:[33.38587,44.34499],
+      sources:[
+        {label:"Facebook 매물 · 138m² / 360M IQD",url:"https://www.facebook.com/groups/iraqresidentialcomplexes/posts/1150886690249901/"}
+      ],
+      infoSources:[
+        {label:"세대수·동수 · Riadi",url:"https://riadi.iq/en/jawahir-dijla-residential-complex/"},
+        {label:"위치·OSM 설명 · Geoview",url:"https://iq.geoview.info/mjm_jwahr_djlt_alskny,1134624868w"}
+      ],
+      sourceNote:"가격은 2025.08.27 공개 매물 1건의 환산값입니다. 세대수는 Riadi 1,500세대를 사용했으며 OSM 설명의 1,224세대와 차이가 있습니다."
+    },
+    nasim_city: {
+      nameKr:"나심 시티", nameEn:"NASIM CITY", nameAr:"النسيم ستي", district:"하이 알후세인 · 알지하드",
+      iqd:1730000, sourceKind:"single", priceMethod:"최근 공개 매물 1건 환산", sampleCount:1, checked:"2026.08.25",
+      units:2666, unitsLabel:"2,666세대", buildings:"43개동 · 16층", sizes:"표본 165m²", centroid:[33.27593,44.30042],
+      sources:[
+        {label:"Raqi · 165m² / 285M IQD",url:"https://raqi.app/ar/posts/8253735-%D8%A7%D9%84%D9%86%D8%B3%D9%8A%D9%85-%D8%B3%D8%AA%D9%8A-%D9%A1%D9%A6%D9%A5%D9%85-%D9%A2-%D8%BA%D8%B1%D9%81"}
+      ],
+      infoSources:[
+        {label:"세대수·동수 · Riadi",url:"https://riadi.iq/en/nasim-city-residential-complex/"},
+        {label:"위치 · OpenStreetMap",url:"https://mapcarta.com/W1151201755"}
+      ],
+      sourceNote:"가격은 최근 공개 매물 1건의 환산값입니다. Riadi의 일반 공급면적(191–211m²)과 매물 표기 면적(165m²)이 달라 원문 확인이 필요합니다."
+    },
+    bismayah_complex: {
+      nameKr:"비스마야 신도시", nameEn:"BISMAYAH NEW CITY", nameAr:"مدينة بسماية", district:"바그다드 남동부",
+      iqd:990000, sourceUsd:750, sourceKind:"official", priceMethod:"알라피다인 은행 공표가", sampleCount:null, checked:"2024.01.18",
+      units:100080, unitsLabel:"100,080세대(계획)", buildings:"834개 주거동(계획)", sizes:"100·120·140m²", centroid:[33.195289,44.619737],
+      sources:[
+        {label:"964media · 은행 공문 인용 원문",url:"https://964media.com/296624/"}
+      ],
+      infoSources:[
+        {label:"사업 규모 · Hanwha 공식",url:"https://m.hwenc.com/majorprojects/iraqbismayah-newcity.do"},
+        {label:"국가투자위원회 사업 안내",url:"https://investpromo.gov.iq/starting-the-construction-of-the-first-buildings-in-bismayah-new-city-project/"}
+      ],
+      sourceNote:"2025년 등록자 기준 공표가입니다. 2026년 신규 공식가는 공개 원문을 확인하지 못했습니다."
     }
   };
 
@@ -319,267 +495,388 @@
     coords:[[33.31639,44.385824],[33.314525,44.388227],[33.313592,44.386425],[33.31223,44.385824],[33.311441,44.384022],[33.311297,44.380073],[33.309504,44.378185],[33.306706,44.377584],[33.305272,44.379215],[33.305128,44.376726],[33.304411,44.375353],[33.302259,44.372949],[33.301541,44.370117],[33.30147,44.367285],[33.303407,44.36265],[33.303981,44.358015],[33.303407,44.356985],[33.300681,44.356985],[33.290063,44.362135],[33.293004,44.366941],[33.297094,44.386339],[33.297524,44.394493],[33.296807,44.394493],[33.296233,44.401617],[33.29695,44.406509],[33.298959,44.411573],[33.300896,44.413719],[33.305487,44.413976],[33.311584,44.412603],[33.317968,44.408569],[33.324064,44.403334],[33.316963,44.393377],[33.318685,44.391575],[33.317681,44.389858],[33.31725,44.387712],[33.317394,44.386425],[33.31639,44.385824]]
   };
 
-  function usdOf(iqd){ return Math.round(iqd / RATE); }
+  function usdOf(item){ return item.sourceUsd || Math.round(item.iqd / RATE); }
   function fmt(n){ return n.toLocaleString('en-US'); }
+  function compactIqd(n){
+    if(n>=1000000) return `${Number((n/1000000).toFixed(2))}M IQD`;
+    return `${Math.round(n/1000)}K IQD`;
+  }
+  function sourceBadge(item, compact=false){
+    if(item.sourceKind==='official' || item.verified) return `<span class="badge verified">✓ ${compact?'공식':'공식가'}</span>`;
+    if(item.sourceKind==='sample') return `<span class="badge sample">${compact?'중앙값':`매물 ${item.sampleCount}건`}</span>`;
+    if(item.sourceKind==='single') return `<span class="badge single">${compact?'1건':'단일 매물'}</span>`;
+    return '<span class="badge estimate">예시</span>';
+  }
+  function calloutPrice(item){ return currencyMode==='iqd' ? compactIqd(item.iqd) : `$${fmt(usdOf(item))}`; }
+  function tierForComplex(item){ return item.iqd>=2300000 ? 'high' : item.iqd>=1600000 ? 'mid' : 'low'; }
 
-  // sort by price desc for list/chart ordering
-  const orderedKeys = Object.keys(districts).filter(k=>k!=='bismayah')
-    .sort((a,b)=>districts[b].iqd - districts[a].iqd);
-  orderedKeys.push('bismayah');
+  const orderedRegionKeys = Object.keys(districts).filter(k=>k!=='bismayah')
+    .sort((a,b)=>districts[b].iqd-districts[a].iqd);
+  orderedRegionKeys.push('bismayah');
+  const orderedComplexKeys = Object.keys(complexes).sort((a,b)=>complexes[b].iqd-complexes[a].iqd);
 
-  /* ---------- LIST ---------- */
+  let activeMode = 'region';
+  let currencyMode = 'usd';
+  let selectedDistrictKey = null;
+  let selectedComplexKey = null;
+
   const listEl = document.getElementById('district-list');
-  orderedKeys.forEach((key, i) => {
-    const d = districts[key];
-    const row = document.createElement('div');
-    row.className = 'district-row';
-    row.dataset.key = key;
-    row.innerHTML = `
-      <div class="rank">${String(i+1).padStart(2,'0')}</div>
-      <div class="district-info">
-        <span class="name-kr">${d.nameKr}</span><span class="name-en">${d.nameEn}</span>
-        ${d.complex ? `<div class="complex">${d.complex}</div>` : ''}
-        ${d.source ? `<div class="meta-line">${d.source}</div>` : ''}
-      </div>
-      <div>
-        <div class="district-price"><div class="usd">$${fmt(usdOf(d.iqd))}</div><div class="iqd">${fmt(d.iqd)} IQD</div></div>
-        <div class="district-badge">${d.verified ? '<span class="badge verified">✓ 검증됨</span>' : '<span class="badge estimate">예시</span>'}</div>
-      </div>
-    `;
-    row.addEventListener('click', () => selectDistrict(key));
-    listEl.appendChild(row);
-  });
-
-  /* ---------- COMPARE CHART ---------- */
   const chartEl = document.getElementById('compare-panel');
-  const maxUsd = usdOf(districts[orderedKeys[0]].iqd);
-  orderedKeys.forEach(key => {
-    const d = districts[key];
-    const usd = usdOf(d.iqd);
-    const pct = Math.round((usd / maxUsd) * 100);
-    const row = document.createElement('div');
-    row.className = 'bar-row';
-    row.innerHTML = `
-      <div class="bar-label">${d.nameKr}<span class="en">${d.nameEn}</span></div>
-      <div class="bar-track"><div class="bar-fill ${key==='bismayah'?'highlight':''}" style="width:${pct}%"></div></div>
-      <div class="bar-value">$${fmt(usd)}</div>
-      <div>${d.verified ? '<span class="badge verified">✓</span>' : '<span class="badge estimate">예시</span>'}</div>
-    `;
-    chartEl.appendChild(row);
-  });
+  const viewTitle = document.getElementById('view-section-title');
+  const viewSub = document.getElementById('view-section-sub');
+  const viewNote = document.getElementById('view-section-note');
+  const listPanelTitle = document.getElementById('list-panel-title');
+  const listPanelCount = document.getElementById('list-panel-count');
+  const mapPanelCount = document.getElementById('map-panel-count');
+  const chartTitle = document.getElementById('chart-title');
+  const chartSubtitle = document.getElementById('chart-subtitle');
+
+  function sourceLinksHtml(item){
+    const priceLinks = item.sources.map(s=>`<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join('');
+    const infoLinks = item.infoSources.map(s=>`<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join('');
+    return `<details class="source-details">
+      <summary>가격 원문 ${item.sources.length}개 · 기본정보/위치 ${item.infoSources.length}개</summary>
+      <div class="source-links">${priceLinks}${infoLinks}<div class="source-note">${item.sourceNote}</div></div>
+    </details>`;
+  }
+
+  function renderList(){
+    listEl.innerHTML = '';
+    if(activeMode==='region'){
+      orderedRegionKeys.forEach((key,i)=>{
+        const d = districts[key];
+        const row = document.createElement('div');
+        row.className = 'district-row';
+        row.dataset.key = key;
+        row.innerHTML = `
+          <div class="rank">${String(i+1).padStart(2,'0')}</div>
+          <div class="district-info">
+            <span class="name-kr">${d.nameKr}</span><span class="name-en">${d.nameEn}</span>
+            ${d.complex?`<div class="complex">${d.complex}</div>`:''}
+            ${d.source?`<div class="meta-line">${d.source}</div>`:''}
+          </div>
+          <div>
+            <div class="district-price"><div class="usd">$${fmt(usdOf(d))}</div><div class="iqd">${fmt(d.iqd)} IQD</div></div>
+            <div class="district-badge">${sourceBadge(d)}</div>
+          </div>`;
+        row.addEventListener('click',()=>selectDistrict(key));
+        listEl.appendChild(row);
+      });
+      return;
+    }
+
+    orderedComplexKeys.forEach((key,i)=>{
+      const d = complexes[key];
+      const row = document.createElement('div');
+      row.className = 'district-row complex-row';
+      row.dataset.key = key;
+      row.innerHTML = `
+        <div class="rank">${String(i+1).padStart(2,'0')}</div>
+        <div class="district-info">
+          <span class="name-kr">${d.nameKr}</span><span class="name-en">${d.nameEn} · ${d.nameAr}</span>
+          <div class="complex-location">${d.district}</div>
+          <div class="complex-facts"><span><b>${d.unitsLabel}</b></span><span>${d.buildings}</span><span>${d.sizes}</span></div>
+          <div class="price-method">${d.priceMethod} · 확인 ${d.checked}</div>
+        </div>
+        <div>
+          <div class="district-price"><div class="usd">$${fmt(usdOf(d))}</div><div class="iqd">${fmt(d.iqd)} IQD</div></div>
+          <div class="district-badge">${sourceBadge(d)}</div>
+        </div>
+        ${sourceLinksHtml(d)}`;
+      row.addEventListener('click',()=>selectComplex(key));
+      row.querySelector('.source-details').addEventListener('click',e=>e.stopPropagation());
+      listEl.appendChild(row);
+    });
+  }
+
+  function renderChart(){
+    chartEl.innerHTML = '';
+    const data = activeMode==='region' ? districts : complexes;
+    const keys = activeMode==='region' ? orderedRegionKeys : orderedComplexKeys;
+    const max = Math.max(...keys.map(k=>data[k].iqd));
+    keys.forEach(key=>{
+      const d = data[key];
+      const value = currencyMode==='iqd' ? `${fmt(d.iqd)} IQD` : `$${fmt(usdOf(d))}`;
+      const row = document.createElement('div');
+      row.className = 'bar-row';
+      row.innerHTML = `
+        <div class="bar-label">${d.nameKr}<span class="en">${d.nameEn}</span></div>
+        <div class="bar-track"><div class="bar-fill ${(key==='bismayah'||key==='bismayah_complex')?'highlight':''}" style="width:${Math.round(d.iqd/max*100)}%"></div></div>
+        <div class="bar-value">${value}</div>
+        <div>${sourceBadge(d,true)}</div>`;
+      chartEl.appendChild(row);
+    });
+    chartSubtitle.textContent = `PRICE PER M² · ${currencyMode.toUpperCase()}`;
+  }
 
   /* ---------- MAP ---------- */
-  const map = L.map('map', { scrollWheelZoom:true });
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom:18
+  const map = L.map('map',{scrollWheelZoom:true});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:18
   }).addTo(map);
 
   const polyLayers = {};
-  const labelLayers = {};
-  const leaderLayers = {};
-  const anchorLayers = {};
-  const calloutOffsets = {
-    mansour:[-88,-54], jadriya:[42,82], harthiya:[-92,-4], karrada:[88,18],
-    yarmouk:[-76,58], kadhimiya:[-86,-38], zayouna:[84,-52], newbaghdad:[92,16],
-    amiriya:[-88,-34], saydiya:[-34,84], jihad:[-88,38], sadrcity:[86,-42], bismayah:[90,24]
+  const calloutGroups = {region:L.layerGroup().addTo(map),complex:L.layerGroup()};
+  const calloutSets = {
+    region:{labels:{},leaders:{},anchors:{}},
+    complex:{labels:{},leaders:{},anchors:{}}
   };
-  let selectedDistrictKey = null;
+  const calloutOffsets = {
+    region:{
+      mansour:[-88,-54],jadriya:[42,82],harthiya:[-92,-4],karrada:[88,18],yarmouk:[-76,58],
+      kadhimiya:[-86,-38],zayouna:[84,-52],newbaghdad:[92,16],amiriya:[-88,-34],saydiya:[-34,84],
+      jihad:[-88,38],sadrcity:[86,-42],bismayah:[90,24]
+    },
+    complex:{
+      mansour_city:[-108,-62],iraq_gate:[116,38],palm_towers:[98,-70],royal_city:[-116,26],
+      baghdad_marina:[86,68],jawahir_dijla:[92,-48],nasim_city:[-92,-54],bismayah_complex:[92,28]
+    }
+  };
 
-  function addLabel(key, latlng, nameKr, usd, color){
-    const leader = L.polyline([latlng, latlng], {
-      color, weight:1.4, opacity:.78, interactive:false, className:'region-leader'
-    }).addTo(map);
-    const anchor = L.circleMarker(latlng, {
-      radius:4, color, weight:2, fillColor:'#fff', fillOpacity:1, interactive:false
-    }).addTo(map);
-    const marker = L.marker(latlng, {
-      icon: L.divIcon({
-        className:'price-callout-icon',
-        html:`<div class="region-callout" id="lbl-${key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${nameKr}</span><span class="price">$${fmt(usd)}</span></div></div>`,
-        iconSize:[1,1], iconAnchor:[0,0]
-      }),
-      interactive:false
-    }).addTo(map);
-    labelLayers[key] = marker;
-    leaderLayers[key] = leader;
-    anchorLayers[key] = anchor;
+  function districtTooltip(d){
+    return `<b>${d.nameKr} · ${d.nameEn}</b>${d.complex?`<br>${d.complex}`:''}<br>$${fmt(usdOf(d))} / ${fmt(d.iqd)} IQD per m²${d.verified?'<br>✓ 공개 원문 확인':'<br>예시 데이터'}`;
   }
 
-  Object.entries(districts).forEach(([key, d]) => {
-    const usd = usdOf(d.iqd);
-    const tooltipText = `<b>${d.nameEn}</b>${d.complex ? `<br>${d.complex}` : ''}<br>$${fmt(usd)} / ${fmt(d.iqd)} IQD per m²${d.verified ? ' <br>✓ 검증된 데이터' : '<br>(예시 데이터)'}`;
-    const poly = L.polygon(d.coords, {
-      color:'#fff', weight:1.5, fillColor: tierColor[d.tier], fillOpacity:0.62
-    }).addTo(map).bindTooltip(tooltipText, {sticky:true});
-    poly.on('click', () => selectDistrict(key));
+  Object.entries(districts).forEach(([key,d])=>{
+    const poly = L.polygon(d.coords,{color:'#fff',weight:1.5,fillColor:tierColor[d.tier],fillOpacity:.62})
+      .addTo(map).bindTooltip(districtTooltip(d),{sticky:true});
+    poly._regionTooltip = districtTooltip(d);
+    poly.on('click',()=>{ if(activeMode==='region') selectDistrict(key); });
     polyLayers[key] = poly;
-    addLabel(key, d.centroid, d.nameKr, usd, tierColor[d.tier]);
   });
 
-  L.polygon(greenZone.coords, { color:'#232428', weight:1.5, dashArray:'5,4', fillColor:'#232428', fillOpacity:0.18, interactive:false }).addTo(map);
-  L.marker(greenZone.centroid, {
-    icon: L.divIcon({ className:'', html:`<div class="cbd-label">GREEN ZONE · CBD</div>`, iconSize:null }), interactive:false
+  L.polygon(greenZone.coords,{color:'#232428',weight:1.5,dashArray:'5,4',fillColor:'#232428',fillOpacity:.18,interactive:false}).addTo(map);
+  L.marker(greenZone.centroid,{
+    icon:L.divIcon({className:'',html:'<div class="cbd-label">GREEN ZONE · CBD</div>',iconSize:null}),interactive:false
   }).addTo(map);
 
-  const allCoords = Object.values(districts).flatMap(d => d.coords).concat(greenZone.coords);
-  const fullBounds = L.latLngBounds(allCoords);
-  map.fitBounds(fullBounds, { padding:[24,24] });
-
-  function rectAt(x, y, width, height, gap=0){
-    return { left:x-(width/2)-gap, right:x+(width/2)+gap, top:y-(height/2)-gap, bottom:y+(height/2)+gap };
+  function popupHtml(d){
+    return `<div class="map-popup">
+      <div class="popup-place">${d.district}</div><h4>${d.nameKr} · ${d.nameEn}</h4>
+      <div class="popup-price">${calloutPrice(d)} / m²</div>
+      <div class="popup-meta">${d.unitsLabel} · ${d.buildings}<br>${d.priceMethod}<br>자료 확인 ${d.checked}</div>
+      <a href="${d.sources[0].url}" target="_blank" rel="noopener">가격 원문 열기 ↗</a>
+    </div>`;
   }
 
-  function overlapArea(a, b){
-    const width = Math.max(0, Math.min(a.right,b.right) - Math.max(a.left,b.left));
-    const height = Math.max(0, Math.min(a.bottom,b.bottom) - Math.max(a.top,b.top));
-    return width * height;
+  function calloutMarkup(mode,key,d,color){
+    const context = mode==='complex' ? `<span class="place">${d.district}</span>` : '';
+    return `<div class="region-callout ${mode==='complex'?'complex':''}" id="lbl-${mode}-${key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${d.nameKr}</span>${context}<span class="price">${calloutPrice(d)}</span></div></div>`;
   }
 
-  function connectorEnd(anchor, label){
-    const dx = anchor.x - label.x;
-    const dy = anchor.y - label.y;
-    if(Math.abs(dx) < 1 && Math.abs(dy) < 1) return L.point(label.x,label.y);
-    const scaleX = (label.width/2) / Math.max(Math.abs(dx),.001);
-    const scaleY = (label.height/2) / Math.max(Math.abs(dy),.001);
-    const scale = Math.min(scaleX,scaleY);
-    return L.point(label.x+(dx*scale), label.y+(dy*scale));
+  function addCallout(mode,key,d,color){
+    const group = calloutGroups[mode];
+    const leader = L.polyline([d.centroid,d.centroid],{color,weight:1.4,opacity:.78,interactive:false,className:'region-leader'}).addTo(group);
+    const anchor = L.circleMarker(d.centroid,{radius:4,color,weight:2,fillColor:'#fff',fillOpacity:1,interactive:true}).addTo(group);
+    const marker = L.marker(d.centroid,{
+      icon:L.divIcon({className:'price-callout-icon',html:calloutMarkup(mode,key,d,color),iconSize:[1,1],iconAnchor:[0,0]}),
+      interactive:true
+    }).addTo(group);
+    const select = ()=> mode==='region' ? selectDistrict(key) : selectComplex(key);
+    marker.on('click',select);
+    anchor.on('click',select);
+    if(mode==='complex') anchor.bindPopup(popupHtml(d),{offset:[0,-6]});
+    calloutSets[mode].labels[key]=marker;
+    calloutSets[mode].leaders[key]=leader;
+    calloutSets[mode].anchors[key]=anchor;
+  }
+
+  Object.entries(districts).forEach(([key,d])=>addCallout('region',key,d,tierColor[d.tier]));
+  Object.entries(complexes).forEach(([key,d])=>addCallout('complex',key,d,tierColor[tierForComplex(d)]));
+
+  const fullBounds = L.latLngBounds(Object.values(districts).flatMap(d=>d.coords).concat(greenZone.coords));
+  const complexBounds = L.latLngBounds(Object.values(complexes).map(d=>d.centroid));
+  map.fitBounds(fullBounds,{padding:[24,24]});
+
+  function rectAt(x,y,width,height,gap=0){
+    return {left:x-width/2-gap,right:x+width/2+gap,top:y-height/2-gap,bottom:y+height/2+gap};
+  }
+  function overlapArea(a,b){
+    return Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
+  }
+  function connectorEnd(anchor,label){
+    const dx=anchor.x-label.x,dy=anchor.y-label.y;
+    if(Math.abs(dx)<1&&Math.abs(dy)<1) return L.point(label.x,label.y);
+    const scale=Math.min((label.width/2)/Math.max(Math.abs(dx),.001),(label.height/2)/Math.max(Math.abs(dy),.001));
+    return L.point(label.x+dx*scale,label.y+dy*scale);
   }
 
   function layoutCallouts(){
+    const data = activeMode==='region' ? districts : complexes;
+    const layers = calloutSets[activeMode];
+    const selected = activeMode==='region' ? selectedDistrictKey : selectedComplexKey;
     const size = map.getSize();
     const mapRect = map.getContainer().getBoundingClientRect();
     const items = [];
 
-    Object.entries(districts).forEach(([key, d]) => {
+    Object.entries(data).forEach(([key,d])=>{
       const point = map.latLngToContainerPoint(d.centroid);
-      const visible = point.x >= -12 && point.x <= size.x+12 && point.y >= -12 && point.y <= size.y+12;
-      labelLayers[key].setOpacity(visible ? 1 : 0);
-      leaderLayers[key].setStyle({ opacity:visible ? .78 : 0 });
-      anchorLayers[key].setStyle({ opacity:visible ? 1 : 0, fillOpacity:visible ? 1 : 0 });
+      const visible = point.x>=-12&&point.x<=size.x+12&&point.y>=-12&&point.y<=size.y+12;
+      layers.labels[key].setOpacity(visible?1:0);
+      layers.leaders[key].setStyle({opacity:visible?.78:0});
+      layers.anchors[key].setStyle({opacity:visible?1:0,fillOpacity:visible?1:0});
       if(!visible) return;
-      const labelEl = document.getElementById(`lbl-${key}`);
-      const bounds = labelEl ? labelEl.getBoundingClientRect() : {width:90,height:40};
-      const offset = calloutOffsets[key] || [72,-52];
-      items.push({
-        key, point, width:Math.max(78,bounds.width), height:Math.max(38,bounds.height),
-        preferredAngle:Math.atan2(offset[1],offset[0]), preferredRadius:Math.max(68,Math.hypot(offset[0],offset[1]))
-      });
+      const el=document.getElementById(`lbl-${activeMode}-${key}`);
+      const bounds=el?el.getBoundingClientRect():{width:activeMode==='complex'?120:90,height:activeMode==='complex'?54:40};
+      const offset=calloutOffsets[activeMode][key]||[76,-52];
+      items.push({key,point,width:Math.max(activeMode==='complex'?112:78,bounds.width),height:Math.max(activeMode==='complex'?50:38,bounds.height),preferredAngle:Math.atan2(offset[1],offset[0]),preferredRadius:Math.max(activeMode==='complex'?82:68,Math.hypot(...offset))});
     });
 
-    const obstacleSelectors = ['.leaflet-control-zoom','.map-legend','.cbd-label'];
-    const obstacles = obstacleSelectors.map(selector => document.querySelector(selector)).filter(Boolean).map(el => {
-      const r = el.getBoundingClientRect();
-      return { left:r.left-mapRect.left-7, right:r.right-mapRect.left+7, top:r.top-mapRect.top-7, bottom:r.bottom-mapRect.top+7 };
+    const obstacles=['.leaflet-control-zoom','.map-legend','.cbd-label'].map(selector=>document.querySelector(selector)).filter(Boolean).map(el=>{
+      const r=el.getBoundingClientRect();
+      return {left:r.left-mapRect.left-7,right:r.right-mapRect.left+7,top:r.top-mapRect.top-7,bottom:r.bottom-mapRect.top+7};
     });
+    items.forEach(item=>item.neighbors=items.filter(other=>other!==item&&item.point.distanceTo(other.point)<150).length);
+    items.sort((a,b)=>a.key===selected?-1:b.key===selected?1:b.neighbors-a.neighbors);
 
-    items.forEach(item => {
-      item.neighbors = items.filter(other => other!==item && item.point.distanceTo(other.point)<135).length;
-    });
-    items.sort((a,b) => {
-      if(a.key===selectedDistrictKey) return -1;
-      if(b.key===selectedDistrictKey) return 1;
-      return b.neighbors-a.neighbors;
-    });
-
-    const placed = [];
-    const angleSteps = [0,-.38,.38,-.76,.76,-1.14,1.14,Math.PI];
-    items.forEach(item => {
-      let best = null;
-      const radii = [item.preferredRadius,item.preferredRadius+24,item.preferredRadius+48,item.preferredRadius+74];
-      radii.forEach(radius => angleSteps.forEach(angleStep => {
-        const angle = item.preferredAngle + angleStep;
-        const x = item.point.x + (Math.cos(angle)*radius);
-        const y = item.point.y + (Math.sin(angle)*radius);
-        const rect = rectAt(x,y,item.width,item.height,7);
-        if(rect.left<10 || rect.right>size.x-10 || rect.top<10 || rect.bottom>size.y-10) return;
-        const labelOverlap = placed.reduce((sum,p) => sum+overlapArea(rect,p.rect),0);
-        const obstacleOverlap = obstacles.reduce((sum,o) => sum+overlapArea(rect,o),0);
-        const penalty = (labelOverlap*20) + (obstacleOverlap*30) + Math.abs(radius-item.preferredRadius);
-        if(!best || penalty<best.penalty) best = {x,y,rect,penalty};
+    const placed=[];
+    const angleSteps=[0,-.34,.34,-.7,.7,-1.08,1.08,Math.PI];
+    items.forEach(item=>{
+      let best=null;
+      const radii=[item.preferredRadius,item.preferredRadius+26,item.preferredRadius+52,item.preferredRadius+82,item.preferredRadius+112];
+      radii.forEach(radius=>angleSteps.forEach(step=>{
+        const angle=item.preferredAngle+step;
+        const x=item.point.x+Math.cos(angle)*radius,y=item.point.y+Math.sin(angle)*radius;
+        const rect=rectAt(x,y,item.width,item.height,7);
+        if(rect.left<10||rect.right>size.x-10||rect.top<10||rect.bottom>size.y-10) return;
+        const labelOverlap=placed.reduce((sum,p)=>sum+overlapArea(rect,p.rect),0);
+        const obstacleOverlap=obstacles.reduce((sum,o)=>sum+overlapArea(rect,o),0);
+        const penalty=labelOverlap*24+obstacleOverlap*30+Math.abs(radius-item.preferredRadius);
+        if(!best||penalty<best.penalty) best={x,y,rect,penalty};
       }));
-
       if(!best){
-        const x = Math.max((item.width/2)+12,Math.min(size.x-(item.width/2)-12,item.point.x+Math.cos(item.preferredAngle)*item.preferredRadius));
-        const y = Math.max((item.height/2)+12,Math.min(size.y-(item.height/2)-12,item.point.y+Math.sin(item.preferredAngle)*item.preferredRadius));
-        best = {x,y,rect:rectAt(x,y,item.width,item.height,7),penalty:Infinity};
+        const x=Math.max(item.width/2+12,Math.min(size.x-item.width/2-12,item.point.x+Math.cos(item.preferredAngle)*item.preferredRadius));
+        const y=Math.max(item.height/2+12,Math.min(size.y-item.height/2-12,item.point.y+Math.sin(item.preferredAngle)*item.preferredRadius));
+        best={x,y,rect:rectAt(x,y,item.width,item.height,7),penalty:Infinity};
       }
-      item.x = best.x;
-      item.y = best.y;
-      placed.push({key:item.key,rect:best.rect});
+      item.x=best.x;item.y=best.y;placed.push({key:item.key,rect:best.rect});
     });
 
-    items.forEach(item => {
-      const labelLatLng = map.containerPointToLatLng(L.point(item.x,item.y));
-      const lineEnd = connectorEnd(item.point,item);
-      labelLayers[item.key].setLatLng(labelLatLng);
-      leaderLayers[item.key].setLatLngs([districts[item.key].centroid,map.containerPointToLatLng(lineEnd)]);
+    items.forEach(item=>{
+      const end=connectorEnd(item.point,item);
+      layers.labels[item.key].setLatLng(map.containerPointToLatLng(L.point(item.x,item.y)));
+      layers.leaders[item.key].setLatLngs([data[item.key].centroid,map.containerPointToLatLng(end)]);
     });
   }
 
-  let calloutFrame = 0;
+  let calloutFrame=0;
   function scheduleCalloutLayout(){
     cancelAnimationFrame(calloutFrame);
-    calloutFrame = requestAnimationFrame(layoutCallouts);
+    calloutFrame=requestAnimationFrame(layoutCallouts);
   }
-  map.on('move zoom resize', scheduleCalloutLayout);
+  map.on('move zoom resize',scheduleCalloutLayout);
 
-  const legend = L.control({position:'topright'});
-  legend.onAdd = function(){
-    const div = L.DomUtil.create('div','map-legend');
-    div.innerHTML = `
-      <b>m² 당 호가 수준 (USD)</b><br>
-      <span class="sw" style="background:#D94800"></span>$915 이상<br>
-      <span class="sw" style="background:#FF8A3D"></span>$687 – $914<br>
-      <span class="sw" style="background:#FFC896"></span>$687 미만<br>
-      <span class="sw" style="background:#232428"></span>그린존 (CBD 기준)
-    `;
-    return div;
-  };
+  let legendDiv;
+  const legend=L.control({position:'topright'});
+  legend.onAdd=()=>{legendDiv=L.DomUtil.create('div','map-legend');return legendDiv;};
   legend.addTo(map);
-  scheduleCalloutLayout();
+  function updateLegend(){
+    if(activeMode==='region'){
+      legendDiv.innerHTML=`<b>지역 평균 단가 수준</b><br><span class="sw" style="background:#D94800"></span>상위<br><span class="sw" style="background:#FF8A3D"></span>중위<br><span class="sw" style="background:#FFC896"></span>하위<br><span class="sw" style="background:#232428"></span>그린존 (CBD)`;
+    }else{
+      legendDiv.innerHTML=`<b>단지 시세 · ${currencyMode.toUpperCase()}</b><br><span class="dot" style="background:#1A8A3F"></span>공식 공표가<br><span class="dot" style="background:#315EBA"></span>복수 매물 중앙값<br><span class="dot" style="background:#D99000"></span>단일 매물 환산<br><small>카드에서 원문 확인</small>`;
+    }
+  }
 
-  /* ---------- SYNC: list <-> map ---------- */
+  function updateCalloutTexts(){
+    [['region',districts],['complex',complexes]].forEach(([mode,data])=>{
+      Object.entries(data).forEach(([key,d])=>{
+        const el=document.querySelector(`#lbl-${mode}-${key} .price`);
+        if(el) el.textContent=calloutPrice(d);
+      });
+    });
+    Object.entries(polyLayers).forEach(([key,poly])=>{
+      poly._regionTooltip=districtTooltip(districts[key]);
+      if(activeMode==='region') poly.setTooltipContent(poly._regionTooltip);
+    });
+    Object.entries(complexes).forEach(([key,d])=>calloutSets.complex.anchors[key].setPopupContent(popupHtml(d)));
+  }
+
+  function styleSelection(mode,selectedKey){
+    const layers=calloutSets[mode];
+    Object.keys(layers.labels).forEach(key=>{
+      const el=document.getElementById(`lbl-${mode}-${key}`);
+      if(el) el.classList.toggle('selected',key===selectedKey);
+      layers.labels[key].setZIndexOffset(key===selectedKey?1000:0);
+      layers.leaders[key].setStyle({weight:key===selectedKey?2.4:1.4});
+      layers.anchors[key].setRadius(key===selectedKey?5:4);
+      layers.anchors[key].setStyle({weight:key===selectedKey?3:2});
+      if(key===selectedKey){layers.leaders[key].bringToFront();layers.anchors[key].bringToFront();}
+    });
+  }
+
   function selectDistrict(key){
-    const d = districts[key];
-    if(!d) return;
-    selectedDistrictKey = key;
-
-    Object.entries(polyLayers).forEach(([k, poly]) => {
-      poly.setStyle({ weight: k===key ? 3 : 1.5 });
-      if(k===key) poly.bringToFront();
-    });
-    Object.keys(labelLayers).forEach(k => {
-      const el = document.getElementById(`lbl-${k}`);
-      if(el) el.classList.toggle('selected', k===key);
-      labelLayers[k].setZIndexOffset(k===key ? 1000 : 0);
-      leaderLayers[k].setStyle({ weight:k===key ? 2.4 : 1.4 });
-      anchorLayers[k].setRadius(k===key ? 5 : 4);
-      anchorLayers[k].setStyle({ weight:k===key ? 3 : 2 });
-      if(k===key){
-        leaderLayers[k].bringToFront();
-        anchorLayers[k].bringToFront();
-      }
-    });
-
-    document.querySelectorAll('.district-row').forEach(r => r.classList.toggle('active', r.dataset.key === key));
-    const row = document.querySelector(`.district-row[data-key="${key}"]`);
-    if(row) row.scrollIntoView({ block:'nearest', behavior:'smooth' });
-
-    map.flyToBounds(polyLayers[key].getBounds(), { padding:[60,60], maxZoom:14, duration:0.6 });
+    if(activeMode!=='region'||!districts[key]) return;
+    selectedDistrictKey=key;
+    Object.entries(polyLayers).forEach(([k,poly])=>{poly.setStyle({weight:k===key?3:1.5});if(k===key)poly.bringToFront();});
+    styleSelection('region',key);
+    document.querySelectorAll('.district-row').forEach(r=>r.classList.toggle('active',r.dataset.key===key));
+    document.querySelector(`.district-row[data-key="${key}"]`)?.scrollIntoView({block:'nearest',behavior:'smooth'});
+    map.flyToBounds(polyLayers[key].getBounds(),{padding:[60,60],maxZoom:14,duration:.6});
     polyLayers[key].openTooltip();
   }
 
-  /* ---------- CURRENCY TOGGLE ---------- */
-  const btnIqd = document.getElementById('btn-iqd');
-  const btnUsd = document.getElementById('btn-usd');
-  btnIqd.addEventListener('click', () => {
-    document.body.classList.add('iqd-active'); document.body.classList.remove('usd-active');
-    btnIqd.classList.add('active'); btnUsd.classList.remove('active');
-  });
-  btnUsd.addEventListener('click', () => {
-    document.body.classList.remove('iqd-active'); document.body.classList.add('usd-active');
-    btnUsd.classList.add('active'); btnIqd.classList.remove('active');
-  });
+  function selectComplex(key){
+    if(activeMode!=='complex'||!complexes[key]) return;
+    selectedComplexKey=key;
+    styleSelection('complex',key);
+    document.querySelectorAll('.district-row').forEach(r=>r.classList.toggle('active',r.dataset.key===key));
+    document.querySelector(`.district-row[data-key="${key}"]`)?.scrollIntoView({block:'nearest',behavior:'smooth'});
+    map.flyTo(complexes[key].centroid,Math.max(map.getZoom(),14),{duration:.6});
+    calloutSets.complex.anchors[key].openPopup();
+  }
+
+  function switchMode(mode){
+    if(mode===activeMode) return;
+    activeMode=mode;
+    map.closePopup();
+    const regionBtn=document.getElementById('btn-region-view');
+    const complexBtn=document.getElementById('btn-complex-view');
+    regionBtn.classList.toggle('active',mode==='region');
+    complexBtn.classList.toggle('active',mode==='complex');
+    regionBtn.setAttribute('aria-pressed',mode==='region');
+    complexBtn.setAttribute('aria-pressed',mode==='complex');
+
+    if(mode==='region'){
+      map.removeLayer(calloutGroups.complex);map.addLayer(calloutGroups.region);
+      Object.entries(polyLayers).forEach(([key,poly])=>{
+        poly.setStyle({color:'#fff',weight:key===selectedDistrictKey?3:1.5,fillOpacity:.62,opacity:1});
+        if(!poly.getTooltip()) poly.bindTooltip(poly._regionTooltip,{sticky:true});
+      });
+      viewTitle.textContent='바그다드 지역별 비교';viewSub.textContent='BAGHDAD DISTRICTS';
+      viewNote.textContent='지도/리스트 클릭 시 서로 연동됩니다 · 지도는 마우스 휠로 확대·축소';
+      listPanelTitle.textContent='지역별 단가';listPanelCount.textContent='13 DISTRICTS';mapPanelCount.textContent='실제 경계 기반';
+      chartTitle.textContent='지역별 m² 단가 비교';
+      map.fitBounds(fullBounds,{padding:[24,24]});
+    }else{
+      map.removeLayer(calloutGroups.region);map.addLayer(calloutGroups.complex);
+      Object.values(polyLayers).forEach(poly=>{poly.closeTooltip();poly.unbindTooltip();poly.setStyle({color:'#9A9CA2',weight:1,fillOpacity:.07,opacity:.45});});
+      viewTitle.textContent='바그다드 아파트 단지별 시세';viewSub.textContent='RESIDENTIAL COMPLEXES';
+      viewNote.textContent='단지명·단가 라벨을 선으로 연결했습니다 · 카드의 ‘가격 원문’을 열어 출처를 확인할 수 있습니다';
+      listPanelTitle.textContent='아파트 단지별 시세';listPanelCount.textContent='8 VERIFIED COMPLEXES';mapPanelCount.textContent='공개 주소·OSM 위치';
+      chartTitle.textContent='아파트 단지별 m² 단가 비교';
+      map.fitBounds(complexBounds,{padding:[55,55]});
+    }
+    renderList();renderChart();updateLegend();
+    setTimeout(scheduleCalloutLayout,80);
+  }
+
+  document.getElementById('btn-region-view').addEventListener('click',()=>switchMode('region'));
+  document.getElementById('btn-complex-view').addEventListener('click',()=>switchMode('complex'));
+
+  const btnIqd=document.getElementById('btn-iqd');
+  const btnUsd=document.getElementById('btn-usd');
+  function setCurrency(mode){
+    currencyMode=mode;
+    document.body.classList.toggle('iqd-active',mode==='iqd');
+    document.body.classList.toggle('usd-active',mode==='usd');
+    btnIqd.classList.toggle('active',mode==='iqd');btnUsd.classList.toggle('active',mode==='usd');
+    renderList();renderChart();updateCalloutTexts();updateLegend();scheduleCalloutLayout();
+  }
+  btnIqd.addEventListener('click',()=>setCurrency('iqd'));
+  btnUsd.addEventListener('click',()=>setCurrency('usd'));
+
+  renderList();renderChart();updateLegend();scheduleCalloutLayout();
 </script>
 
 </body>
