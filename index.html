@@ -112,12 +112,12 @@
     --pin-color:var(--hw-orange);
     width:max-content; transform:translate(-50%, -50%); pointer-events:none;
   }
-  .region-label{ min-width:62px; font-family:'Pretendard',sans-serif; text-align:center; background:rgba(255,255,255,.96); border:1px solid var(--pin-color); border-radius:5px; padding:4px 7px; box-shadow:0 1px 5px rgba(0,0,0,.2); white-space:nowrap; line-height:1.2; transition:.15s; }
-  .region-label .en{ display:none; font-weight:700; font-size:9.5px; letter-spacing:.2px; color:#232428; }
-  .region-label .price{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:12px; color:#9E3500; }
+  .region-label{ min-width:78px; font-family:'Pretendard',sans-serif; text-align:center; background:rgba(255,255,255,.96); border:1px solid var(--pin-color); border-radius:6px; padding:5px 8px; box-shadow:0 1px 5px rgba(0,0,0,.2); white-space:nowrap; line-height:1.15; transition:.15s; }
+  .region-label .name{ display:block; font-weight:750; font-size:10.5px; letter-spacing:-.1px; color:#232428; }
+  .region-label .price{ display:block; margin-top:2px; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:12.5px; color:#9E3500; }
   .region-callout.selected .region-label{ padding:5px 9px; box-shadow:0 2px 9px rgba(255,97,0,.45); }
-  .region-callout.selected .region-label .en{ display:block; margin-bottom:2px; font-size:10px; }
-  .region-callout.selected .region-label .price{ font-size:13px; }
+  .region-callout.selected .region-label .name{ font-size:11.5px; }
+  .region-callout.selected .region-label .price{ font-size:13.5px; }
   .region-leader{ stroke-linecap:round; }
   .cbd-label{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:9.5px; color:#fff; background:#232428; padding:2px 7px; border-radius:4px; white-space:nowrap; }
   .map-legend{ background:rgba(255,255,255,.97); border:1px solid var(--hw-border); border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.85; box-shadow:0 2px 10px rgba(0,0,0,.08); }
@@ -141,9 +141,6 @@
     .split{ grid-template-columns:1fr; }
     #map{ min-height:420px; }
     .district-list{ max-height:360px; }
-  }
-  @media (max-width:600px){
-    .region-callout.selected .region-label .en{ display:none; }
   }
 </style>
 </head>
@@ -381,12 +378,14 @@
   const labelLayers = {};
   const leaderLayers = {};
   const anchorLayers = {};
-  const calloutSides = {
-    mansour:'left', harthiya:'left', yarmouk:'left', kadhimiya:'left', amiriya:'left', jihad:'left',
-    jadriya:'right', karrada:'right', zayouna:'right', newbaghdad:'right', saydiya:'right', sadrcity:'right', bismayah:'right'
+  const calloutOffsets = {
+    mansour:[-88,-54], jadriya:[42,82], harthiya:[-92,-4], karrada:[88,18],
+    yarmouk:[-76,58], kadhimiya:[-86,-38], zayouna:[84,-52], newbaghdad:[92,16],
+    amiriya:[-88,-34], saydiya:[-34,84], jihad:[-88,38], sadrcity:[86,-42], bismayah:[90,24]
   };
+  let selectedDistrictKey = null;
 
-  function addLabel(key, latlng, en, usd, color){
+  function addLabel(key, latlng, nameKr, usd, color){
     const leader = L.polyline([latlng, latlng], {
       color, weight:1.4, opacity:.78, interactive:false, className:'region-leader'
     }).addTo(map);
@@ -396,7 +395,7 @@
     const marker = L.marker(latlng, {
       icon: L.divIcon({
         className:'price-callout-icon',
-        html:`<div class="region-callout" id="lbl-${key}" style="--pin-color:${color}"><div class="region-label"><span class="en">${en}</span><span class="price">$${fmt(usd)}</span></div></div>`,
+        html:`<div class="region-callout" id="lbl-${key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${nameKr}</span><span class="price">$${fmt(usd)}</span></div></div>`,
         iconSize:[1,1], iconAnchor:[0,0]
       }),
       interactive:false
@@ -414,7 +413,7 @@
     }).addTo(map).bindTooltip(tooltipText, {sticky:true});
     poly.on('click', () => selectDistrict(key));
     polyLayers[key] = poly;
-    addLabel(key, d.centroid, d.nameEn, usd, tierColor[d.tier]);
+    addLabel(key, d.centroid, d.nameKr, usd, tierColor[d.tier]);
   });
 
   L.polygon(greenZone.coords, { color:'#232428', weight:1.5, dashArray:'5,4', fillColor:'#232428', fillOpacity:0.18, interactive:false }).addTo(map);
@@ -426,51 +425,94 @@
   const fullBounds = L.latLngBounds(allCoords);
   map.fitBounds(fullBounds, { padding:[24,24] });
 
-  function spreadCallouts(items, top, bottom, gap){
-    if(!items.length) return;
-    items.sort((a,b) => a.point.y - b.point.y);
-    items.forEach((item, i) => {
-      item.y = Math.max(top, Math.min(bottom, item.point.y));
-      if(i > 0) item.y = Math.max(item.y, items[i-1].y + gap);
-    });
-    if(items[items.length-1].y > bottom){
-      items[items.length-1].y = bottom;
-      for(let i=items.length-2; i>=0; i--){
-        items[i].y = Math.min(items[i].y, items[i+1].y - gap);
-      }
-    }
-    if(items[0].y < top){
-      const step = items.length > 1 ? (bottom - top) / (items.length - 1) : 0;
-      items.forEach((item, i) => item.y = top + (step * i));
-    }
+  function rectAt(x, y, width, height, gap=0){
+    return { left:x-(width/2)-gap, right:x+(width/2)+gap, top:y-(height/2)-gap, bottom:y+(height/2)+gap };
+  }
+
+  function overlapArea(a, b){
+    const width = Math.max(0, Math.min(a.right,b.right) - Math.max(a.left,b.left));
+    const height = Math.max(0, Math.min(a.bottom,b.bottom) - Math.max(a.top,b.top));
+    return width * height;
+  }
+
+  function connectorEnd(anchor, label){
+    const dx = anchor.x - label.x;
+    const dy = anchor.y - label.y;
+    if(Math.abs(dx) < 1 && Math.abs(dy) < 1) return L.point(label.x,label.y);
+    const scaleX = (label.width/2) / Math.max(Math.abs(dx),.001);
+    const scaleY = (label.height/2) / Math.max(Math.abs(dy),.001);
+    const scale = Math.min(scaleX,scaleY);
+    return L.point(label.x+(dx*scale), label.y+(dy*scale));
   }
 
   function layoutCallouts(){
     const size = map.getSize();
-    const left = [];
-    const right = [];
+    const mapRect = map.getContainer().getBoundingClientRect();
+    const items = [];
 
     Object.entries(districts).forEach(([key, d]) => {
       const point = map.latLngToContainerPoint(d.centroid);
-      const visible = point.x >= 0 && point.x <= size.x && point.y >= 0 && point.y <= size.y;
+      const visible = point.x >= -12 && point.x <= size.x+12 && point.y >= -12 && point.y <= size.y+12;
       labelLayers[key].setOpacity(visible ? 1 : 0);
       leaderLayers[key].setStyle({ opacity:visible ? .78 : 0 });
       anchorLayers[key].setStyle({ opacity:visible ? 1 : 0, fillOpacity:visible ? 1 : 0 });
       if(!visible) return;
-      const item = { key, point };
-      (calloutSides[key] === 'left' ? left : right).push(item);
+      const labelEl = document.getElementById(`lbl-${key}`);
+      const bounds = labelEl ? labelEl.getBoundingClientRect() : {width:90,height:40};
+      const offset = calloutOffsets[key] || [72,-52];
+      items.push({
+        key, point, width:Math.max(78,bounds.width), height:Math.max(38,bounds.height),
+        preferredAngle:Math.atan2(offset[1],offset[0]), preferredRadius:Math.max(68,Math.hypot(offset[0],offset[1]))
+      });
     });
 
-    const bottom = Math.max(90, size.y - 36);
-    spreadCallouts(left, 76, bottom, 34);
-    spreadCallouts(right, 132, bottom, 34);
-    const sideInset = size.x < 520 ? 56 : 92;
+    const obstacleSelectors = ['.leaflet-control-zoom','.map-legend','.cbd-label'];
+    const obstacles = obstacleSelectors.map(selector => document.querySelector(selector)).filter(Boolean).map(el => {
+      const r = el.getBoundingClientRect();
+      return { left:r.left-mapRect.left-7, right:r.right-mapRect.left+7, top:r.top-mapRect.top-7, bottom:r.bottom-mapRect.top+7 };
+    });
 
-    [...left, ...right].forEach(item => {
-      const x = calloutSides[item.key] === 'left' ? sideInset : size.x - sideInset;
-      const labelLatLng = map.containerPointToLatLng(L.point(x, item.y));
+    items.forEach(item => {
+      item.neighbors = items.filter(other => other!==item && item.point.distanceTo(other.point)<135).length;
+    });
+    items.sort((a,b) => {
+      if(a.key===selectedDistrictKey) return -1;
+      if(b.key===selectedDistrictKey) return 1;
+      return b.neighbors-a.neighbors;
+    });
+
+    const placed = [];
+    const angleSteps = [0,-.38,.38,-.76,.76,-1.14,1.14,Math.PI];
+    items.forEach(item => {
+      let best = null;
+      const radii = [item.preferredRadius,item.preferredRadius+24,item.preferredRadius+48,item.preferredRadius+74];
+      radii.forEach(radius => angleSteps.forEach(angleStep => {
+        const angle = item.preferredAngle + angleStep;
+        const x = item.point.x + (Math.cos(angle)*radius);
+        const y = item.point.y + (Math.sin(angle)*radius);
+        const rect = rectAt(x,y,item.width,item.height,7);
+        if(rect.left<10 || rect.right>size.x-10 || rect.top<10 || rect.bottom>size.y-10) return;
+        const labelOverlap = placed.reduce((sum,p) => sum+overlapArea(rect,p.rect),0);
+        const obstacleOverlap = obstacles.reduce((sum,o) => sum+overlapArea(rect,o),0);
+        const penalty = (labelOverlap*20) + (obstacleOverlap*30) + Math.abs(radius-item.preferredRadius);
+        if(!best || penalty<best.penalty) best = {x,y,rect,penalty};
+      }));
+
+      if(!best){
+        const x = Math.max((item.width/2)+12,Math.min(size.x-(item.width/2)-12,item.point.x+Math.cos(item.preferredAngle)*item.preferredRadius));
+        const y = Math.max((item.height/2)+12,Math.min(size.y-(item.height/2)-12,item.point.y+Math.sin(item.preferredAngle)*item.preferredRadius));
+        best = {x,y,rect:rectAt(x,y,item.width,item.height,7),penalty:Infinity};
+      }
+      item.x = best.x;
+      item.y = best.y;
+      placed.push({key:item.key,rect:best.rect});
+    });
+
+    items.forEach(item => {
+      const labelLatLng = map.containerPointToLatLng(L.point(item.x,item.y));
+      const lineEnd = connectorEnd(item.point,item);
       labelLayers[item.key].setLatLng(labelLatLng);
-      leaderLayers[item.key].setLatLngs([districts[item.key].centroid, labelLatLng]);
+      leaderLayers[item.key].setLatLngs([districts[item.key].centroid,map.containerPointToLatLng(lineEnd)]);
     });
   }
 
@@ -480,7 +522,6 @@
     calloutFrame = requestAnimationFrame(layoutCallouts);
   }
   map.on('move zoom resize', scheduleCalloutLayout);
-  layoutCallouts();
 
   const legend = L.control({position:'topright'});
   legend.onAdd = function(){
@@ -495,11 +536,13 @@
     return div;
   };
   legend.addTo(map);
+  scheduleCalloutLayout();
 
   /* ---------- SYNC: list <-> map ---------- */
   function selectDistrict(key){
     const d = districts[key];
     if(!d) return;
+    selectedDistrictKey = key;
 
     Object.entries(polyLayers).forEach(([k, poly]) => {
       poly.setStyle({ weight: k===key ? 3 : 1.5 });
