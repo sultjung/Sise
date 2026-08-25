@@ -619,6 +619,12 @@
     attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:18
   }).addTo(map);
 
+  // Establish the map view before adding vector layers so Leaflet's renderer
+  // has valid pixel bounds when the callout groups are attached.
+  const fullBounds = L.latLngBounds(Object.values(districts).flatMap(d=>d.coords).concat(greenZone.coords));
+  const complexBounds = L.latLngBounds(Object.values(complexes).map(d=>d.centroid));
+  map.fitBounds(fullBounds,{padding:[24,24]});
+
   const polyLayers = {};
   const calloutGroups = {region:L.layerGroup().addTo(map),complex:L.layerGroup()};
   const calloutSets = {
@@ -690,10 +696,6 @@
 
   Object.entries(districts).forEach(([key,d])=>addCallout('region',key,d,tierColor[d.tier]));
   Object.entries(complexes).forEach(([key,d])=>addCallout('complex',key,d,tierColor[tierForComplex(d)]));
-
-  const fullBounds = L.latLngBounds(Object.values(districts).flatMap(d=>d.coords).concat(greenZone.coords));
-  const complexBounds = L.latLngBounds(Object.values(complexes).map(d=>d.centroid));
-  map.fitBounds(fullBounds,{padding:[24,24]});
 
   function rectAt(x,y,width,height,gap=0){
     return {left:x-width/2-gap,right:x+width/2+gap,top:y-height/2-gap,bottom:y+height/2+gap};
