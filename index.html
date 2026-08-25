@@ -208,8 +208,8 @@
   <div class="top-controls">
     <div class="updated">LAST UPDATED · 2026.08.25</div>
     <div class="toggle">
-      <button id="btn-iqd">IQD</button>
-      <button id="btn-usd" class="active">USD</button>
+      <button id="btn-iqd" aria-pressed="false">IQD</button>
+      <button id="btn-usd" class="active" aria-pressed="true">USD</button>
     </div>
   </div>
 </div>
@@ -306,12 +306,8 @@
 
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-  window.addEventListener('error',event=>{
-    if(event.error?.stack) console.error('SITE_STACK',event.error.stack);
-  });
-  try {
   const RATE = 1310; // 1 USD ≈ 1310 IQD
   const tierColor = { high:"#D94800", mid:"#FF8A3D", low:"#FFC896" };
 
@@ -862,7 +858,7 @@
       Object.values(polyLayers).forEach(poly=>{poly.closeTooltip();poly.unbindTooltip();poly.setStyle({color:'#9A9CA2',weight:1,fillOpacity:.07,opacity:.45});});
       viewTitle.textContent='바그다드 아파트 단지별 시세';viewSub.textContent='RESIDENTIAL COMPLEXES';
       viewNote.textContent='단지명·단가 라벨을 선으로 연결했습니다 · 카드의 ‘가격 원문’을 열어 출처를 확인할 수 있습니다';
-      listPanelTitle.textContent='아파트 단지별 시세';listPanelCount.textContent='8 VERIFIED COMPLEXES';mapPanelCount.textContent='공개 주소·OSM 위치';
+      listPanelTitle.textContent='아파트 단지별 시세';listPanelCount.textContent='8 SOURCE-CHECKED';mapPanelCount.textContent='공개 주소·OSM 위치';
       chartTitle.textContent='아파트 단지별 m² 단가 비교';
       map.fitBounds(complexBounds,{padding:[55,55]});
     }
@@ -880,15 +876,13 @@
     document.body.classList.toggle('iqd-active',mode==='iqd');
     document.body.classList.toggle('usd-active',mode==='usd');
     btnIqd.classList.toggle('active',mode==='iqd');btnUsd.classList.toggle('active',mode==='usd');
+    btnIqd.setAttribute('aria-pressed',mode==='iqd');btnUsd.setAttribute('aria-pressed',mode==='usd');
     renderList();renderChart();updateCalloutTexts();updateLegend();scheduleCalloutLayout();
   }
   btnIqd.addEventListener('click',()=>setCurrency('iqd'));
   btnUsd.addEventListener('click',()=>setCurrency('usd'));
 
   renderList();renderChart();updateLegend();scheduleCalloutLayout();
-  } catch(error) {
-    console.error('SITE_STACK',error.stack || error.message);
-  }
 </script>
 
 </body>
