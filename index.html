@@ -672,7 +672,7 @@
     const group = calloutGroups[mode];
     // Leaflet cannot clip a zero-length polyline before the first map layout.
     // Give the leader a tiny valid segment; layoutCallouts replaces it immediately.
-    const leaderSeed = [d.centroid[0]+0.00001,d.centroid[1]+0.00001];
+    const leaderSeed = [d.centroid[0]+0.005,d.centroid[1]+0.005];
     const leader = L.polyline([d.centroid,leaderSeed],{color,weight:1.4,opacity:.78,interactive:false,className:'region-leader'}).addTo(group);
     const anchor = L.circleMarker(d.centroid,{radius:4,color,weight:2,fillColor:'#fff',fillOpacity:1,interactive:true}).addTo(group);
     const marker = L.marker(d.centroid,{
