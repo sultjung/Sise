@@ -23,6 +23,9 @@
     --tier-mid:#FF8A3D;
     --tier-low:#FFC896;
     --verified:#1A8A3F;
+    --green-zone:#149764;
+    --green-zone-dark:#075B40;
+    --green-zone-soft:#DDF7EA;
     --radius:10px;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
@@ -168,7 +171,22 @@
   .region-callout.selected .region-label .name{ font-size:11.5px; }
   .region-callout.selected .region-label .price{ font-size:13.5px; }
   .region-leader{ stroke-linecap:round; }
-  .cbd-label{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:9.5px; color:#fff; background:#232428; padding:2px 7px; border-radius:4px; white-space:nowrap; }
+  .cbd-label{
+    display:flex; align-items:center; gap:6px;
+    font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:9.5px; letter-spacing:.25px;
+    color:#F5FFF9; background:linear-gradient(135deg,var(--green-zone-dark) 0%,#0B7B53 58%,var(--green-zone) 100%);
+    padding:5px 9px; border:1px solid rgba(222,255,239,.9); border-radius:999px; white-space:nowrap;
+    box-shadow:0 4px 12px rgba(4,92,61,.30),0 0 0 3px rgba(20,151,100,.14);
+  }
+  .cbd-label::before{
+    content:""; width:6px; height:6px; flex:0 0 6px; border-radius:50%;
+    background:#8AF2BC; box-shadow:0 0 0 3px rgba(138,242,188,.18);
+  }
+  .cbd-label .cbd{
+    padding-left:6px; border-left:1px solid rgba(222,255,239,.38);
+    color:#CFF7E1; font-size:8px; font-weight:600; letter-spacing:.6px;
+  }
+  .green-zone-boundary{ filter:drop-shadow(0 0 4px rgba(7,91,64,.42)); }
   .map-legend{ background:rgba(255,255,255,.97); border:1px solid var(--hw-border); border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.85; box-shadow:0 2px 10px rgba(0,0,0,.08); }
   .map-legend .sw{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px;}
   .map-legend .dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin:0 8px 0 2px; vertical-align:0; }
@@ -587,6 +605,7 @@
     }
   };
 
+  const varGreenZone = '#149764';
   const greenZone = {
     centroid:[33.306979,44.38523],
     coords:[[33.31639,44.385824],[33.314525,44.388227],[33.313592,44.386425],[33.31223,44.385824],[33.311441,44.384022],[33.311297,44.380073],[33.309504,44.378185],[33.306706,44.377584],[33.305272,44.379215],[33.305128,44.376726],[33.304411,44.375353],[33.302259,44.372949],[33.301541,44.370117],[33.30147,44.367285],[33.303407,44.36265],[33.303981,44.358015],[33.303407,44.356985],[33.300681,44.356985],[33.290063,44.362135],[33.293004,44.366941],[33.297094,44.386339],[33.297524,44.394493],[33.296807,44.394493],[33.296233,44.401617],[33.29695,44.406509],[33.298959,44.411573],[33.300896,44.413719],[33.305487,44.413976],[33.311584,44.412603],[33.317968,44.408569],[33.324064,44.403334],[33.316963,44.393377],[33.318685,44.391575],[33.317681,44.389858],[33.31725,44.387712],[33.317394,44.386425],[33.31639,44.385824]]
@@ -723,6 +742,9 @@
 
   /* ---------- MAP ---------- */
   const map = L.map('map',{scrollWheelZoom:true});
+  map.createPane('greenZonePane');
+  map.getPane('greenZonePane').style.zIndex='410';
+  map.getPane('greenZonePane').style.pointerEvents='none';
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
     attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:18
   }).addTo(map);
@@ -766,9 +788,23 @@
     polyLayers[key] = poly;
   });
 
-  L.polygon(greenZone.coords,{color:'#232428',weight:1.5,dashArray:'5,4',fillColor:'#232428',fillOpacity:.18,interactive:false}).addTo(map);
+  // Green Zone uses its own pane so the emerald treatment stays visible
+  // even when a district polygon is selected and brought to the front.
+  L.polygon(greenZone.coords,{
+    pane:'greenZonePane',color:'#77D6AA',weight:8,opacity:.34,
+    fillColor:varGreenZone,fillOpacity:.08,lineCap:'round',lineJoin:'round',interactive:false
+  }).addTo(map);
+  L.polygon(greenZone.coords,{
+    pane:'greenZonePane',className:'green-zone-boundary',
+    color:'#075B40',weight:2.5,opacity:.96,dashArray:'9,5',
+    fillColor:varGreenZone,fillOpacity:.30,lineCap:'round',lineJoin:'round',interactive:false
+  }).addTo(map);
   L.marker(greenZone.centroid,{
-    icon:L.divIcon({className:'',html:'<div class="cbd-label">GREEN ZONE · CBD</div>',iconSize:null}),interactive:false
+    icon:L.divIcon({
+      className:'',
+      html:'<div class="cbd-label">GREEN ZONE<span class="cbd">CBD</span></div>',
+      iconSize:null
+    }),interactive:false
   }).addTo(map);
 
   function popupHtml(d){
@@ -895,7 +931,7 @@
   legend.addTo(map);
   function updateLegend(){
     if(activeMode==='region'){
-      legendDiv.innerHTML=`<b>지역 평균 단가 수준</b><br><span class="sw" style="background:#D94800"></span>상위<br><span class="sw" style="background:#FF8A3D"></span>중위<br><span class="sw" style="background:#FFC896"></span>하위<br><span class="sw" style="background:#232428"></span>그린존 (CBD)<br><small>비스마야: 공식·시장 병기</small>`;
+      legendDiv.innerHTML=`<b>지역 평균 단가 수준</b><br><span class="sw" style="background:#D94800"></span>상위<br><span class="sw" style="background:#FF8A3D"></span>중위<br><span class="sw" style="background:#FFC896"></span>하위<br><span class="sw" style="background:#149764;border:1px solid #075B40"></span>그린존 · Green Zone (CBD)<br><small>비스마야: 공식·시장 병기</small>`;
     }else{
       legendDiv.innerHTML=`<b>단지 시세 · ${currencyMode.toUpperCase()}</b><br><span class="dot" style="background:#315EBA"></span>복수 매물 호가 중앙값<br><span class="dot" style="background:#1A8A3F"></span>비스마야 공식 분양가<br><small>카드에서 모든 원문 확인</small>`;
     }
