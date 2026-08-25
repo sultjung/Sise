@@ -980,7 +980,7 @@
       chartTitle.textContent='아파트 단지별 m² 단가 비교';
       map.fitBounds(complexBounds,{padding:[55,55]});
     }
-    renderList();renderChart();updateLegend();
+    renderList();renderChart();updateCalloutTexts();updateLegend();
     setTimeout(scheduleCalloutLayout,80);
   }
 
