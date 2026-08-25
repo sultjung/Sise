@@ -311,6 +311,7 @@
   window.addEventListener('error',event=>{
     if(event.error?.stack) console.error('SITE_STACK',event.error.stack);
   });
+  try {
   const RATE = 1310; // 1 USD ≈ 1310 IQD
   const tierColor = { high:"#D94800", mid:"#FF8A3D", low:"#FFC896" };
 
@@ -880,6 +881,9 @@
   btnUsd.addEventListener('click',()=>setCurrency('usd'));
 
   renderList();renderChart();updateLegend();scheduleCalloutLayout();
+  } catch(error) {
+    console.error('SITE_STACK',error.stack || error.message);
+  }
 </script>
 
 </body>
