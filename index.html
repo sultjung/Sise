@@ -670,7 +670,10 @@
 
   function addCallout(mode,key,d,color){
     const group = calloutGroups[mode];
-    const leader = L.polyline([d.centroid,d.centroid],{color,weight:1.4,opacity:.78,interactive:false,className:'region-leader'}).addTo(group);
+    // Leaflet cannot clip a zero-length polyline before the first map layout.
+    // Give the leader a tiny valid segment; layoutCallouts replaces it immediately.
+    const leaderSeed = [d.centroid[0]+0.00001,d.centroid[1]+0.00001];
+    const leader = L.polyline([d.centroid,leaderSeed],{color,weight:1.4,opacity:.78,interactive:false,className:'region-leader'}).addTo(group);
     const anchor = L.circleMarker(d.centroid,{radius:4,color,weight:2,fillColor:'#fff',fillOpacity:1,interactive:true}).addTo(group);
     const marker = L.marker(d.centroid,{
       icon:L.divIcon({className:'price-callout-icon',html:calloutMarkup(mode,key,d,color),iconSize:[1,1],iconAnchor:[0,0]}),
@@ -717,7 +720,7 @@
       const point = map.latLngToContainerPoint(d.centroid);
       const visible = point.x>=-12&&point.x<=size.x+12&&point.y>=-12&&point.y<=size.y+12;
       layers.labels[key].setOpacity(visible?1:0);
-      layers.leaders[key].setStyle({opacity:visible?.78:0});
+      layers.leaders[key].setStyle({opacity:visible ? .78 : 0});
       layers.anchors[key].setStyle({opacity:visible?1:0,fillOpacity:visible?1:0});
       if(!visible) return;
       const el=document.getElementById(`lbl-${activeMode}-${key}`);
