@@ -306,8 +306,11 @@
 
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
+  window.addEventListener('error',event=>{
+    if(event.error?.stack) console.error('SITE_STACK',event.error.stack);
+  });
   const RATE = 1310; // 1 USD ≈ 1310 IQD
   const tierColor = { high:"#D94800", mid:"#FF8A3D", low:"#FFC896" };
 
