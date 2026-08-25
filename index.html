@@ -107,22 +107,18 @@
   .district-badge{ margin-top:5px; text-align:right; }
 
   #map{ flex:1; min-height:680px; }
-  .price-pin-icon{ background:transparent; border:0; }
-  .region-pin{
+  .price-callout-icon{ background:transparent; border:0; }
+  .region-callout{
     --pin-color:var(--hw-orange);
-    display:flex; flex-direction:column; align-items:center; width:max-content;
-    transform:translate(-50%, calc(-100% + 4px)); pointer-events:none;
+    width:max-content; transform:translate(-50%, -50%); pointer-events:none;
   }
-  .region-label{ font-family:'Pretendard',sans-serif; text-align:center; background:rgba(255,255,255,.9); border:1px solid rgba(0,0,0,.1); border-radius:4px; padding:2px 5px; box-shadow:0 1px 3px rgba(0,0,0,.18); white-space:nowrap; line-height:1.25; transition:.15s; }
-  .region-label .en{ display:none; font-weight:700; font-size:8.5px; letter-spacing:.2px; color:#232428; }
-  .region-label .price{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:9px; color:#B23D00; }
-  .region-pin-stem{ width:1px; height:8px; background:var(--pin-color); opacity:.9; }
-  .region-pin-dot{ width:8px; height:8px; flex:0 0 auto; background:#fff; border:2px solid var(--pin-color); border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,.28); }
-  .region-pin.selected .region-label{ padding:3px 8px; box-shadow:0 2px 8px rgba(255,97,0,.4); }
-  .region-pin.selected .region-label .en{ display:inline; font-size:10.5px; }
-  .region-pin.selected .region-label .price{ font-size:11px; }
-  .region-pin.selected .region-pin-stem{ height:10px; }
-  .region-pin.selected .region-pin-dot{ width:10px; height:10px; border-width:3px; }
+  .region-label{ min-width:62px; font-family:'Pretendard',sans-serif; text-align:center; background:rgba(255,255,255,.96); border:1px solid var(--pin-color); border-radius:5px; padding:4px 7px; box-shadow:0 1px 5px rgba(0,0,0,.2); white-space:nowrap; line-height:1.2; transition:.15s; }
+  .region-label .en{ display:none; font-weight:700; font-size:9.5px; letter-spacing:.2px; color:#232428; }
+  .region-label .price{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:12px; color:#9E3500; }
+  .region-callout.selected .region-label{ padding:5px 9px; box-shadow:0 2px 9px rgba(255,97,0,.45); }
+  .region-callout.selected .region-label .en{ display:block; margin-bottom:2px; font-size:10px; }
+  .region-callout.selected .region-label .price{ font-size:13px; }
+  .region-leader{ stroke-linecap:round; }
   .cbd-label{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:9.5px; color:#fff; background:#232428; padding:2px 7px; border-radius:4px; white-space:nowrap; }
   .map-legend{ background:rgba(255,255,255,.97); border:1px solid var(--hw-border); border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.85; box-shadow:0 2px 10px rgba(0,0,0,.08); }
   .map-legend .sw{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px;}
@@ -145,6 +141,9 @@
     .split{ grid-template-columns:1fr; }
     #map{ min-height:420px; }
     .district-list{ max-height:360px; }
+  }
+  @media (max-width:600px){
+    .region-callout.selected .region-label .en{ display:none; }
   }
 </style>
 </head>
@@ -380,17 +379,31 @@
 
   const polyLayers = {};
   const labelLayers = {};
+  const leaderLayers = {};
+  const anchorLayers = {};
+  const calloutSides = {
+    mansour:'left', harthiya:'left', yarmouk:'left', kadhimiya:'left', amiriya:'left', jihad:'left',
+    jadriya:'right', karrada:'right', zayouna:'right', newbaghdad:'right', saydiya:'right', sadrcity:'right', bismayah:'right'
+  };
 
   function addLabel(key, latlng, en, usd, color){
+    const leader = L.polyline([latlng, latlng], {
+      color, weight:1.4, opacity:.78, interactive:false, className:'region-leader'
+    }).addTo(map);
+    const anchor = L.circleMarker(latlng, {
+      radius:4, color, weight:2, fillColor:'#fff', fillOpacity:1, interactive:false
+    }).addTo(map);
     const marker = L.marker(latlng, {
       icon: L.divIcon({
-        className:'price-pin-icon',
-        html:`<div class="region-pin" id="lbl-${key}" style="--pin-color:${color}"><div class="region-label"><span class="en">${en}</span> <span class="price">$${fmt(usd)}</span></div><span class="region-pin-stem"></span><span class="region-pin-dot"></span></div>`,
+        className:'price-callout-icon',
+        html:`<div class="region-callout" id="lbl-${key}" style="--pin-color:${color}"><div class="region-label"><span class="en">${en}</span><span class="price">$${fmt(usd)}</span></div></div>`,
         iconSize:[1,1], iconAnchor:[0,0]
       }),
       interactive:false
     }).addTo(map);
     labelLayers[key] = marker;
+    leaderLayers[key] = leader;
+    anchorLayers[key] = anchor;
   }
 
   Object.entries(districts).forEach(([key, d]) => {
@@ -412,6 +425,62 @@
   const allCoords = Object.values(districts).flatMap(d => d.coords).concat(greenZone.coords);
   const fullBounds = L.latLngBounds(allCoords);
   map.fitBounds(fullBounds, { padding:[24,24] });
+
+  function spreadCallouts(items, top, bottom, gap){
+    if(!items.length) return;
+    items.sort((a,b) => a.point.y - b.point.y);
+    items.forEach((item, i) => {
+      item.y = Math.max(top, Math.min(bottom, item.point.y));
+      if(i > 0) item.y = Math.max(item.y, items[i-1].y + gap);
+    });
+    if(items[items.length-1].y > bottom){
+      items[items.length-1].y = bottom;
+      for(let i=items.length-2; i>=0; i--){
+        items[i].y = Math.min(items[i].y, items[i+1].y - gap);
+      }
+    }
+    if(items[0].y < top){
+      const step = items.length > 1 ? (bottom - top) / (items.length - 1) : 0;
+      items.forEach((item, i) => item.y = top + (step * i));
+    }
+  }
+
+  function layoutCallouts(){
+    const size = map.getSize();
+    const left = [];
+    const right = [];
+
+    Object.entries(districts).forEach(([key, d]) => {
+      const point = map.latLngToContainerPoint(d.centroid);
+      const visible = point.x >= 0 && point.x <= size.x && point.y >= 0 && point.y <= size.y;
+      labelLayers[key].setOpacity(visible ? 1 : 0);
+      leaderLayers[key].setStyle({ opacity:visible ? .78 : 0 });
+      anchorLayers[key].setStyle({ opacity:visible ? 1 : 0, fillOpacity:visible ? 1 : 0 });
+      if(!visible) return;
+      const item = { key, point };
+      (calloutSides[key] === 'left' ? left : right).push(item);
+    });
+
+    const bottom = Math.max(90, size.y - 36);
+    spreadCallouts(left, 76, bottom, 34);
+    spreadCallouts(right, 132, bottom, 34);
+    const sideInset = size.x < 520 ? 56 : 92;
+
+    [...left, ...right].forEach(item => {
+      const x = calloutSides[item.key] === 'left' ? sideInset : size.x - sideInset;
+      const labelLatLng = map.containerPointToLatLng(L.point(x, item.y));
+      labelLayers[item.key].setLatLng(labelLatLng);
+      leaderLayers[item.key].setLatLngs([districts[item.key].centroid, labelLatLng]);
+    });
+  }
+
+  let calloutFrame = 0;
+  function scheduleCalloutLayout(){
+    cancelAnimationFrame(calloutFrame);
+    calloutFrame = requestAnimationFrame(layoutCallouts);
+  }
+  map.on('move zoom resize', scheduleCalloutLayout);
+  layoutCallouts();
 
   const legend = L.control({position:'topright'});
   legend.onAdd = function(){
@@ -440,6 +509,13 @@
       const el = document.getElementById(`lbl-${k}`);
       if(el) el.classList.toggle('selected', k===key);
       labelLayers[k].setZIndexOffset(k===key ? 1000 : 0);
+      leaderLayers[k].setStyle({ weight:k===key ? 2.4 : 1.4 });
+      anchorLayers[k].setRadius(k===key ? 5 : 4);
+      anchorLayers[k].setStyle({ weight:k===key ? 3 : 2 });
+      if(k===key){
+        leaderLayers[k].bringToFront();
+        anchorLayers[k].bringToFront();
+      }
     });
 
     document.querySelectorAll('.district-row').forEach(r => r.classList.toggle('active', r.dataset.key === key));
