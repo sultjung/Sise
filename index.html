@@ -107,12 +107,22 @@
   .district-badge{ margin-top:5px; text-align:right; }
 
   #map{ flex:1; min-height:680px; }
-  .region-label{ font-family:'Pretendard',sans-serif; text-align:center; pointer-events:none; background:rgba(255,255,255,.92); border:1px solid rgba(0,0,0,.1); border-radius:4px; padding:1px 5px; box-shadow:0 1px 3px rgba(0,0,0,.2); white-space:nowrap; line-height:1.3; transition:.15s; }
-  .region-label .en{ font-weight:700; font-size:8.5px; letter-spacing:.2px; color:#232428; }
+  .price-pin-icon{ background:transparent; border:0; }
+  .region-pin{
+    --pin-color:var(--hw-orange);
+    display:flex; flex-direction:column; align-items:center; width:max-content;
+    transform:translate(-50%, calc(-100% + 4px)); pointer-events:none;
+  }
+  .region-label{ font-family:'Pretendard',sans-serif; text-align:center; background:rgba(255,255,255,.9); border:1px solid rgba(0,0,0,.1); border-radius:4px; padding:2px 5px; box-shadow:0 1px 3px rgba(0,0,0,.18); white-space:nowrap; line-height:1.25; transition:.15s; }
+  .region-label .en{ display:none; font-weight:700; font-size:8.5px; letter-spacing:.2px; color:#232428; }
   .region-label .price{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:9px; color:#B23D00; }
-  .region-label.selected{ padding:3px 8px; box-shadow:0 2px 8px rgba(255,97,0,.4); z-index:1000 !important; }
-  .region-label.selected .en{ font-size:10.5px; }
-  .region-label.selected .price{ font-size:11px; }
+  .region-pin-stem{ width:1px; height:8px; background:var(--pin-color); opacity:.9; }
+  .region-pin-dot{ width:8px; height:8px; flex:0 0 auto; background:#fff; border:2px solid var(--pin-color); border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,.28); }
+  .region-pin.selected .region-label{ padding:3px 8px; box-shadow:0 2px 8px rgba(255,97,0,.4); }
+  .region-pin.selected .region-label .en{ display:inline; font-size:10.5px; }
+  .region-pin.selected .region-label .price{ font-size:11px; }
+  .region-pin.selected .region-pin-stem{ height:10px; }
+  .region-pin.selected .region-pin-dot{ width:10px; height:10px; border-width:3px; }
   .cbd-label{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:9.5px; color:#fff; background:#232428; padding:2px 7px; border-radius:4px; white-space:nowrap; }
   .map-legend{ background:rgba(255,255,255,.97); border:1px solid var(--hw-border); border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.85; box-shadow:0 2px 10px rgba(0,0,0,.08); }
   .map-legend .sw{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px;}
@@ -371,9 +381,13 @@
   const polyLayers = {};
   const labelLayers = {};
 
-  function addLabel(key, latlng, en, usd){
+  function addLabel(key, latlng, en, usd, color){
     const marker = L.marker(latlng, {
-      icon: L.divIcon({ className:'', html:`<div class="region-label" id="lbl-${key}"><span class="en">${en}</span> <span class="price">$${fmt(usd)}</span></div>`, iconSize:null }),
+      icon: L.divIcon({
+        className:'price-pin-icon',
+        html:`<div class="region-pin" id="lbl-${key}" style="--pin-color:${color}"><div class="region-label"><span class="en">${en}</span> <span class="price">$${fmt(usd)}</span></div><span class="region-pin-stem"></span><span class="region-pin-dot"></span></div>`,
+        iconSize:[1,1], iconAnchor:[0,0]
+      }),
       interactive:false
     }).addTo(map);
     labelLayers[key] = marker;
@@ -387,7 +401,7 @@
     }).addTo(map).bindTooltip(tooltipText, {sticky:true});
     poly.on('click', () => selectDistrict(key));
     polyLayers[key] = poly;
-    addLabel(key, d.centroid, d.nameEn, usd);
+    addLabel(key, d.centroid, d.nameEn, usd, tierColor[d.tier]);
   });
 
   L.polygon(greenZone.coords, { color:'#232428', weight:1.5, dashArray:'5,4', fillColor:'#232428', fillOpacity:0.18, interactive:false }).addTo(map);
@@ -425,6 +439,7 @@
     Object.keys(labelLayers).forEach(k => {
       const el = document.getElementById(`lbl-${k}`);
       if(el) el.classList.toggle('selected', k===key);
+      labelLayers[k].setZIndexOffset(k===key ? 1000 : 0);
     });
 
     document.querySelectorAll('.district-row').forEach(r => r.classList.toggle('active', r.dataset.key === key));
