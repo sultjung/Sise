@@ -436,7 +436,7 @@
       centroid:[33.305935,44.480956],
       coords:[[33.318886,44.482774],[33.311068,44.477195],[33.309633,44.474019],[33.30827,44.470671],[33.305114,44.46947],[33.302747,44.46741],[33.301025,44.470328],[33.294497,44.489897],[33.29586,44.497622],[33.299303,44.508351],[33.318886,44.482774]]
     },
-    amiriya: { nameKr:"알아미리야", nameEn:"AL-AMIRIYA", iqd:null, tier:"mid", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
+    amiriya: { nameKr:"알아미리야", nameEn:"AL-AMIRIYA", iqd:1602000, tier:"mid", verified:false, sourceKind:"sample", sampleCount:2, propertyType:"아파트", complex:"알와드 주거단지 (مجمع الود)", source:"2026.08.27 공개 매물 2건 · 총 호가 기준 m² 중앙값",
       centroid:[33.299216,44.286448],
       coords:[[33.310259,44.302521],[33.306098,44.286986],[33.306959,44.276901],[33.304556,44.275742],[33.303624,44.275742],[33.302978,44.276343],[33.301866,44.274497],[33.299642,44.276858],[33.297562,44.276514],[33.294154,44.276386],[33.28845,44.277888],[33.282638,44.281922],[33.288235,44.294367],[33.290316,44.302006],[33.291535,44.309302],[33.307533,44.303122],[33.310259,44.302521]]
     },
@@ -621,6 +621,10 @@
   districts.saydiya.sources=complexListingLinks(['baghdad_marina']);
   districts.kadhimiya.sources=complexListingLinks(['jawahir_dijla']);
   districts.jihad.sources=complexListingLinks(['nasim_city']);
+  districts.amiriya.sources=[
+    {label:"알와드 주거단지 · 180m² / 298M IQD",url:"https://raqi.app/ar/posts/10539867-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%88%D8%AF-%D9%A1%D9%A8%D9%A0%D9%85-%D9%85%D8%A4%D8%AC%D8%B1%D8%A9"},
+    {label:"알와드 주거단지 · 230m² / 356M IQD",url:"https://raqi.app/ar/posts/10523547-%D9%A2%D9%A3%D9%A0%D9%85-%D8%A7%D9%84%D8%B7%D8%A7%D8%A8%D9%82-%D8%A7%D9%84%D8%B1%D8%A7%D8%A8%D8%B9-%D9%82%D8%B1%D8%B6-%D8%B9%D9%82%D8%A7%D8%B1%D9%8A"}
+  ];
 
   const varGreenZone = '#149764';
   const greenZone = {
