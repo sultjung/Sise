@@ -171,6 +171,16 @@ def summarize(listings: list[dict]) -> dict:
         }
     prices = [x["price_per_m2_iqd"] for x in listings]
     complexes = sorted({x["complex_name"] for x in listings if x["complex_name"]})
+    listing_sources = []
+    seen_urls = set()
+    for item in listings:
+        if item["url"] in seen_urls:
+            continue
+        seen_urls.add(item["url"])
+        listing_sources.append({
+            "label": f"원문 · {item['area_m2']}m² / {item['price_iqd']:,} IQD",
+            "url": item["url"],
+        })
     return {
         # 호가의 극단값 영향을 줄이기 위해 화면 표시 기준은 중앙값을 사용한다.
         "median_price_per_m2_iqd": round(statistics.median(prices)),
@@ -179,6 +189,7 @@ def summarize(listings: list[dict]) -> dict:
         "max_price_per_m2_iqd": max(prices),
         "sample_count": len(prices),
         "complexes_seen": complexes,
+        "listing_sources": listing_sources[:12],
     }
 
 
@@ -203,6 +214,7 @@ def write_latest(entry: dict) -> None:
                 "price_per_m2_iqd": median,
                 "sample_count": summary["sample_count"],
                 "complexes_seen": summary["complexes_seen"],
+                "listing_sources": summary.get("listing_sources", []),
                 "property_type": summary.get("property_type") or "아파트",
             }
     payload = {
