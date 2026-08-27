@@ -423,7 +423,7 @@
       centroid:[33.295233,44.335369],
       coords:[[33.306978,44.323463],[33.290694,44.323034],[33.288756,44.333334],[33.285241,44.342003],[33.2856,44.345865],[33.302387,44.356422],[33.306978,44.323463]]
     },
-    kadhimiya: { nameKr:"카지미야", nameEn:"AL-KADHIMIYA", iqd:null, tier:"mid", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
+    kadhimiya: { nameKr:"카지미야", nameEn:"AL-KADHIMIYA", iqd:2610000, tier:"mid", verified:false, sourceKind:"single", sampleCount:1, complex:"Jawahir Dijla", source:"2026.08.25 공개 매물 1건 · 자와히르 디즐라 · ㎡당 호가",
       centroid:[33.384361,44.340557],
       coords:[[33.387913,44.322018],[33.366052,44.345278],[33.366698,44.346308],[33.366124,44.347853],[33.381033,44.360555],[33.38519,44.360727],[33.388415,44.35841],[33.390708,44.354118],[33.39164,44.350084],[33.389991,44.345278],[33.387053,44.339699],[33.385477,44.334892],[33.385405,44.332489],[33.387125,44.330772],[33.39121,44.329227],[33.390995,44.325279],[33.389561,44.325022],[33.387913,44.322018]]
     },
@@ -439,11 +439,11 @@
       centroid:[33.299216,44.286448],
       coords:[[33.310259,44.302521],[33.306098,44.286986],[33.306959,44.276901],[33.304556,44.275742],[33.303624,44.275742],[33.302978,44.276343],[33.301866,44.274497],[33.299642,44.276858],[33.297562,44.276514],[33.294154,44.276386],[33.28845,44.277888],[33.282638,44.281922],[33.288235,44.294367],[33.290316,44.302006],[33.291535,44.309302],[33.307533,44.303122],[33.310259,44.302521]]
     },
-    saydiya: { nameKr:"사이디야", nameEn:"AL-SAYDIYA", iqd:null, tier:"low", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
+    saydiya: { nameKr:"사이디야", nameEn:"AL-SAYDIYA", iqd:1900000, tier:"low", verified:false, sourceKind:"single", sampleCount:1, complex:"Baghdad Marina", source:"2026.08.25 공개 매물 1건 · 바그다드 마리나 · ㎡당 호가",
       centroid:[33.256041,44.355001],
       coords:[[33.267302,44.359941],[33.262421,44.34432],[33.258546,44.341573],[33.251799,44.345865],[33.235289,44.34535],[33.237586,44.372473],[33.255818,44.366121],[33.268306,44.359426],[33.267302,44.359941]]
     },
-    jihad: { nameKr:"알지하드", nameEn:"HAYY AL-JIHAD", iqd:null, tier:"low", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
+    jihad: { nameKr:"알지하드", nameEn:"HAYY AL-JIHAD", iqd:2250000, tier:"low", verified:false, sourceKind:"single", sampleCount:1, complex:"Nasim City", source:"2026.08.25 공개 매물 1건 · 나심 시티 · ㎡당 호가",
       centroid:[33.271327,44.298972],
       coords:[[33.289738,44.306366],[33.287299,44.29538],[33.282638,44.281922],[33.273378,44.281647],[33.26936,44.279759],[33.263619,44.2789],[33.255293,44.283364],[33.25759,44.28611],[33.258595,44.290573],[33.261035,44.298127],[33.262614,44.299843],[33.263188,44.302933],[33.264336,44.310143],[33.264336,44.319584],[33.264767,44.322331],[33.275101,44.317696],[33.284429,44.310143],[33.28816,44.309284],[33.289738,44.306366]]
     },
@@ -782,7 +782,7 @@
     const priceLine=d.sourceKind==='dual'
       ? `<br>공식 $${fmt(d.officialUsd)} / ${fmt(d.officialIqd)} IQD per m²<br>시장 $${fmt(usdOf(d))} / ${fmt(d.iqd)} IQD per m²`
       : `<br>$${fmt(usdOf(d))} / ${fmt(d.iqd)} IQD per m²`;
-    return `<b>${d.nameKr} · ${d.nameEn}</b>${d.complex?`<br>${d.complex}`:''}${priceLine}${d.verified?'<br>✓ 공개 원문 확인':'<br>예시 데이터'}`;
+    return `<b>${d.nameKr} · ${d.nameEn}</b>${d.complex?`<br>${d.complex}`:''}${priceLine}${d.sourceKind==='single'?'<br>단일 공개 매물':'<br>✓ 공개 원문 기반'}`;
   }
 
   Object.entries(districts).forEach(([key,d])=>{
@@ -1053,11 +1053,11 @@
     Object.entries(snapshot.by_district).forEach(([key,summary])=>{
       const d=districts[key];
       const value=summary && summary.price_per_m2_iqd;
-      if(!d || !Number.isFinite(value) || summary.sample_count<3) return;
+      if(!d || !Number.isFinite(value) || summary.sample_count<1) return;
       d.iqd=value;
       d.sampleCount=summary.sample_count;
       d.checked=snapshot.updated_at;
-      d.sourceKind=key==='bismayah' ? 'dual' : 'sample';
+      d.sourceKind=key==='bismayah' ? 'dual' : (summary.sample_count===1 ? 'single' : 'sample');
       d.source=`${snapshot.source} · ${snapshot.updated_at} · 매물 ${summary.sample_count}건 중앙값`;
       if(!calloutSets.region.labels[key]) addCallout('region',key,d,tierColor[d.tier]);
     });
