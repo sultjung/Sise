@@ -71,6 +71,7 @@
   .badge.verified{ background:#E8F6EC; color:var(--verified); }
   .badge.estimate{ background:#F1F1F2; color:var(--hw-ink-soft); }
   .badge.sample{ background:#EAF1FF; color:#315EBA; }
+  .badge.pending{ background:#F1F1F2; color:#6B6D72; }
   .badge.single{ background:#FFF2D9; color:#9A5B00; }
   .badge.dual{ background:linear-gradient(90deg,#E8F6EC 0 50%,#EAF1FF 50%); color:#24553A; border:1px solid #CFE3D5; }
 
@@ -401,52 +402,52 @@
 
   // districts: iqd = per-m² asking price in IQD. verified:true means real sourced data.
   const districts = {
-    mansour: { nameKr:"알만수르", nameEn:"AL-MANSOUR", iqd:2485549, tier:"high", verified:true,
-      complex:"Mansour City (المنصور ستي)", source:"aiqarat.com 매물 등록가, 2023.11 (173㎡ 유닛 기준)",
+    mansour: { nameKr:"알만수르", nameEn:"AL-MANSOUR", iqd:2070000, tier:"high", verified:false, sourceKind:"sample", sampleCount:4,
+      complex:"대표 단지 4곳", source:"2026.08.25 공개 매물 · 단지별 m² 호가 중앙값의 중앙값",
       centroid:[33.320317,44.355281],
       coords:[[33.329776,44.353199],[33.324756,44.353456],[33.32533,44.33835],[33.315863,44.337406],[33.305462,44.340324],[33.30288,44.356031],[33.315105,44.365935],[33.317512,44.370622],[33.32031,44.365988],[33.32325,44.364443],[33.326047,44.361696],[33.328055,44.358005],[33.329776,44.353199]]
     },
-    jadriya: { nameKr:"알자드리야", nameEn:"AL-JADRIYA", iqd:1310000, tier:"high", verified:false, complex:null,
+    jadriya: { nameKr:"알자드리야", nameEn:"AL-JADRIYA", iqd:null, tier:"high", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
       centroid:[33.280201,44.385953],
       coords:[[33.295171,44.399651],[33.294598,44.394329],[33.289862,44.381798],[33.287279,44.378365],[33.279817,44.370554],[33.276732,44.367636],[33.27257,44.367121],[33.268049,44.368065],[33.264317,44.370897],[33.262953,44.375618],[33.263599,44.38257],[33.268479,44.391582],[33.280248,44.406259],[33.284266,44.40377],[33.287279,44.403255],[33.293019,44.40008],[33.295171,44.399651]]
     },
-    harthiya: { nameKr:"알하르씨야", nameEn:"AL-HARTHIYA", iqd:1255000, tier:"high", verified:false, complex:null,
+    harthiya: { nameKr:"알하르씨야", nameEn:"AL-HARTHIYA", iqd:null, tier:"high", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
       centroid:[33.306314,44.369063],
       coords:[[33.315105,44.365935],[33.304273,44.358253],[33.3037,44.362673],[33.301691,44.367437],[33.302193,44.371857],[33.303807,44.374088],[33.305529,44.376663],[33.305421,44.378723],[33.315105,44.365935]]
     },
-    karrada: { nameKr:"알카라다", nameEn:"AL-KARRADA", iqd:1190000, tier:"mid", verified:false, complex:null,
+    karrada: { nameKr:"알카라다", nameEn:"AL-KARRADA", iqd:null, tier:"mid", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
       centroid:[33.296341,44.418794],
       coords:[[33.295171,44.399651],[33.292778,44.400654],[33.287756,44.403658],[33.284384,44.40443],[33.281084,44.406662],[33.28833,44.42297],[33.292133,44.436703],[33.292133,44.445372],[33.295577,44.450693],[33.304257,44.431553],[33.314729,44.426489],[33.311215,44.423571],[33.310282,44.419022],[33.299953,44.41782],[33.296509,44.411812],[33.295171,44.399651]]
     },
-    yarmouk: { nameKr:"야르무크", nameEn:"AL-YARMOUK", iqd:1080000, tier:"mid", verified:false, complex:null,
+    yarmouk: { nameKr:"야르무크", nameEn:"AL-YARMOUK", iqd:null, tier:"mid", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
       centroid:[33.295233,44.335369],
       coords:[[33.306978,44.323463],[33.290694,44.323034],[33.288756,44.333334],[33.285241,44.342003],[33.2856,44.345865],[33.302387,44.356422],[33.306978,44.323463]]
     },
-    kadhimiya: { nameKr:"카지미야", nameEn:"AL-KADHIMIYA", iqd:1050000, tier:"mid", verified:false, complex:null,
+    kadhimiya: { nameKr:"카지미야", nameEn:"AL-KADHIMIYA", iqd:null, tier:"mid", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
       centroid:[33.384361,44.340557],
       coords:[[33.387913,44.322018],[33.366052,44.345278],[33.366698,44.346308],[33.366124,44.347853],[33.381033,44.360555],[33.38519,44.360727],[33.388415,44.35841],[33.390708,44.354118],[33.39164,44.350084],[33.389991,44.345278],[33.387053,44.339699],[33.385477,44.334892],[33.385405,44.332489],[33.387125,44.330772],[33.39121,44.329227],[33.390995,44.325279],[33.389561,44.325022],[33.387913,44.322018]]
     },
-    zayouna: { nameKr:"자야우나", nameEn:"ZAYOUNA", iqd:980000, tier:"mid", verified:false, complex:null,
+    zayouna: { nameKr:"자야우나", nameEn:"ZAYOUNA", iqd:null, tier:"mid", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
       centroid:[33.325838,44.457855],
       coords:[[33.340396,44.455409],[33.321464,44.433951],[33.309055,44.458842],[33.318451,44.469056],[33.325265,44.474463],[33.340396,44.455409]]
     },
-    newbaghdad: { nameKr:"뉴바그다드", nameEn:"NEW BAGHDAD", iqd:915000, tier:"mid", verified:false, complex:null,
+    newbaghdad: { nameKr:"뉴바그다드", nameEn:"NEW BAGHDAD", iqd:null, tier:"mid", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
       centroid:[33.305935,44.480956],
       coords:[[33.318886,44.482774],[33.311068,44.477195],[33.309633,44.474019],[33.30827,44.470671],[33.305114,44.46947],[33.302747,44.46741],[33.301025,44.470328],[33.294497,44.489897],[33.29586,44.497622],[33.299303,44.508351],[33.318886,44.482774]]
     },
-    amiriya: { nameKr:"알아미리야", nameEn:"AL-AMIRIYA", iqd:905000, tier:"mid", verified:false, complex:null,
+    amiriya: { nameKr:"알아미리야", nameEn:"AL-AMIRIYA", iqd:null, tier:"mid", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
       centroid:[33.299216,44.286448],
       coords:[[33.310259,44.302521],[33.306098,44.286986],[33.306959,44.276901],[33.304556,44.275742],[33.303624,44.275742],[33.302978,44.276343],[33.301866,44.274497],[33.299642,44.276858],[33.297562,44.276514],[33.294154,44.276386],[33.28845,44.277888],[33.282638,44.281922],[33.288235,44.294367],[33.290316,44.302006],[33.291535,44.309302],[33.307533,44.303122],[33.310259,44.302521]]
     },
-    saydiya: { nameKr:"사이디야", nameEn:"AL-SAYDIYA", iqd:650000, tier:"low", verified:false, complex:null,
+    saydiya: { nameKr:"사이디야", nameEn:"AL-SAYDIYA", iqd:null, tier:"low", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
       centroid:[33.256041,44.355001],
       coords:[[33.267302,44.359941],[33.262421,44.34432],[33.258546,44.341573],[33.251799,44.345865],[33.235289,44.34535],[33.237586,44.372473],[33.255818,44.366121],[33.268306,44.359426],[33.267302,44.359941]]
     },
-    jihad: { nameKr:"알지하드", nameEn:"HAYY AL-JIHAD", iqd:600000, tier:"low", verified:false, complex:null,
+    jihad: { nameKr:"알지하드", nameEn:"HAYY AL-JIHAD", iqd:null, tier:"low", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
       centroid:[33.271327,44.298972],
       coords:[[33.289738,44.306366],[33.287299,44.29538],[33.282638,44.281922],[33.273378,44.281647],[33.26936,44.279759],[33.263619,44.2789],[33.255293,44.283364],[33.25759,44.28611],[33.258595,44.290573],[33.261035,44.298127],[33.262614,44.299843],[33.263188,44.302933],[33.264336,44.310143],[33.264336,44.319584],[33.264767,44.322331],[33.275101,44.317696],[33.284429,44.310143],[33.28816,44.309284],[33.289738,44.306366]]
     },
-    sadrcity: { nameKr:"사드르시티", nameEn:"SADR CITY", iqd:520000, tier:"low", verified:false, complex:null,
+    sadrcity: { nameKr:"사드르시티", nameEn:"SADR CITY", iqd:null, tier:"low", verified:false, sourceKind:"pending", sampleCount:0, complex:null, source:"공개 매물 표본 수집 중",
       centroid:[33.389194,44.468995],
       coords:[[33.418059,44.456224],[33.389111,44.422235],[33.356999,44.463434],[33.359867,44.46721],[33.367609,44.471673],[33.374777,44.474763],[33.396277,44.508409],[33.409748,44.48987],[33.401436,44.479913],[33.418059,44.456224]]
     },
@@ -611,6 +612,7 @@
     coords:[[33.31639,44.385824],[33.314525,44.388227],[33.313592,44.386425],[33.31223,44.385824],[33.311441,44.384022],[33.311297,44.380073],[33.309504,44.378185],[33.306706,44.377584],[33.305272,44.379215],[33.305128,44.376726],[33.304411,44.375353],[33.302259,44.372949],[33.301541,44.370117],[33.30147,44.367285],[33.303407,44.36265],[33.303981,44.358015],[33.303407,44.356985],[33.300681,44.356985],[33.290063,44.362135],[33.293004,44.366941],[33.297094,44.386339],[33.297524,44.394493],[33.296807,44.394493],[33.296233,44.401617],[33.29695,44.406509],[33.298959,44.411573],[33.300896,44.413719],[33.305487,44.413976],[33.311584,44.412603],[33.317968,44.408569],[33.324064,44.403334],[33.316963,44.393377],[33.318685,44.391575],[33.317681,44.389858],[33.31725,44.387712],[33.317394,44.386425],[33.31639,44.385824]]
   };
 
+  function hasPrice(item){ return Number.isFinite(item.iqd); }
   function usdOf(item){ return item.sourceUsd || Math.round(item.iqd / RATE); }
   function fmt(n){ return n.toLocaleString('en-US'); }
   function compactIqd(n){
@@ -622,6 +624,7 @@
     if(item.sourceKind==='official' || item.verified) return `<span class="badge verified">✓ ${compact?'공식':'공식가'}</span>`;
     if(item.sourceKind==='sample') return `<span class="badge sample">${compact?'중앙값':`매물 ${item.sampleCount}건`}</span>`;
     if(item.sourceKind==='single') return `<span class="badge single">${compact?'1건':'단일 매물'}</span>`;
+    if(item.sourceKind==='pending') return `<span class="badge pending">${compact?'수집 중':'표본 수집 중'}</span>`;
     return '<span class="badge estimate">예시</span>';
   }
   function calloutPrice(item){ return currencyMode==='iqd' ? compactIqd(item.iqd) : `$${fmt(usdOf(item))}`; }
@@ -639,9 +642,9 @@
   }
   function tierForComplex(item){ return item.iqd>=2300000 ? 'high' : item.iqd>=1600000 ? 'mid' : 'low'; }
 
-  const orderedRegionKeys = Object.keys(districts).filter(k=>k!=='bismayah')
+  const orderedRegionKeys = Object.keys(districts).filter(k=>k!=='bismayah' && hasPrice(districts[k]))
     .sort((a,b)=>districts[b].iqd-districts[a].iqd);
-  orderedRegionKeys.push('bismayah');
+  if(hasPrice(districts.bismayah)) orderedRegionKeys.push('bismayah');
   const orderedComplexKeys = Object.keys(complexes).sort((a,b)=>complexes[b].iqd-complexes[a].iqd);
 
   let activeMode = 'region';
@@ -775,6 +778,7 @@
   };
 
   function districtTooltip(d){
+    if(!hasPrice(d)) return `<b>${d.nameKr} · ${d.nameEn}</b><br>실제 평균 산출을 위한 공개 매물 표본 수집 중`;
     const priceLine=d.sourceKind==='dual'
       ? `<br>공식 $${fmt(d.officialUsd)} / ${fmt(d.officialIqd)} IQD per m²<br>시장 $${fmt(usdOf(d))} / ${fmt(d.iqd)} IQD per m²`
       : `<br>$${fmt(usdOf(d))} / ${fmt(d.iqd)} IQD per m²`;
@@ -845,7 +849,7 @@
     calloutSets[mode].anchors[key]=anchor;
   }
 
-  Object.entries(districts).forEach(([key,d])=>addCallout('region',key,d,tierColor[d.tier]));
+  Object.entries(districts).forEach(([key,d])=>{ if(hasPrice(d)) addCallout('region',key,d,tierColor[d.tier]); });
   Object.entries(complexes).forEach(([key,d])=>addCallout('complex',key,d,tierColor[tierForComplex(d)]));
 
   function rectAt(x,y,width,height,gap=0){
@@ -966,7 +970,7 @@
   }
 
   function selectDistrict(key){
-    if(activeMode!=='region'||!districts[key]) return;
+    if(activeMode!=='region'||!districts[key]||!hasPrice(districts[key])) return;
     selectedDistrictKey=key;
     Object.entries(polyLayers).forEach(([k,poly])=>{poly.setStyle({weight:k===key?3:1.5});if(k===key)poly.bringToFront();});
     styleSelection('region',key);
@@ -1005,7 +1009,7 @@
       });
       viewTitle.textContent='바그다드 지역별 비교';viewSub.textContent='BAGHDAD DISTRICTS';
       viewNote.textContent='지도/리스트 클릭 시 서로 연동됩니다 · 지도는 마우스 휠로 확대·축소';
-      listPanelTitle.textContent='지역별 단가';listPanelCount.textContent='13 DISTRICTS';mapPanelCount.textContent='실제 경계 기반';
+      listPanelTitle.textContent='검증된 지역 평균';listPanelCount.textContent=`${orderedRegionKeys.length} VERIFIED`;mapPanelCount.textContent='실제 경계 기반';
       chartTitle.textContent='지역별 m² 단가 비교';
       map.fitBounds(fullBounds,{padding:[24,24]});
     }else{
