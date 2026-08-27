@@ -607,6 +607,15 @@
     }
   };
 
+  function complexListingLinks(keys){
+    return keys.flatMap(key=>complexes[key]?.sources || []);
+  }
+  districts.mansour.sources=complexListingLinks(['mansour_city','iraq_gate','palm_towers','royal_city']);
+  districts.bismayah.sources=complexListingLinks(['bismayah_complex']);
+  districts.saydiya.sources=complexListingLinks(['baghdad_marina']);
+  districts.kadhimiya.sources=complexListingLinks(['jawahir_dijla']);
+  districts.jihad.sources=complexListingLinks(['nasim_city']);
+
   const varGreenZone = '#149764';
   const greenZone = {
     centroid:[33.306979,44.38523],
@@ -677,6 +686,12 @@
     </details>`;
   }
 
+  function districtSourceLinksHtml(item){
+    if(!item.sources?.length) return '';
+    const links=item.sources.map(s=>'<a href="'+s.url+'" target="_blank" rel="noopener">'+s.label+'</a>').join('');
+    return '<details class="source-details"><summary>표본 매물 원문 '+item.sources.length+'건</summary><div class="source-links">'+links+'</div></details>';
+  }
+
   function renderList(){
     listEl.innerHTML = '';
     if(activeMode==='region'){
@@ -695,7 +710,8 @@
           <div>
             ${listPriceHtml(d)}
             <div class="district-badge">${sourceBadge(d)}</div>
-          </div>`;
+          </div>
+          ${districtSourceLinksHtml(d)}`;
         row.addEventListener('click',()=>selectDistrict(key));
         listEl.appendChild(row);
       });
@@ -1064,6 +1080,7 @@
       d.checked=snapshot.updated_at;
       d.sourceKind=key==='bismayah' ? 'dual' : (summary.sample_count===1 ? 'single' : 'sample');
       d.propertyType=summary.property_type || '아파트';
+      if(summary.listing_sources?.length) d.sources=summary.listing_sources;
       d.source=`${snapshot.source} · ${snapshot.updated_at} · 매물 ${summary.sample_count}건 중앙값`;
       if(!calloutSets.region.labels[key]) addCallout('region',key,d,tierColor[d.tier]);
     });
