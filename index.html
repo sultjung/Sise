@@ -874,6 +874,7 @@
     const items = [];
 
     Object.entries(data).forEach(([key,d])=>{
+      if(activeMode==='region' && !hasPrice(d)) return;
       const point = map.latLngToContainerPoint(d.centroid);
       const visible = point.x>=-12&&point.x<=size.x+12&&point.y>=-12&&point.y<=size.y+12;
       layers.labels[key].setOpacity(visible?1:0);
