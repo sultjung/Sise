@@ -208,7 +208,7 @@ def write_latest(entry: dict) -> None:
     payload = {
         "updated_at": entry["date"],
         "source": entry["source"],
-        "method": "매매 아파트 공개 호가의 m²당 중앙값 (1건은 단일 매물 표기)",
+        "method": "매매 주거용 공개 호가의 m²당 중앙값 (아파트 우선, 1건은 단일 매물 표기)",
         "by_district": published,
     }
     LATEST_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
