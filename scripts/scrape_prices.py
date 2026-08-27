@@ -178,7 +178,7 @@ def summarize(listings: list[dict]) -> dict:
             continue
         seen_urls.add(item["url"])
         listing_sources.append({
-            "label": f"원문 · {item['area_m2']}m² / {item['price_iqd']:,} IQD",
+            "label": f"{item.get('complex_name') or '지역 매물'} · {item['area_m2']}m² / {item['price_iqd']:,} IQD",
             "url": item["url"],
         })
     return {
