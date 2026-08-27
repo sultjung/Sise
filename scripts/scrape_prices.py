@@ -72,7 +72,7 @@ REQUEST_DELAY_SEC = 2.0
 MAX_LISTINGS_PER_AREA = 40   # 지역당 너무 많이 긁지 않도록 상한
 HISTORY_PATH = Path(__file__).resolve().parent.parent / "data" / "history.json"
 LATEST_PATH = Path(__file__).resolve().parent.parent / "data" / "latest.json"
-MIN_PUBLISHABLE_SAMPLES = 3
+MIN_PUBLISHABLE_SAMPLES = 1
 
 SALE_KEYWORDS = ["للبيع"]
 RENT_KEYWORDS = ["للايجار", "للإيجار", "ايجار", "إيجار"]
@@ -188,8 +188,7 @@ def append_history(entry: dict) -> None:
 def write_latest(entry: dict) -> None:
     """대시보드가 읽는 최신 검증값을 별도 파일로 저장한다.
 
-    표본이 3건 미만인 지역은 공개하지 않아 단일 호가가 지역 평균처럼
-    표시되는 일을 막는다.
+    표본이 1건뿐인 지역도 공개하되, 대시보드에서 단일 매물임을 명확히 표시한다.
     """
     published = {}
     for key, summary in entry["by_district"].items():
@@ -204,7 +203,7 @@ def write_latest(entry: dict) -> None:
     payload = {
         "updated_at": entry["date"],
         "source": entry["source"],
-        "method": "매매 아파트 공개 호가의 m²당 중앙값 (표본 3건 이상만 공개)",
+        "method": "매매 아파트 공개 호가의 m²당 중앙값 (1건은 단일 매물 표기)",
         "by_district": published,
     }
     LATEST_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
