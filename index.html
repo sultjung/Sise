@@ -883,7 +883,8 @@
 
   function calloutMarkup(mode,key,d,color){
     const context = mode==='complex' ? `<span class="place">${d.district}</span>` : '';
-    return `<div class="region-callout ${mode==='complex'?'complex':''}" id="lbl-${mode}-${key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${d.nameKr}</span>${context}<span class="callout-prices">${calloutPricesHtml(d)}</span></div></div>`;
+    const name = mode==='region' && d.propertyType==='빌라/단독주택' ? `${d.nameKr} (빌라/단독주택 기준)` : d.nameKr;
+    return `<div class="region-callout ${mode==='complex'?'complex':''}" id="lbl-${mode}-${key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${name}</span>${context}<span class="callout-prices">${calloutPricesHtml(d)}</span></div></div>`;
   }
 
   function addCallout(mode,key,d,color){
