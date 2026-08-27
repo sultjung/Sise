@@ -173,20 +173,9 @@
   .region-callout.selected .region-label .name{ font-size:11.5px; }
   .region-callout.selected .region-label .price{ font-size:13.5px; }
   .region-leader{ stroke-linecap:round; }
-  .cbd-label{
-    display:flex; align-items:center; gap:6px;
-    font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:9.5px; letter-spacing:.25px;
-    color:#F5FFF9; background:linear-gradient(135deg,var(--green-zone-dark) 0%,#0B7B53 58%,var(--green-zone) 100%);
-    padding:5px 9px; border:1px solid rgba(222,255,239,.9); border-radius:999px; white-space:nowrap;
-    box-shadow:0 4px 12px rgba(4,92,61,.30),0 0 0 3px rgba(20,151,100,.14);
-  }
-  .cbd-label::before{
-    content:""; width:6px; height:6px; flex:0 0 6px; border-radius:50%;
-    background:#8AF2BC; box-shadow:0 0 0 3px rgba(138,242,188,.18);
-  }
-  .cbd-label .cbd{
-    padding-left:6px; border-left:1px solid rgba(222,255,239,.38);
-    color:#CFF7E1; font-size:8px; font-weight:600; letter-spacing:.6px;
+  .green-zone-text{
+    font-family:'Pretendard',sans-serif; font-weight:800; font-size:13px; letter-spacing:.3px;
+    color:#075B40; white-space:nowrap; text-shadow:0 1px 0 rgba(255,255,255,.9),0 0 7px rgba(220,255,235,.95);
   }
   .green-zone-boundary{ filter:drop-shadow(0 0 4px rgba(7,91,64,.42)); }
   .map-legend{ background:rgba(255,255,255,.97); border:1px solid var(--hw-border); border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.85; box-shadow:0 2px 10px rgba(0,0,0,.08); }
@@ -864,7 +853,7 @@
   L.marker(greenZone.centroid,{
     icon:L.divIcon({
       className:'',
-      html:'<div class="cbd-label">그린존</div>',
+      html:'<div class="green-zone-text">그린존</div>',
       iconSize:null
     }),interactive:false
   }).addTo(map);
