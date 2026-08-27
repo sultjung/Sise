@@ -32,6 +32,7 @@ import json
 import re
 import sys
 import time
+import statistics
 import datetime
 from pathlib import Path
 from urllib.parse import urljoin, quote
@@ -70,6 +71,8 @@ HEADERS = {
 REQUEST_DELAY_SEC = 2.0
 MAX_LISTINGS_PER_AREA = 40   # 지역당 너무 많이 긁지 않도록 상한
 HISTORY_PATH = Path(__file__).resolve().parent.parent / "data" / "history.json"
+LATEST_PATH = Path(__file__).resolve().parent.parent / "data" / "latest.json"
+MIN_PUBLISHABLE_SAMPLES = 3
 
 SALE_KEYWORDS = ["للبيع"]
 RENT_KEYWORDS = ["للايجار", "للإيجار", "ايجار", "إيجار"]
@@ -165,6 +168,8 @@ def summarize(listings: list[dict]) -> dict:
     prices = [x["price_per_m2_iqd"] for x in listings]
     complexes = sorted({x["complex_name"] for x in listings if x["complex_name"]})
     return {
+        # 호가의 극단값 영향을 줄이기 위해 화면 표시 기준은 중앙값을 사용한다.
+        "median_price_per_m2_iqd": round(statistics.median(prices)),
         "avg_price_per_m2_iqd": round(sum(prices) / len(prices)),
         "min_price_per_m2_iqd": min(prices),
         "max_price_per_m2_iqd": max(prices),
@@ -178,6 +183,31 @@ def append_history(entry: dict) -> None:
     history = json.loads(HISTORY_PATH.read_text(encoding="utf-8")) if HISTORY_PATH.exists() else []
     history.append(entry)
     HISTORY_PATH.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def write_latest(entry: dict) -> None:
+    """대시보드가 읽는 최신 검증값을 별도 파일로 저장한다.
+
+    표본이 3건 미만인 지역은 공개하지 않아 단일 호가가 지역 평균처럼
+    표시되는 일을 막는다.
+    """
+    published = {}
+    for key, summary in entry["by_district"].items():
+        median = summary.get("median_price_per_m2_iqd")
+        if summary.get("sample_count", 0) >= MIN_PUBLISHABLE_SAMPLES and median:
+            published[key] = {
+                "district_kr": summary["district_kr"],
+                "price_per_m2_iqd": median,
+                "sample_count": summary["sample_count"],
+                "complexes_seen": summary["complexes_seen"],
+            }
+    payload = {
+        "updated_at": entry["date"],
+        "source": entry["source"],
+        "method": "매매 아파트 공개 호가의 m²당 중앙값 (표본 3건 이상만 공개)",
+        "by_district": published,
+    }
+    LATEST_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def main():
@@ -196,7 +226,8 @@ def main():
 
     entry = {"date": today, "source": "aiqarat.com", "by_district": by_district}
     append_history(entry)
-    print(f"\n→ {HISTORY_PATH} 에 저장 완료")
+    write_latest(entry)
+    print(f"\n→ {HISTORY_PATH} 및 {LATEST_PATH} 에 저장 완료")
 
 
 if __name__ == "__main__":
