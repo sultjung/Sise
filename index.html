@@ -1021,8 +1021,21 @@
     polyLayers[key].openTooltip();
   }
 
+  function clearComplexSelection(){
+    selectedComplexKey=null;
+    map.closePopup();
+    styleSelection('complex',null);
+    document.querySelectorAll('.district-row').forEach(r=>r.classList.remove('active'));
+    map.flyToBounds(complexBounds,{padding:[55,55],duration:.6});
+    scheduleCalloutLayout();
+  }
+
   function selectComplex(key){
     if(activeMode!=='complex'||!complexes[key]) return;
+    if(selectedComplexKey===key){
+      clearComplexSelection();
+      return;
+    }
     selectedComplexKey=key;
     styleSelection('complex',key);
     document.querySelectorAll('.district-row').forEach(r=>r.classList.toggle('active',r.dataset.key===key));
