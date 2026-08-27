@@ -642,7 +642,7 @@
   }
   function tierForComplex(item){ return item.iqd>=2300000 ? 'high' : item.iqd>=1600000 ? 'mid' : 'low'; }
 
-  const orderedRegionKeys = Object.keys(districts).filter(k=>k!=='bismayah' && hasPrice(districts[k]))
+  let orderedRegionKeys = Object.keys(districts).filter(k=>k!=='bismayah' && hasPrice(districts[k]))
     .sort((a,b)=>districts[b].iqd-districts[a].iqd);
   if(hasPrice(districts.bismayah)) orderedRegionKeys.push('bismayah');
   const orderedComplexKeys = Object.keys(complexes).sort((a,b)=>complexes[b].iqd-complexes[a].iqd);
@@ -1042,7 +1042,38 @@
   btnIqd.addEventListener('click',()=>setCurrency('iqd'));
   btnUsd.addEventListener('click',()=>setCurrency('usd'));
 
+  function refreshOrderedRegions(){
+    orderedRegionKeys = Object.keys(districts).filter(k=>k!=='bismayah' && hasPrice(districts[k]))
+      .sort((a,b)=>districts[b].iqd-districts[a].iqd);
+    if(hasPrice(districts.bismayah)) orderedRegionKeys.push('bismayah');
+  }
+
+  function applyLatestPrices(snapshot){
+    if(!snapshot || !snapshot.by_district) return;
+    Object.entries(snapshot.by_district).forEach(([key,summary])=>{
+      const d=districts[key];
+      const value=summary && summary.price_per_m2_iqd;
+      if(!d || !Number.isFinite(value) || summary.sample_count<3) return;
+      d.iqd=value;
+      d.sampleCount=summary.sample_count;
+      d.checked=snapshot.updated_at;
+      d.sourceKind=key==='bismayah' ? 'dual' : 'sample';
+      d.source=`${snapshot.source} · ${snapshot.updated_at} · 매물 ${summary.sample_count}건 중앙값`;
+      if(!calloutSets.region.labels[key]) addCallout('region',key,d,tierColor[d.tier]);
+    });
+    refreshOrderedRegions();
+    renderList();renderChart();updateCalloutTexts();updateLegend();scheduleCalloutLayout();
+    if(activeMode==='region'){
+      listPanelTitle.textContent='검증된 지역 평균';
+      listPanelCount.textContent=`${orderedRegionKeys.length} VERIFIED`;
+    }
+  }
+
   renderList();renderChart();updateLegend();scheduleCalloutLayout();
+  fetch('./data/latest.json',{cache:'no-store'})
+    .then(response=>response.ok ? response.json() : null)
+    .then(applyLatestPrices)
+    .catch(()=>{ /* latest snapshot unavailable: retain embedded verified values */ });
 </script>
 
 </body>
