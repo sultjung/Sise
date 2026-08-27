@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-25",
+  "updated_at": "2026-08-27",
   "source": "공개 매물 원문",
   "method": "매매 아파트 공개 호가의 m²당 중앙값 (1건은 단일 매물 표기)",
   "by_district": {
@@ -45,6 +45,15 @@
       "complexes_seen": [
         "Nasim City"
       ]
+    },
+    "amiriya": {
+      "district_kr": "알아미리야",
+      "price_per_m2_iqd": 1602000,
+      "sample_count": 2,
+      "complexes_seen": [
+        "مجمع الود السكني"
+      ],
+      "property_type": "아파트"
     }
   }
 }
