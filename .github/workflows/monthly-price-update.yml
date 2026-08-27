@@ -1,0 +1,46 @@
+name: Monthly housing-price update
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 23:30 Korea time on days 28–31; the first step keeps only the actual month-end run.
+    - cron: "30 14 28-31 * *"
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run only on the last day of the month (KST)
+        id: month_end
+        shell: bash
+        run: |
+          today=$(date -u -d '+9 hours' +%m)
+          tomorrow=$(date -u -d '+9 hours +1 day' +%m)
+          if [ "$today" != "$tomorrow" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.month_end.outputs.run == 'true' || github.event_name == 'workflow_dispatch'
+      - uses: actions/setup-python@v5
+        if: steps.month_end.outputs.run == 'true' || github.event_name == 'workflow_dispatch'
+        with:
+          python-version: "3.12"
+      - name: Install collector dependencies
+        if: steps.month_end.outputs.run == 'true' || github.event_name == 'workflow_dispatch'
+        run: pip install requests beautifulsoup4
+      - name: Collect latest apartment asking prices
+        if: steps.month_end.outputs.run == 'true' || github.event_name == 'workflow_dispatch'
+        run: python scripts/scrape_prices.py
+      - name: Commit updated price history
+        if: steps.month_end.outputs.run == 'true' || github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/history.json data/latest.json
+          git diff --cached --quiet || git commit -m "chore: monthly housing price update"
+          git push
