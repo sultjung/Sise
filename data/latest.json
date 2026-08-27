@@ -54,6 +54,15 @@
         "مجمع الود السكني"
       ],
       "property_type": "아파트"
+    },
+    "yarmouk": {
+      "district_kr": "야르무크",
+      "price_per_m2_iqd": 6505495,
+      "sample_count": 3,
+      "complexes_seen": [
+        "야르무크 단독주택"
+      ],
+      "property_type": "빌라/단독주택"
     }
   }
 }
