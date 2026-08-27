@@ -608,7 +608,13 @@
   };
 
   function complexListingLinks(keys){
-    return keys.flatMap(key=>complexes[key]?.sources || []);
+    return keys.flatMap(key=>{
+      const complex=complexes[key];
+      return (complex?.sources || []).map(source=>({
+        ...source,
+        label:`${complex.nameKr} · ${source.label.replace(/^[^·]+ · /,'')}`
+      }));
+    });
   }
   districts.mansour.sources=complexListingLinks(['mansour_city','iraq_gate','palm_towers','royal_city']);
   districts.bismayah.sources=complexListingLinks(['bismayah_complex']);
