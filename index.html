@@ -399,7 +399,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
   const RATE = 1310; // 1 USD ≈ 1310 IQD
-  const tierColor = { high:"#D94800", mid:"#FF8A3D", low:"#FFC896" };
+  const tierColor = { high:"#D94800", mid:"#FF8A3D", low:"#FFC896", pending:"#C9CDD3" };
 
   // districts: iqd = per-m² asking price in IQD. verified:true means real sourced data.
   const districts = {
@@ -683,6 +683,14 @@
     return `<span class="price dual-official">공식 ${officialCalloutPrice(item)}</span><span class="price dual-market">시장 ${calloutPrice(item)}</span>`;
   }
   function tierForComplex(item){ return item.iqd>=2300000 ? 'high' : item.iqd>=1600000 ? 'mid' : 'low'; }
+  function tierForDistrict(item){
+    if(!hasPrice(item)) return 'pending';
+    const ranked=Object.values(districts).filter(hasPrice).sort((a,b)=>b.iqd-a.iqd);
+    const rank=ranked.indexOf(item);
+    const highCount=Math.ceil(ranked.length/3);
+    const midEnd=Math.ceil(ranked.length*2/3);
+    return rank<highCount ? 'high' : rank<midEnd ? 'mid' : 'low';
+  }
 
   let orderedRegionKeys = Object.keys(districts).filter(k=>k!=='bismayah' && hasPrice(districts[k]))
     .sort((a,b)=>districts[b].iqd-districts[a].iqd);
@@ -835,7 +843,7 @@
   }
 
   Object.entries(districts).forEach(([key,d])=>{
-    const poly = L.polygon(d.coords,{color:'#fff',weight:1.5,fillColor:tierColor[d.tier],fillOpacity:.62})
+    const poly = L.polygon(d.coords,{color:'#fff',weight:1.5,fillColor:tierColor[tierForDistrict(d)],fillOpacity:.62})
       .addTo(map).bindTooltip(districtTooltip(d),{sticky:true});
     poly._regionTooltip = districtTooltip(d);
     poly.on('click',()=>{ if(activeMode==='region') selectDistrict(key); });
@@ -898,7 +906,7 @@
     calloutSets[mode].anchors[key]=anchor;
   }
 
-  Object.entries(districts).forEach(([key,d])=>{ if(hasPrice(d)) addCallout('region',key,d,tierColor[d.tier]); });
+  Object.entries(districts).forEach(([key,d])=>{ if(hasPrice(d)) addCallout('region',key,d,tierColor[tierForDistrict(d)]); });
   Object.entries(complexes).forEach(([key,d])=>addCallout('complex',key,d,tierColor[tierForComplex(d)]));
 
   function rectAt(x,y,width,height,gap=0){
@@ -986,7 +994,7 @@
   legend.addTo(map);
   function updateLegend(){
     if(activeMode==='region'){
-      legendDiv.innerHTML=`<b>지역 평균 단가 수준</b><br><span class="sw" style="background:#D94800"></span>상위<br><span class="sw" style="background:#FF8A3D"></span>중위<br><span class="sw" style="background:#FFC896"></span>하위<br><span class="sw" style="background:#149764;border:1px solid #075B40"></span>그린존<br><small>비스마야: 공식·시장 병기</small>`;
+      legendDiv.innerHTML=`<b>지역 평균 단가 수준</b><br><span class="sw" style="background:#D94800"></span>상위 1/3<br><span class="sw" style="background:#FF8A3D"></span>중위 1/3<br><span class="sw" style="background:#FFC896"></span>하위 1/3<br><span class="sw" style="background:#C9CDD3"></span>시세 미확인<br><span class="sw" style="background:#149764;border:1px solid #075B40"></span>그린존<br><small>확인된 현재 단가 기준으로 자동 재산정 · 비스마야: 공식·시장 병기</small>`;
     }else{
       legendDiv.innerHTML=`<b>단지 시세 · ${currencyMode.toUpperCase()}</b><br><span class="dot" style="background:#315EBA"></span>복수 매물 호가 중앙값<br><span class="dot" style="background:#1A8A3F"></span>비스마야 공식 분양가<br><small>카드에서 모든 원문 확인</small>`;
     }
@@ -1123,6 +1131,15 @@
     if(hasPrice(districts.bismayah)) orderedRegionKeys.push('bismayah');
   }
 
+  function refreshDistrictTierVisuals(){
+    Object.entries(districts).forEach(([key,d])=>{
+      const color=tierColor[tierForDistrict(d)];
+      polyLayers[key]?.setStyle({fillColor:color});
+      const label=document.querySelector(`#lbl-region-${key}`);
+      if(label) label.style.setProperty('--pin-color',color);
+    });
+  }
+
   function applyLatestPrices(snapshot){
     if(!snapshot || !snapshot.by_district) return;
     Object.entries(snapshot.by_district).forEach(([key,summary])=>{
@@ -1136,9 +1153,10 @@
       d.propertyType=summary.property_type || '아파트';
       if(summary.listing_sources?.length) d.sources=summary.listing_sources;
       d.source=`${snapshot.source} · ${snapshot.updated_at} · 매물 ${summary.sample_count}건 중앙값`;
-      if(!calloutSets.region.labels[key]) addCallout('region',key,d,tierColor[d.tier]);
+      if(!calloutSets.region.labels[key]) addCallout('region',key,d,tierColor[tierForDistrict(d)]);
     });
     refreshOrderedRegions();
+    refreshDistrictTierVisuals();
     renderList();renderChart();updateCalloutTexts();updateLegend();scheduleCalloutLayout();
     if(activeMode==='region'){
       listPanelTitle.textContent='검증된 지역 평균';
