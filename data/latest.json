@@ -1,0 +1,19 @@
+{
+  "updated_at": "2026-08-25",
+  "source": "공개 매물 원문",
+  "method": "매매 아파트 공개 호가의 m²당 중앙값 (표본 3건 이상만 공개)",
+  "by_district": {
+    "mansour": {
+      "district_kr": "알만수르",
+      "price_per_m2_iqd": 2070000,
+      "sample_count": 4,
+      "complexes_seen": ["Mansour City", "Palm Towers", "Royal City", "Iraq Gate"]
+    },
+    "bismayah": {
+      "district_kr": "비스마야",
+      "price_per_m2_iqd": 1110000,
+      "sample_count": 15,
+      "complexes_seen": ["Bismayah New City"]
+    }
+  }
+}
