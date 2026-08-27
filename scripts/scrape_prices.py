@@ -50,16 +50,20 @@ SEARCH_URL_TEMPLATE = "https://aiqarat.com/?s={query}"
 # 검색할 지역/단지 목록. "query"는 검색창에 넣을 키워드,
 # "district_key"/"district_kr"는 대시보드 쪽 지역 id와 맞춰주면 연동이 쉬움.
 TARGET_AREAS = [
-    {"district_key": "bismayah", "district_kr": "비스마야",  "query": "بسماية شقة"},
-    {"district_key": "mansour",  "district_kr": "알만수르",  "query": "المنصور شقة"},
-    {"district_key": "jadriya",  "district_kr": "알자드리야", "query": "الجادرية شقة"},
-    {"district_key": "harthiya", "district_kr": "알하르씨야", "query": "الحارثية شقة"},
-    {"district_key": "karrada",  "district_kr": "알카라다",  "query": "الكرادة شقة"},
-    {"district_key": "yarmouk",  "district_kr": "야르무크",  "query": "اليرموك شقة"},
-    {"district_key": "kadhimiya","district_kr": "카지미야",  "query": "الكاظمية شقة"},
-    {"district_key": "zayouna",  "district_kr": "자야우나",  "query": "زيونة شقة"},
-    {"district_key": "amiriya",  "district_kr": "알아미리야", "query": "العامرية شقة"},
-    # 필요하면 여기에 지역/단지를 계속 추가하면 됩니다.
+    # 아파트를 우선 수집하고, 없을 때만 빌라·단독주택 매물을 대체 표본으로 사용한다.
+    {"district_key":"bismayah","district_kr":"비스마야","apartment":["بسماية شقة"],"fallback":["بسماية فيلا","بسماية دار"]},
+    {"district_key":"mansour","district_kr":"알만수르","apartment":["المنصور شقة"],"fallback":["المنصور فيلا","المنصور دار"]},
+    {"district_key":"jadriya","district_kr":"알자드리야","apartment":["الجادرية شقة"],"fallback":["الجادرية فيلا","الجادرية دار"]},
+    {"district_key":"harthiya","district_kr":"알하르씨야","apartment":["الحارثية شقة"],"fallback":["الحارثية فيلا","الحارثية دار"]},
+    {"district_key":"karrada","district_kr":"알카라다","apartment":["الكرادة شقة"],"fallback":["الكرادة فيلا","الكرادة دار"]},
+    {"district_key":"yarmouk","district_kr":"야르무크","apartment":["اليرموك شقة"],"fallback":["اليرموك فيلا","اليرموك دار"]},
+    {"district_key":"kadhimiya","district_kr":"카지미야","apartment":["الكاظمية شقة"],"fallback":["الكاظمية فيلا","الكاظمية دار"]},
+    {"district_key":"zayouna","district_kr":"자야우나","apartment":["زيونة شقة"],"fallback":["زيونة فيلا","زيونة دار"]},
+    {"district_key":"newbaghdad","district_kr":"뉴바그다드","apartment":["بغداد الجديدة شقة"],"fallback":["بغداد الجديدة فيلا","بغداد الجديدة دار"]},
+    {"district_key":"amiriya","district_kr":"알아미리야","apartment":["العامرية شقة"],"fallback":["العامرية فيلا","العامرية دار"]},
+    {"district_key":"saydiya","district_kr":"사이디야","apartment":["السيدية شقة"],"fallback":["السيدية فيلا","السيدية دار"]},
+    {"district_key":"jihad","district_kr":"알지하드","apartment":["حي الجهاد شقة"],"fallback":["حي الجهاد فيلا","حي الجهاد دار"]},
+    {"district_key":"sadrcity","district_kr":"사드르시티","apartment":["مدينة الصدر شقة"],"fallback":["مدينة الصدر فيلا","مدينة الصدر دار"]},
 ]
 
 HEADERS = {
@@ -141,8 +145,8 @@ def parse_property_page(html: str, url: str) -> dict | None:
 # 메인 로직
 # ---------------------------------------------------------------------------
 
-def collect_area(area_cfg: dict) -> list[dict]:
-    links = search_area(area_cfg["query"])
+def collect_area(query: str) -> list[dict]:
+    links = search_area(query)
     time.sleep(REQUEST_DELAY_SEC)
 
     results = []
@@ -199,6 +203,7 @@ def write_latest(entry: dict) -> None:
                 "price_per_m2_iqd": median,
                 "sample_count": summary["sample_count"],
                 "complexes_seen": summary["complexes_seen"],
+                "property_type": summary.get("property_type") or "아파트",
             }
     payload = {
         "updated_at": entry["date"],
@@ -216,12 +221,25 @@ def main():
     by_district = {}
     for area_cfg in TARGET_AREAS:
         key = area_cfg["district_key"]
-        print(f"  → {area_cfg['district_kr']} ({area_cfg['query']}) 검색 중…")
-        listings = collect_area(area_cfg)
+        print(f"  → {area_cfg['district_kr']} 아파트 매물 검색 중…")
+        apartment_listings = []
+        for query in area_cfg["apartment"]:
+            apartment_listings.extend(collect_area(query))
+        if apartment_listings:
+            listings = apartment_listings
+            property_type = "아파트"
+        else:
+            print("     아파트 표본 없음 → 빌라/단독주택 매물 보조 검색")
+            fallback_listings = []
+            for query in area_cfg["fallback"]:
+                fallback_listings.extend(collect_area(query))
+            listings = fallback_listings
+            property_type = "빌라/단독주택" if fallback_listings else None
         summary = summarize(listings)
         summary["district_kr"] = area_cfg["district_kr"]
+        summary["property_type"] = property_type
         by_district[key] = summary
-        print(f"     매매 {summary['sample_count']}건, 평균 {summary['avg_price_per_m2_iqd']} IQD/m²")
+        print(f"     {property_type or '매물 없음'} {summary['sample_count']}건, 중앙값 {summary.get('median_price_per_m2_iqd')} IQD/m²")
 
     entry = {"date": today, "source": "aiqarat.com", "by_district": by_district}
     append_history(entry)
