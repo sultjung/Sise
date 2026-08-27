@@ -7,16 +7,17 @@
 ```
 index.html                        ← 대시보드 (GitHub Pages로 바로 배포 가능)
 design/map-preview.html           ← 지도 컴포넌트만 따로 뗀 개발/검토용 파일
-scripts/scrape_prices.py          ← aiqarat.com에서 지역별 매매 호가를 자동 수집하는 스크립트
-.github/workflows/daily-scrape.yml← 매일 자동으로 스크립트를 실행하는 GitHub Actions
-data/history.json                 ← 날짜별·지역별로 쌓이는 수집 결과
+scripts/scrape_prices.py                  ← aiqarat.com에서 지역별 매매 호가를 수집하는 스크립트
+.github/workflows/monthly-price-update.yml ← 매월 말일(KST) 자동 실행 + 수동 실행 버튼
+data/history.json                         ← 날짜별·지역별 원시 수집 이력
+data/latest.json                          ← 표본 3건 이상인 최신 지역 중앙값
 ```
 
 ## 대시보드 (`index.html`)
 
 - 비스마야 세대별(100/120/140㎡) 시세 — 알라피다인 은행 공식 발표가 기준(검증됨)
-- 바그다드 13개 지역 비교 — 실제 트레이싱한 경계 좌표 기반 지도(Leaflet) + 리스트
-- 만수르(Mansour City)는 실제 매물가로 검증, 나머지 지역은 예시 데이터(배지로 구분)
+- 바그다드 지역 비교 — 실제 트레이싱한 경계 좌표 기반 지도(Leaflet) + 리스트
+- 표본 3건 이상의 공개 매물만 지역 평균으로 표시하고, 표본이 부족한 지역은 평균·순위·차트에서 제외
 - 지도 마우스 휠 확대/축소, 리스트 ↔ 지도 클릭 연동
 - 기본 통화 USD, IQD 전환 가능
 
@@ -25,9 +26,9 @@ Branch를 `main` / `(root)`로 설정하면 `index.html`이 바로 사이트로 
 
 ## 시세 자동 수집 (`scripts/`, `.github/workflows/`)
 
-- aiqarat.com을 지역명으로 매일 자동 검색해서 매물을 수집
+- aiqarat.com을 지역명으로 매월 말일 자동 검색해서 매물을 수집
 - "매매(للبيع)"만 남기고 "임대"는 자동 제외
-- 지역별 평균/최소/최대/표본수를 `data/history.json`에 날짜별로 누적
+- 지역별 중앙값/평균/최소/최대/표본수를 `data/history.json`에 날짜별로 누적하고, 표시 가능한 최신 중앙값은 `data/latest.json`에 저장
 - OpenSooq는 봇 차단이 걸려있어 소스에서 제외했습니다 (자세한 내용은
   `scripts/scrape_prices.py` 상단 주석 및 아래 주의사항 참고)
 
