@@ -121,6 +121,7 @@
   .district-info .name-kr{ font-size:13px; font-weight:700; }
   .district-info .name-en{ font-size:10.2px; color:var(--hw-ink-soft); font-family:'IBM Plex Mono',monospace; margin-left:6px; }
   .district-info .complex{ font-size:11px; color:var(--hw-orange); margin-top:3px; font-weight:600; }
+  .property-type{ display:inline-block; margin-left:6px; padding:1px 5px; border-radius:999px; background:#F1F1F2; color:var(--hw-ink-soft); font-size:9px; font-weight:700; vertical-align:1px; }
   .district-info .meta-line{ font-size:10.3px; color:var(--hw-ink-soft); margin-top:3px; }
   .district-price{ text-align:right; white-space:nowrap; }
   .district-price .usd{ font-family:'IBM Plex Mono',monospace; font-size:13.5px; font-weight:700; }
@@ -619,6 +620,10 @@
     if(n>=1000000) return `${Number((n/1000000).toFixed(2))}M IQD`;
     return `${Math.round(n/1000)}K IQD`;
   }
+  function propertyTypeHtml(item){
+    const type=item.propertyType || '아파트';
+    return type==='아파트' ? '' : `<span class="property-type">${type}</span>`;
+  }
   function sourceBadge(item, compact=false){
     if(item.sourceKind==='dual') return `<span class="badge dual">${compact?'공식+시장':`공식 + 매물 ${item.sampleCount}건`}</span>`;
     if(item.sourceKind==='official' || item.verified) return `<span class="badge verified">✓ ${compact?'공식':'공식가'}</span>`;
@@ -684,7 +689,7 @@
           <div class="rank">${String(i+1).padStart(2,'0')}</div>
           <div class="district-info">
             <span class="name-kr">${d.nameKr}</span><span class="name-en">${d.nameEn}</span>
-            ${d.complex?`<div class="complex">${d.complex}</div>`:''}
+            ${d.complex?`<div class="complex">${d.complex}${propertyTypeHtml(d)}</div>`:''}
             ${d.source?`<div class="meta-line">${d.source}</div>`:''}
           </div>
           <div>
@@ -1058,6 +1063,7 @@
       d.sampleCount=summary.sample_count;
       d.checked=snapshot.updated_at;
       d.sourceKind=key==='bismayah' ? 'dual' : (summary.sample_count===1 ? 'single' : 'sample');
+      d.propertyType=summary.property_type || '아파트';
       d.source=`${snapshot.source} · ${snapshot.updated_at} · 매물 ${summary.sample_count}건 중앙값`;
       if(!calloutSets.region.labels[key]) addCallout('region',key,d,tierColor[d.tier]);
     });
