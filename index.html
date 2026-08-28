@@ -121,7 +121,8 @@
   .district-info .name-kr{ font-size:13px; font-weight:700; }
   .district-info .name-en{ font-size:10.2px; color:var(--hw-ink-soft); font-family:'IBM Plex Mono',monospace; margin-left:6px; }
   .district-info .complex{ font-size:11px; color:var(--hw-orange); margin-top:3px; font-weight:600; }
-  .property-type{ display:inline-block; margin-left:6px; padding:1px 5px; border-radius:999px; background:#F1F1F2; color:var(--hw-ink-soft); font-size:9px; font-weight:700; vertical-align:1px; }
+  .property-note{ margin-top:3px; color:#8B6A4C; font-size:9.4px; font-weight:650; letter-spacing:-.1px; }
+  .property-note::before{ content:'※ '; color:var(--hw-orange); }
   .district-info .meta-line{ font-size:10.3px; color:var(--hw-ink-soft); margin-top:3px; }
   .district-price{ text-align:right; white-space:nowrap; }
   .district-price .usd{ font-family:'IBM Plex Mono',monospace; font-size:13.5px; font-weight:700; }
@@ -667,9 +668,9 @@
     if(n>=1000000) return `${Number((n/1000000).toFixed(2))}M IQD`;
     return `${Math.round(n/1000)}K IQD`;
   }
-  function propertyTypeHtml(item){
+  function propertyTypeNoteHtml(item){
     const type=item.propertyType || '아파트';
-    return type==='아파트' ? '' : `<span class="property-type">${type}</span>`;
+    return type==='아파트' ? '' : `<div class="property-note">${type} 기준</div>`;
   }
   function sourceBadge(item, compact=false){
     if(item.sourceKind==='dual') return `<span class="badge dual">${compact?'공식+시장':`공식 + 매물 ${item.sampleCount}건`}</span>`;
@@ -750,7 +751,8 @@
           <div class="rank">${String(i+1).padStart(2,'0')}</div>
           <div class="district-info">
             <span class="name-kr">${d.nameKr}</span><span class="name-en">${d.nameEn}</span>
-            ${d.complex?`<div class="complex">${d.complex}${propertyTypeHtml(d)}</div>`:''}
+            ${d.complex?`<div class="complex">${d.complex}</div>`:''}
+            ${propertyTypeNoteHtml(d)}
             ${d.source?`<div class="meta-line">${d.source}</div>`:''}
           </div>
           <div>
@@ -893,8 +895,8 @@
 
   function calloutMarkup(mode,key,d,color){
     const context = mode==='complex' ? `<span class="place">${d.district}</span>` : '';
-    const name = mode==='region' && d.propertyType==='빌라/단독주택' ? `${d.nameKr} (빌라/단독주택 기준)` : d.nameKr;
-    return `<div class="region-callout ${mode==='complex'?'complex':''}" id="lbl-${mode}-${key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${name}</span>${context}<span class="callout-prices">${calloutPricesHtml(d)}</span></div></div>`;
+    const typeNote = mode==='region' && d.propertyType==='빌라/단독주택' ? '<span class="place">빌라/단독주택 기준</span>' : '';
+    return `<div class="region-callout ${mode==='complex'?'complex':''}" id="lbl-${mode}-${key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${d.nameKr}</span>${typeNote}${context}<span class="callout-prices">${calloutPricesHtml(d)}</span></div></div>`;
   }
 
   function addCallout(mode,key,d,color){
