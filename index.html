@@ -356,7 +356,7 @@
     </div>
     <div class="view-switch" role="group" aria-label="시세 보기 기준">
       <button id="btn-region-view" class="active" aria-pressed="true">지역별 <span class="view-count">13</span></button>
-      <button id="btn-complex-view" aria-pressed="false">아파트 단지별 <span class="view-count">8</span></button>
+      <button id="btn-complex-view" aria-pressed="false">아파트 단지별 <span class="view-count">14</span></button>
     </div>
   </div>
   <div class="section-note" id="view-section-note" style="margin:-7px 0 12px;">지도/리스트 클릭 시 서로 연동됩니다 · 지도는 마우스 휠로 확대·축소</div>
@@ -452,7 +452,8 @@
   };
 
   /* Apartment-complex prices: only public source material is included.
-     Multi-listing values are medians of asking prices, not completed transactions. */
+     Multi-listing values are medians of asking prices, not completed transactions.
+     knownOnly entries are confirmed projects without a defensible current price. */
   const complexes = {
     mansour_city: {
       nameKr:"만수르 시티", nameEn:"MANSOUR CITY", nameAr:"المنصور ستي", district:"알바이지야 · 만수르",
@@ -609,6 +610,54 @@
         {label:"위치 · OpenStreetMap",url:"https://mapcarta.com/N10916647741"}
       ],
       sourceNote:"대표 시장가는 100·120·140m²별 5건씩 총 15건의 ㎡당 호가 중앙값 1.11M IQD입니다. 승계금·미납잔금·보증인 교체 광고는 제외했습니다."
+    },
+    dar_alsalam: {
+      nameKr:"다르 알살람", nameEn:"DAR AL SALAM", nameAr:"مجمع دار السلام السكني", district:"바그다드 · 세부 위치 추가 확인 중",
+      iqd:null, sourceKind:"known", knownOnly:true, priceMethod:"공개 매매 호가 표본 수집 중", sampleCount:0, checked:"2026.08.28",
+      units:1346, unitsLabel:"1,346세대(1단계)", buildings:"134㎡ 1,096세대 · 205㎡ 250세대", sizes:"134·205m²", centroid:[33.304,44.395],
+      sources:[], infoSources:[
+        {label:"1단계 준공·세대수 · Baghdad Today",url:"https://baghdadtoday.news/250427-%D9%88%D8%B2%D9%8A%D8%B1-%D8%A7%D9%84%D8%B9%D9%85%D9%84-%D9%8A%D9%88%D8%B2%D8%B9-%D8%A7%D9%84%D9%88%D8%AC%D8%A8%D8%A9-%D8%A7%D9%84%D8%A7%D9%88%D9%84%D9%89-%D9%85%D9%86-%D8%A7%D9%84%D9%88%D8%AD%D8%AF%D8%A7%D8%AA-%D8%A7%D9%84%D8%B3%D9%83%D9%86%D9%8A%D8%A9-%D9%81%D9%8A-%D9%85%D8%AC%D9%85%D8%B9-%D8%AF%D8%A7%D8%B1-%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85-%D8%A7%D9%84%D8%B3%D9%83%D9%86%D9%8A.html"},
+        {label:"최근 공개 매물 표기 · Raqi",url:"https://www.raqi.app/ar/posts/10318933-%D8%B4%D9%82%D8%A9-%D8%B7%D8%A7%D8%A8%D9%82-%D9%A9-%D8%A3%D9%82%D8%B3%D8%A7%D8%B7-%D9%84%D8%AD%D8%AF-%D8%B4%D9%87%D8%B1-%D9%A8"}
+      ], sourceNote:"2024년 1단계 주택 배정이 확인됐습니다. 광고가 잔여 할부금·승계 조건을 함께 적는 경우가 있어, 현재는 m² 단가를 산정하지 않았습니다."
+    },
+    millennium: {
+      nameKr:"밀레니엄 주거단지", nameEn:"MILLENNIUM", nameAr:"مجمع ملينيوم السكني", district:"알아미리야 · 바그다드",
+      iqd:null, sourceKind:"known", knownOnly:true, priceMethod:"공개 매물 표본 추가 수집 중", sampleCount:0, checked:"2026.08.28",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"복수 주거동", sizes:"확인 매물 154·208·255m²", centroid:[33.299216,44.286448],
+      sources:[], infoSources:[
+        {label:"154m² 공개 매물 · Raqi",url:"https://raqi.app/ar/posts/10354029-%D9%84%D9%84%D8%A8%D9%8A%D8%B9-%D8%B4%D9%82%D8%A9-%D9%81%D9%8A-%D9%85%D8%AC%D9%85%D8%B9-%D9%85%D9%84%D9%8A%D9%86%D9%8A%D9%88%D9%85-%D8%A7%D9%84%D9%85%D8%B3%D8%A7%D8%AD%D8%A9-154-%D9%852-%D8%A7%D9%84%D8%A8%D8%B1%D8%AC-%D8%A7%D9%84%D8%A3%D9%88%D9%84-%D8%B9%D8%AF%D8%AF-%D8%BA"},
+        {label:"개발사 단지 소개 · Ramlah",url:"https://play.google.com/store/apps/details?hl=ar&id=com.lamassu.ramlah"}
+      ], sourceNote:"아미리야의 입주형 아파트 단지로 공개 매물이 확인됩니다. 서로 다른 면적·가구 상태를 충분히 확보한 뒤 대표 m² 호가를 추가합니다."
+    },
+    yarmouk_compound: {
+      nameKr:"알야르무크 컴파운드", nameEn:"AL-YARMOUK COMPOUND", nameAr:"مجمع اليرموك السكني", district:"야르무크 · 카르크 · 바그다드",
+      iqd:null, sourceKind:"known", knownOnly:true, priceMethod:"분양·매물 가격 표본 수집 중", sampleCount:0, checked:"2026.08.28",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"수직형 아파트 단지", sizes:"공개 안내 340·438m²", centroid:[33.295233,44.335369],
+      sources:[], infoSources:[
+        {label:"단지 공식 사이트",url:"https://ycompound.com/"},
+        {label:"위치·최근 안내 · Yarmouk Compound",url:"https://www.findglocal.com/IQ/Baghdad/108542478670714/Yarmouk-Compound--%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%8A%D8%B1%D9%85%D9%88%D9%83-%D8%A7%D9%84%D8%B3%D9%83%D9%86%D9%8A"}
+      ], sourceNote:"야르무크 지역 단독주택 시세와 별개인 고급 수직형 컴파운드입니다. 단지별 공개 매매 호가가 충분하지 않아 가격 비교에서는 제외했습니다."
+    },
+    sama_baghdad: {
+      nameKr:"사마 바그다드", nameEn:"SAMA BAGHDAD", nameAr:"مجمع سما بغداد السكني", district:"바그다드 · 세부 위치 추가 확인 중",
+      iqd:null, sourceKind:"known", knownOnly:true, priceMethod:"공개 매물·사업 규모 확인 중", sampleCount:0, checked:"2026.08.28",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"주거단지", sizes:"면적 공개 확인 안 됨", centroid:[33.315,44.365],
+      sources:[], infoSources:[{label:"개발사 프로젝트 목록",url:"https://wafaa-alfurat.iq/projects"}],
+      sourceNote:"개발사 프로젝트 목록에서 바그다드 주거단지로 확인했습니다. 위치·세대수·가격은 추가 원문 확인 후 보완합니다."
+    },
+    al_salam_district: {
+      nameKr:"알살람 주거단지", nameEn:"AL-SALAM DISTRICT", nameAr:"مجمع حي السلام السكني", district:"바그다드 · 세부 위치 추가 확인 중",
+      iqd:null, sourceKind:"known", knownOnly:true, priceMethod:"공개 매물·사업 규모 확인 중", sampleCount:0, checked:"2026.08.28",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"주거단지", sizes:"면적 공개 확인 안 됨", centroid:[33.267,44.354],
+      sources:[], infoSources:[{label:"단지 분류·기본정보 · Riadi",url:"https://riadi.iq/en/category/residential-complexes/"}],
+      sourceNote:"다르 알살람과 명칭이 유사하지만 별도 단지로 분류했습니다. 현 단계에서는 가격을 표시하지 않습니다."
+    },
+    al_khulood: {
+      nameKr:"알쿨루드 주거단지", nameEn:"AL-KHULOOD", nameAr:"مجمع الخلود السكني", district:"바그다드 · 세부 위치 추가 확인 중",
+      iqd:null, sourceKind:"known", knownOnly:true, priceMethod:"공개 매물·사업 규모 확인 중", sampleCount:0, checked:"2026.08.28",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"주거동", sizes:"확인 매물 193m²", centroid:[33.325,44.385],
+      sources:[], infoSources:[{label:"193m² 공개 매물 표기 · Raqi",url:"https://raqi.app/ar/posts/11244809-%D8%B4%D9%82%D9%82-%D9%84%D9%84%D8%A8%D9%8A%D8%B9-%D9%88%D8%A7%D9%84%D8%A7%D9%8A%D8%AC%D8%A7%D8%B1-%D9%85%D8%A7%D8%B1%D9%8A%D9%86%D8%A7-b5-%D8%AC%D9%88%D8%A7%D9%87%D8%B1-%D8%AF%D8%AC%D9%84%D8%A9"}],
+      sourceNote:"공개 매물에 단지명·면적은 확인되나, 독립적인 공식 단지 자료와 표본이 부족해 정보 확인 대상으로 표시했습니다."
     }
   };
 
@@ -680,11 +729,13 @@
     if(item.sourceKind==='sample') return `<span class="badge sample">${compact?'중앙값':`매물 ${item.sampleCount}건`}</span>`;
     if(item.sourceKind==='single') return `<span class="badge single">${compact?'1건':'단일 매물'}</span>`;
     if(item.sourceKind==='pending') return `<span class="badge pending">${compact?'수집 중':'표본 수집 중'}</span>`;
+    if(item.sourceKind==='known') return `<span class="badge pending">${compact?'시세 미확인':'단지 정보 확인'}</span>`;
     return '<span class="badge estimate">예시</span>';
   }
   function calloutPrice(item){ return currencyMode==='iqd' ? compactIqd(item.iqd) : `$${fmt(usdOf(item))}`; }
   function officialCalloutPrice(item){ return currencyMode==='iqd' ? compactIqd(item.officialIqd) : `$${fmt(item.officialUsd || Math.round(item.officialIqd/RATE))}`; }
   function listPriceHtml(item){
+    if(!hasPrice(item)) return `<div class="district-price"><div class="usd" style="font-size:13px">시세 미확인</div><div class="iqd">가격 표본 수집 중</div></div>`;
     if(item.sourceKind!=='dual') return `<div class="district-price"><div class="usd">$${fmt(usdOf(item))}</div><div class="iqd">${fmt(item.iqd)} IQD</div></div>`;
     return `<div class="dual-price">
       <div class="dual-price-line official"><span class="kind">공식</span><span class="usd">$${fmt(item.officialUsd)}</span><span class="iqd">${fmt(item.officialIqd)} IQD</span></div>
@@ -692,10 +743,11 @@
     </div>`;
   }
   function calloutPricesHtml(item){
+    if(!hasPrice(item)) return `<span class="price" style="font-size:10px">시세 미확인</span>`;
     if(item.sourceKind!=='dual') return `<span class="price">${calloutPrice(item)}</span>`;
     return `<span class="price dual-official">공식 ${officialCalloutPrice(item)}</span><span class="price dual-market">시장 ${calloutPrice(item)}</span>`;
   }
-  function tierForComplex(item){ return item.iqd>=2300000 ? 'high' : item.iqd>=1600000 ? 'mid' : 'low'; }
+  function tierForComplex(item){ if(!hasPrice(item)) return 'pending'; return item.iqd>=2300000 ? 'high' : item.iqd>=1600000 ? 'mid' : 'low'; }
   function tierForDistrict(item){
     if(!hasPrice(item)) return 'pending';
     const ranked=Object.values(districts).filter(hasPrice).sort((a,b)=>b.iqd-a.iqd);
@@ -708,7 +760,12 @@
   let orderedRegionKeys = Object.keys(districts).filter(k=>k!=='bismayah' && hasPrice(districts[k]))
     .sort((a,b)=>districts[b].iqd-districts[a].iqd);
   if(hasPrice(districts.bismayah)) orderedRegionKeys.push('bismayah');
-  const orderedComplexKeys = Object.keys(complexes).sort((a,b)=>complexes[b].iqd-complexes[a].iqd);
+  const orderedComplexKeys = Object.keys(complexes).sort((a,b)=>{
+    const ap=hasPrice(complexes[a]),bp=hasPrice(complexes[b]);
+    if(ap!==bp) return ap?-1:1;
+    return ap ? complexes[b].iqd-complexes[a].iqd : complexes[a].nameKr.localeCompare(complexes[b].nameKr,'ko');
+  });
+  const pricedComplexKeys = orderedComplexKeys.filter(key=>hasPrice(complexes[key]));
 
   let activeMode = 'region';
   let currencyMode = 'usd';
@@ -730,7 +787,7 @@
     const priceLinks = item.sources.map(s=>`<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join('');
     const infoLinks = item.infoSources.map(s=>`<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join('');
     return `<details class="source-details">
-      <summary>가격 원문 ${item.sources.length}개 · 기본정보/위치 ${item.infoSources.length}개</summary>
+      <summary>${item.sources.length?`가격 원문 ${item.sources.length}개 · `:''}기본정보/위치 ${item.infoSources.length}개</summary>
       <div class="source-links">${priceLinks}${infoLinks}<div class="source-note">${item.sourceNote}</div></div>
     </details>`;
   }
@@ -795,7 +852,7 @@
   function renderChart(){
     chartEl.innerHTML = '';
     const data = activeMode==='region' ? districts : complexes;
-    const keys = activeMode==='region' ? orderedRegionKeys : orderedComplexKeys;
+    const keys = activeMode==='region' ? orderedRegionKeys : pricedComplexKeys;
     const max = Math.max(...keys.map(k=>data[k].iqd));
     keys.forEach(key=>{
       const d = data[key];
@@ -844,7 +901,8 @@
     },
     complex:{
       mansour_city:[-108,-62],iraq_gate:[116,38],palm_towers:[98,-70],royal_city:[-116,26],
-      baghdad_marina:[86,68],jawahir_dijla:[92,-48],nasim_city:[-92,-54],bismayah_complex:[92,28]
+      baghdad_marina:[86,68],jawahir_dijla:[92,-48],nasim_city:[-92,-54],bismayah_complex:[92,28],
+      dar_alsalam:[84,-68],millennium:[-88,22],yarmouk_compound:[-96,-34],sama_baghdad:[98,-12],al_salam_district:[-88,50],al_khulood:[90,44]
     }
   };
 
@@ -884,6 +942,7 @@
   }).addTo(map);
 
   function popupHtml(d){
+    if(!hasPrice(d)) return `<div class="map-popup"><div class="popup-place">${d.district}</div><h4>${d.nameKr} · ${d.nameEn}</h4><div class="popup-price" style="font-size:15px">시세 미확인</div><div class="popup-meta">${d.unitsLabel} · ${d.buildings}<br>${d.sizes}<br>${d.priceMethod}<br>자료 확인 ${d.checked}</div><a href="${d.infoSources[0].url}" target="_blank" rel="noopener">단지 정보 원문 열기 ↗</a></div>`;
     const price=d.sourceKind==='dual'
       ? `<div class="popup-price-dual"><span class="official">공식 ${officialCalloutPrice(d)} / m²</span><span class="market">시장 ${calloutPrice(d)} / m²</span></div>`
       : `<div class="popup-price">${calloutPrice(d)} / m²</div>`;
@@ -1116,8 +1175,8 @@
       Object.values(polyLayers).forEach(poly=>{poly.closeTooltip();poly.unbindTooltip();poly.setStyle({color:'#9A9CA2',weight:1,fillOpacity:.07,opacity:.45});});
       viewTitle.textContent='바그다드 아파트 단지별 시세';viewSub.textContent='RESIDENTIAL COMPLEXES';
       viewNote.textContent='단지명·단가 라벨을 선으로 연결했습니다 · 카드의 ‘가격 원문’을 열어 출처를 확인할 수 있습니다';
-      listPanelTitle.textContent='아파트 단지별 시세';listPanelCount.textContent='8 SOURCE-CHECKED';mapPanelCount.textContent='공개 주소·OSM 위치';
-      chartTitle.textContent='아파트 단지별 m² 단가 비교';
+      listPanelTitle.textContent='아파트·컴파운드';listPanelCount.textContent='14 PROJECTS';mapPanelCount.textContent='확인 위치·참고 위치';
+      chartTitle.textContent='시세 확인 단지별 m² 단가 비교';
       map.fitBounds(complexBounds,{padding:[55,55]});
     }
     renderList();renderChart();updateCalloutTexts();updateLegend();
