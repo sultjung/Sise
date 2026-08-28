@@ -861,7 +861,7 @@
 
   Object.entries(districts).forEach(([key,d])=>{
     const poly = L.polygon(d.coords,{color:'#fff',weight:1.5,fillColor:tierColor[tierForDistrict(d)],fillOpacity:.62})
-      .addTo(map).bindTooltip(districtTooltip(d),{sticky:true}).bindPopup(popupHtml(d,'region'),{maxWidth:310});
+      .addTo(map).bindTooltip(districtTooltip(d),{sticky:true});
     poly._regionTooltip = districtTooltip(d);
     poly.on('click',()=>{ if(activeMode==='region') selectDistrict(key); });
     polyLayers[key] = poly;
@@ -1036,7 +1036,9 @@
       poly._regionTooltip=districtTooltip(districts[key]);
       if(activeMode==='region') poly.setTooltipContent(poly._regionTooltip);
     });
-    Object.entries(districts).forEach(([key,d])=>polyLayers[key].setPopupContent(popupHtml(d,'region')));
+    Object.entries(districts).forEach(([key,d])=>{
+      if(polyLayers[key].getPopup()) polyLayers[key].setPopupContent(popupHtml(d,'region'));
+    });
     Object.entries(complexes).forEach(([key,d])=>calloutSets.complex.anchors[key].setPopupContent(popupHtml(d,'complex')));
   }
 
@@ -1075,7 +1077,9 @@
     document.querySelector(`.district-row[data-key="${key}"]`)?.scrollIntoView({block:'nearest',behavior:'smooth'});
     map.flyToBounds(polyLayers[key].getBounds(),{padding:[60,60],maxZoom:14,duration:.6});
     polyLayers[key].openTooltip();
-    setTimeout(()=>polyLayers[key].openPopup(),300);
+    const regionLayer=polyLayers[key];
+    if(!regionLayer.getPopup()) regionLayer.bindPopup(popupHtml(districts[key],'region'),{maxWidth:310});
+    setTimeout(()=>regionLayer.openPopup(),300);
   }
 
   function clearComplexSelection(){
@@ -1194,7 +1198,3 @@
       listPanelCount.textContent=`${orderedRegionKeys.length} VERIFIED`;
     }
   }
-
-  renderList();renderChart();updateLegend();scheduleCalloutLayout();
-  fetch('./data/latest.json',{cache:'no-store'})
-    .then(response=>response.ok ? response.json() : null)
