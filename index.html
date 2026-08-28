@@ -167,6 +167,7 @@
   .region-label .price.dual-official{ color:#1A7140; font-size:10.3px; }
   .region-label .price.dual-market{ color:#315EBA; font-size:10.3px; }
   .region-label .place{ display:block; margin-top:2px; color:var(--hw-ink-soft); font-size:8.5px; font-weight:550; }
+  .region-label .basis-warning{ color:#D7263D; font-weight:800; letter-spacing:-.15px; }
   .region-callout.complex .region-label{ min-width:112px; padding:6px 9px; }
   .region-callout.complex .region-label .name{ font-size:10.8px; }
   .region-callout.complex .region-label .price{ font-size:12.2px; }
@@ -256,7 +257,7 @@
 </div>
 
 <div class="disclaimer">
-  ※ <b>단지별 시세</b>는 2026.08.25에 실제로 열린 공개 원문만 사용했습니다. 민간시장 값은 매도자의 <b>호가 중앙값</b>으로 등기된 실거래가가 아닙니다. 삭제된 광고와 동일 매물 중복은 제외했으며, 1 USD ≈ 1,310 IQD로 환산했습니다.
+  ※ <b>단지별 시세</b>는 2026.08.25에 실제로 열린 공개 원문만 사용했습니다. 민간시장 값은 매도자의 <b>호가 중앙값</b>으로 등기된 실거래가가 아닙니다. 삭제된 광고와 동일 매물 중복은 제외했으며, 1 USD ≈ 1,320 IQD로 환산했습니다.
 </div>
 
 <div class="page">
@@ -267,6 +268,7 @@
       <div class="bar"></div>
       <h2>비스마야 세대별 시세</h2>
       <span class="sub-en">BISMAYAH · PRICE PER M²</span>
+      <span class="sub-en" id="bismayah-update-date">LAST UPDATE · 2026.08.28</span>
     </div>
     <span class="badge dual">공식 분양가 + 민간시장 호가</span>
   </div>
@@ -391,7 +393,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-  const RATE = 1310; // 1 USD ≈ 1310 IQD
+  const RATE = 1320; // 1 USD ≈ 1320 IQD
   const tierColor = { high:"#D94800", mid:"#FF8A3D", low:"#FFC896", pending:"#C9CDD3" };
 
   // districts: iqd = per-m² asking price in IQD. verified:true means real sourced data.
@@ -905,7 +907,7 @@
 
   function calloutMarkup(mode,key,d,color){
     const context = mode==='complex' ? `<span class="place">${d.district}</span>` : '';
-    const typeNote = mode==='region' && d.propertyType==='빌라/단독주택' ? '<span class="place">빌라/단독주택 기준</span>' : '';
+    const typeNote = mode==='region' && d.propertyType==='빌라/단독주택' ? '<span class="place basis-warning">빌라/단독주택 기준</span>' : '';
     return `<div class="region-callout ${mode==='complex'?'complex':''}" id="lbl-${mode}-${key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${d.nameKr}</span>${typeNote}${context}<span class="callout-prices">${calloutPricesHtml(d)}</span></div></div>`;
   }
 
@@ -1167,6 +1169,10 @@
 
   function applyLatestPrices(snapshot){
     if(!snapshot || !snapshot.by_district) return;
+    if(snapshot.updated_at){
+      const updateEl=document.getElementById('bismayah-update-date');
+      if(updateEl) updateEl.textContent=`LAST UPDATE · ${snapshot.updated_at.replaceAll('-','.')}`;
+    }
     Object.entries(snapshot.by_district).forEach(([key,summary])=>{
       const d=districts[key];
       const value=summary && summary.price_per_m2_iqd;
@@ -1192,9 +1198,3 @@
   renderList();renderChart();updateLegend();scheduleCalloutLayout();
   fetch('./data/latest.json',{cache:'no-store'})
     .then(response=>response.ok ? response.json() : null)
-    .then(applyLatestPrices)
-    .catch(()=>{ /* latest snapshot unavailable: retain embedded verified values */ });
-</script>
-
-</body>
-</html>
