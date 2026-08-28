@@ -192,6 +192,9 @@
   .map-popup .popup-price-dual .market{ color:#315EBA; }
   .map-popup .popup-meta{ margin-top:7px; color:var(--hw-ink-soft); font-size:10.5px; line-height:1.55; }
   .map-popup a{ display:inline-block; margin-top:8px; color:#315EBA; font-size:10.5px; font-weight:700; }
+  .map-popup .popup-sources{ max-height:158px; overflow-y:auto; margin-top:9px; padding-top:7px; border-top:1px dashed var(--hw-border); }
+  .map-popup .popup-sources b{ display:block; color:#875000; font-size:10px; }
+  .map-popup .popup-sources a{ display:block; margin-top:5px; width:max-content; max-width:100%; line-height:1.35; }
 
   .compare-panel{ background:var(--hw-white); border:1px solid var(--hw-border); border-radius:var(--radius); padding:22px 24px; }
   .bar-row{ display:grid; grid-template-columns:150px 1fr 110px 60px; align-items:center; gap:12px; margin-bottom:12px; }
@@ -856,7 +859,7 @@
 
   Object.entries(districts).forEach(([key,d])=>{
     const poly = L.polygon(d.coords,{color:'#fff',weight:1.5,fillColor:tierColor[tierForDistrict(d)],fillOpacity:.62})
-      .addTo(map).bindTooltip(districtTooltip(d),{sticky:true});
+      .addTo(map).bindTooltip(districtTooltip(d),{sticky:true}).bindPopup(popupHtml(d,'region'),{maxWidth:310});
     poly._regionTooltip = districtTooltip(d);
     poly.on('click',()=>{ if(activeMode==='region') selectDistrict(key); });
     polyLayers[key] = poly;
@@ -881,15 +884,22 @@
     }),interactive:false
   }).addTo(map);
 
-  function popupHtml(d){
+  function popupHtml(d,mode='complex'){
     const price=d.sourceKind==='dual'
       ? `<div class="popup-price-dual"><span class="official">공식 ${officialCalloutPrice(d)} / m²</span><span class="market">시장 ${calloutPrice(d)} / m²</span></div>`
       : `<div class="popup-price">${calloutPrice(d)} / m²</div>`;
+    const isComplex=mode==='complex';
+    const location=isComplex ? d.district : (d.complex || '지역 평균');
+    const basis=d.propertyType==='빌라/단독주택' ? '<br>※ 빌라/단독주택 기준' : '';
+    const meta=isComplex
+      ? `${d.unitsLabel} · ${d.buildings}<br>${d.priceMethod}<br>자료 확인 ${d.checked}`
+      : `${d.source || '공개 매물 기반'}${basis}`;
+    const links=(d.sources||[]).map((source,index)=>`<a href="${source.url}" target="_blank" rel="noopener">${index+1}. ${source.label} ↗</a>`).join('');
     return `<div class="map-popup">
-      <div class="popup-place">${d.district}</div><h4>${d.nameKr} · ${d.nameEn}</h4>
+      <div class="popup-place">${location}</div><h4>${d.nameKr} · ${d.nameEn}</h4>
       ${price}
-      <div class="popup-meta">${d.unitsLabel} · ${d.buildings}<br>${d.priceMethod}<br>자료 확인 ${d.checked}</div>
-      <a href="${d.sources[0].url}" target="_blank" rel="noopener">가격 원문 열기 ↗</a>
+      <div class="popup-meta">${meta}</div>
+      ${links?`<div class="popup-sources"><b>표본 매물 ${d.sources.length}건</b>${links}</div>`:''}
     </div>`;
   }
 
@@ -913,7 +923,7 @@
     const select = ()=> mode==='region' ? selectDistrict(key) : selectComplex(key);
     marker.on('click',select);
     anchor.on('click',select);
-    if(mode==='complex') anchor.bindPopup(popupHtml(d),{offset:[0,-6]});
+    anchor.bindPopup(popupHtml(d,mode),{offset:[0,-6],maxWidth:310});
     calloutSets[mode].labels[key]=marker;
     calloutSets[mode].leaders[key]=leader;
     calloutSets[mode].anchors[key]=anchor;
@@ -1024,7 +1034,8 @@
       poly._regionTooltip=districtTooltip(districts[key]);
       if(activeMode==='region') poly.setTooltipContent(poly._regionTooltip);
     });
-    Object.entries(complexes).forEach(([key,d])=>calloutSets.complex.anchors[key].setPopupContent(popupHtml(d)));
+    Object.entries(districts).forEach(([key,d])=>polyLayers[key].setPopupContent(popupHtml(d,'region')));
+    Object.entries(complexes).forEach(([key,d])=>calloutSets.complex.anchors[key].setPopupContent(popupHtml(d,'complex')));
   }
 
   function styleSelection(mode,selectedKey){
@@ -1062,6 +1073,7 @@
     document.querySelector(`.district-row[data-key="${key}"]`)?.scrollIntoView({block:'nearest',behavior:'smooth'});
     map.flyToBounds(polyLayers[key].getBounds(),{padding:[60,60],maxZoom:14,duration:.6});
     polyLayers[key].openTooltip();
+    setTimeout(()=>polyLayers[key].openPopup(),300);
   }
 
   function clearComplexSelection(){
