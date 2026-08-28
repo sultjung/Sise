@@ -161,6 +161,8 @@
     --pin-color:var(--hw-orange);
     width:max-content; transform:translate(-50%, -50%); pointer-events:none;
   }
+  /* Complex labels are interactive: map selection must match list selection. */
+  .region-callout.complex{ pointer-events:auto; cursor:pointer; }
   .region-label{ min-width:78px; font-family:'Pretendard',sans-serif; text-align:center; background:rgba(255,255,255,.96); border:1px solid var(--pin-color); border-radius:6px; padding:5px 8px; box-shadow:0 1px 5px rgba(0,0,0,.2); white-space:nowrap; line-height:1.15; transition:.15s; }
   .region-label .name{ display:block; font-weight:750; font-size:10.5px; letter-spacing:-.1px; color:#232428; }
   .region-label .price{ display:block; margin-top:2px; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:12.5px; color:#9E3500; }
