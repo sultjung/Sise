@@ -1009,7 +1009,7 @@
   legend.addTo(map);
   function updateLegend(){
     if(activeMode==='region'){
-      legendDiv.innerHTML=`<b>지역 평균 단가 수준</b><br><span class="sw" style="background:#D94800"></span>상위 1/3<br><span class="sw" style="background:#FF8A3D"></span>중위 1/3<br><span class="sw" style="background:#FFC896"></span>하위 1/3<br><span class="sw" style="background:#C9CDD3"></span>시세 미확인<br><span class="sw" style="background:#149764;border:1px solid #075B40"></span>그린존<br><small>확인된 현재 단가 기준으로 자동 재산정 · 비스마야: 공식·시장 병기</small>`;
+      legendDiv.innerHTML=`<b>지역 평균 단가 수준</b><br><span class="sw" style="background:#D94800"></span>상위 1/3<br><span class="sw" style="background:#FF8A3D"></span>중위 1/3<br><span class="sw" style="background:#FFC896"></span>하위 1/3<br><span class="sw" style="background:#C9CDD3"></span>시세 미확인<br><span class="sw" style="background:#149764;border:1px solid #075B40"></span>그린존<br>`;
     }else{
       legendDiv.innerHTML=`<b>단지 시세 · ${currencyMode.toUpperCase()}</b><br><span class="dot" style="background:#315EBA"></span>복수 매물 호가 중앙값<br><span class="dot" style="background:#1A8A3F"></span>비스마야 공식 분양가<br><small>카드에서 모든 원문 확인</small>`;
     }
