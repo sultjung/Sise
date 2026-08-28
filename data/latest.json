@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-08-27",
+  "updated_at": "2026-08-28",
   "source": "공개 매물 원문",
-  "method": "매매 아파트 공개 호가의 m²당 중앙값 (1건은 단일 매물 표기)",
+  "method": "공개 매매 호가의 m²당 중앙값 (지역별 아파트 또는 빌라/단독주택 기준)",
   "by_district": {
     "mansour": {
       "district_kr": "알만수르",
@@ -62,6 +62,34 @@
       "complexes_seen": [
         "야르무크 단독주택"
       ],
+      "property_type": "빌라/단독주택"
+    },
+    "zayouna": {
+      "district_kr": "자야우나",
+      "price_per_m2_iqd": 6815000,
+      "sample_count": 3,
+      "complexes_seen": ["자야우나 단독주택"],
+      "property_type": "빌라/단독주택"
+    },
+    "newbaghdad": {
+      "district_kr": "뉴바그다드",
+      "price_per_m2_iqd": 2900000,
+      "sample_count": 2,
+      "complexes_seen": ["뉴바그다드 단독주택"],
+      "property_type": "빌라/단독주택"
+    },
+    "karrada": {
+      "district_kr": "알카라다",
+      "price_per_m2_iqd": 5480000,
+      "sample_count": 3,
+      "complexes_seen": ["카라다 단독주택"],
+      "property_type": "빌라/단독주택"
+    },
+    "sadrcity": {
+      "district_kr": "사드르시티",
+      "price_per_m2_iqd": 1940000,
+      "sample_count": 5,
+      "complexes_seen": ["사드르시티 단독주택"],
       "property_type": "빌라/단독주택"
     }
   }
