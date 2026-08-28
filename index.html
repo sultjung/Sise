@@ -193,6 +193,8 @@
   .map-popup .popup-price-dual .market{ color:#315EBA; }
   .map-popup .popup-meta{ margin-top:7px; color:var(--hw-ink-soft); font-size:10.5px; line-height:1.55; }
   .map-popup a{ display:inline-block; margin-top:8px; color:#315EBA; font-size:10.5px; font-weight:700; }
+  .map-popup .popup-listings{ display:flex; flex-wrap:wrap; gap:5px; margin-top:9px; }
+  .map-popup .popup-listings a{ margin:0; padding:4px 6px; background:#F2F6FF; border-radius:4px; font-size:9.5px; }
 
   .compare-panel{ background:var(--hw-white); border:1px solid var(--hw-border); border-radius:var(--radius); padding:22px 24px; }
   .bar-row{ display:grid; grid-template-columns:150px 1fr 110px 60px; align-items:center; gap:12px; margin-bottom:12px; }
@@ -356,7 +358,7 @@
     </div>
     <div class="view-switch" role="group" aria-label="시세 보기 기준">
       <button id="btn-region-view" class="active" aria-pressed="true">지역별 <span class="view-count">13</span></button>
-      <button id="btn-complex-view" aria-pressed="false">아파트 단지별 <span class="view-count">14</span></button>
+      <button id="btn-complex-view" aria-pressed="false">아파트 단지별 <span class="view-count">15</span></button>
     </div>
   </div>
   <div class="section-note" id="view-section-note" style="margin:-7px 0 12px;">지도/리스트 클릭 시 서로 연동됩니다 · 지도는 마우스 휠로 확대·축소</div>
@@ -950,7 +952,7 @@
       <div class="popup-place">${d.district}</div><h4>${d.nameKr} · ${d.nameEn}</h4>
       ${price}
       <div class="popup-meta">${d.unitsLabel} · ${d.buildings}<br>${d.priceMethod}<br>자료 확인 ${d.checked}</div>
-      <a href="${d.sources[0].url}" target="_blank" rel="noopener">가격 원문 열기 ↗</a>
+      <div class="popup-listings">${d.sources.map((s,i)=>`<a href="${s.url}" target="_blank" rel="noopener">매물 ${i+1} 열기 ↗</a>`).join('')}</div>
     </div>`;
   }
 
@@ -1174,8 +1176,8 @@
       map.removeLayer(calloutGroups.region);map.addLayer(calloutGroups.complex);
       Object.values(polyLayers).forEach(poly=>{poly.closeTooltip();poly.unbindTooltip();poly.setStyle({color:'#9A9CA2',weight:1,fillOpacity:.07,opacity:.45});});
       viewTitle.textContent='바그다드 아파트 단지별 시세';viewSub.textContent='RESIDENTIAL COMPLEXES';
-      viewNote.textContent='단지명·단가 라벨을 선으로 연결했습니다 · 카드의 ‘가격 원문’을 열어 출처를 확인할 수 있습니다';
-      listPanelTitle.textContent='아파트·컴파운드';listPanelCount.textContent='14 PROJECTS';mapPanelCount.textContent='확인 위치·참고 위치';
+      viewNote.textContent='리스트 또는 지도 클릭 시 해당 단지로 이동하고 매물 정보가 열립니다 · 팝업에서 각 매물 원문을 바로 열 수 있습니다';
+      listPanelTitle.textContent='아파트·컴파운드';listPanelCount.textContent='15 PROJECTS';mapPanelCount.textContent='확인 위치·참고 위치';
       chartTitle.textContent='시세 확인 단지별 m² 단가 비교';
       map.fitBounds(complexBounds,{padding:[55,55]});
     }
