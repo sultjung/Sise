@@ -206,5 +206,128 @@
         "property_type": null
       }
     }
+  },
+  {
+    "date": "2026-08-30",
+    "source": "aiqarat.com",
+    "by_district": {
+      "bismayah": {
+        "avg_price_per_m2_iqd": null,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complexes_seen": [],
+        "district_kr": "비스마야",
+        "property_type": null
+      },
+      "mansour": {
+        "avg_price_per_m2_iqd": null,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complexes_seen": [],
+        "district_kr": "알만수르",
+        "property_type": null
+      },
+      "jadriya": {
+        "avg_price_per_m2_iqd": null,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complexes_seen": [],
+        "district_kr": "알자드리야",
+        "property_type": null
+      },
+      "harthiya": {
+        "avg_price_per_m2_iqd": null,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complexes_seen": [],
+        "district_kr": "알하르씨야",
+        "property_type": null
+      },
+      "karrada": {
+        "avg_price_per_m2_iqd": null,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complexes_seen": [],
+        "district_kr": "알카라다",
+        "property_type": null
+      },
+      "yarmouk": {
+        "avg_price_per_m2_iqd": null,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complexes_seen": [],
+        "district_kr": "야르무크",
+        "property_type": null
+      },
+      "kadhimiya": {
+        "avg_price_per_m2_iqd": null,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complexes_seen": [],
+        "district_kr": "카지미야",
+        "property_type": null
+      },
+      "zayouna": {
+        "avg_price_per_m2_iqd": null,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complexes_seen": [],
+        "district_kr": "자야우나",
+        "property_type": null
+      },
+      "newbaghdad": {
+        "avg_price_per_m2_iqd": null,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complexes_seen": [],
+        "district_kr": "뉴바그다드",
+        "property_type": null
+      },
+      "amiriya": {
+        "avg_price_per_m2_iqd": null,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complexes_seen": [],
+        "district_kr": "알아미리야",
+        "property_type": null
+      },
+      "saydiya": {
+        "avg_price_per_m2_iqd": null,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complexes_seen": [],
+        "district_kr": "사이디야",
+        "property_type": null
+      },
+      "jihad": {
+        "avg_price_per_m2_iqd": null,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complexes_seen": [],
+        "district_kr": "알지하드",
+        "property_type": null
+      },
+      "sadrcity": {
+        "avg_price_per_m2_iqd": null,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complexes_seen": [],
+        "district_kr": "사드르시티",
+        "property_type": null
+      }
+    }
   }
 ]
