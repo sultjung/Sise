@@ -1,0 +1,18 @@
+[
+  {
+    "date": "2026-08-30",
+    "source": "공개 매물 원문·단지별 검증값",
+    "method": "단지별 매매 호가의 m²당 중앙값; 비스마야는 시장가",
+    "by_complex": {
+      "mansour_city": {"price_per_m2_iqd": 2020000, "sample_count": 5},
+      "iraq_gate": {"price_per_m2_iqd": 2160000, "sample_count": 5},
+      "palm_towers": {"price_per_m2_iqd": 2120000, "sample_count": 4},
+      "royal_city": {"price_per_m2_iqd": 1710000, "sample_count": 4},
+      "baghdad_marina": {"price_per_m2_iqd": 1900000, "sample_count": 5},
+      "jawahir_dijla": {"price_per_m2_iqd": 2610000, "sample_count": 4},
+      "nasim_city": {"price_per_m2_iqd": 2250000, "sample_count": 5},
+      "al_wud": {"price_per_m2_iqd": 1602000, "sample_count": 2},
+      "bismayah_complex": {"price_per_m2_iqd": 1110000, "sample_count": 15}
+    }
+  }
+]
