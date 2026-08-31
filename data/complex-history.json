@@ -10,6 +10,7 @@
       "royal_city": {"price_per_m2_iqd": 2756500, "sample_count": 1},
       "baghdad_marina": {"price_per_m2_iqd": 1833000, "sample_count": 1},
       "jawahir_dijla": {"price_per_m2_iqd": 2244000, "sample_count": 1},
+      "nasim_city": {"price_per_m2_iqd": 2250000, "sample_count": 5},
       "al_wud": {"price_per_m2_iqd": 1575000, "sample_count": 2},
       "bismayah_complex": {"price_per_m2_iqd": 1083000, "sample_count": 1}
     }
