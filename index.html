@@ -213,7 +213,7 @@
   .bar-label{ font-size:12.5px; font-weight:600; }
   .bar-label .en{ display:block; font-size:10px; color:var(--hw-ink-soft); font-family:'IBM Plex Mono',monospace; font-weight:400; }
   .bar-track{ background:#EEF0F3; border-radius:5px; height:14px; position:relative; overflow:hidden; }
-  .bar-fill{ height:100%; border-radius:5px; background:linear-gradient(90deg, var(--hw-orange-dim), var(--hw-orange)); }
+  .bar-fill{ height:100%; border-radius:5px; background:#F2F2F2; border:1px solid #E2E2E2; }
   .bar-fill.highlight{ background:linear-gradient(90deg,#FFB27A, var(--hw-orange)); }
   .bar-value{ text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700; }
   .bar-value.dual{ font-size:10px; line-height:1.45; }
@@ -385,16 +385,6 @@
     </div>
   </div>
 
-  <!-- COMPARE CHART -->
-  <div class="section-head">
-    <div class="section-title">
-      <div class="bar"></div>
-      <h2 id="chart-title">지역별 m² 단가 비교</h2>
-      <span class="sub-en" id="chart-subtitle">PRICE PER M² · USD</span>
-    </div>
-  </div>
-  <div class="compare-panel" id="compare-panel"></div>
-
   <div class="section-head">
     <div class="section-title"><div class="bar"></div><h2>월별 단지·아파트 시세 추이</h2><span class="sub-en">MONTHLY PRICE TREND</span></div>
   </div>
@@ -403,6 +393,16 @@
     <div id="trend-chart" class="trend-chart"></div>
     <div class="trend-meta" id="trend-meta">월말 기준 공개 매물 호가 중앙값 · IQD/m²</div>
   </div>
+
+  <!-- COMPARE CHART -->
+  <div class="section-head">
+    <div class="section-title">
+      <div class="bar"></div>
+      <h2 id="chart-title">시세 확인 단지별 m² 단가 비교</h2>
+      <span class="sub-en" id="chart-subtitle">PRICE PER M² · USD</span>
+    </div>
+  </div>
+  <div class="compare-panel" id="compare-panel"></div>
 
   <div class="footer-note">
     <b>가격 해석:</b> ‘공식가’는 기관 공표값, ‘시장가’는 현재 공개 매물의 호가 중앙값입니다. 비스마야는 공식 990,000 IQD/m²와 현금·완납성 매물 15건 중앙값 1,110,000 IQD/m²를 함께 표시합니다. 거래 완료 가격을 뜻하지 않으며, 지역별 보기의 미검증 값은 기존 예시 데이터로 배지에서 구분됩니다.
@@ -907,10 +907,10 @@
     controls.querySelectorAll('[data-trend-key]').forEach(b=>b.addEventListener('click',()=>{selectedTrendKey=b.dataset.trendKey;renderTrend();}));
     controls.querySelectorAll('[data-trend-type]').forEach(b=>b.addEventListener('click',()=>{selectedTrendType=b.dataset.trendType;renderTrend();}));
     if(selectedTrendKey==='all'){
-      const latest=trendHistory.at(-1); const rows=seriesKeys.map(k=>({key:k,name:complexes[k].nameKr,...(latest?.by_complex?.[k]||{})})).filter(r=>Number.isFinite(r.price_per_m2_iqd));
+      const latest=trendHistory.at(-1); const rows=seriesKeys.map(k=>({key:k,name:complexes[k].nameKr,price_per_m2_iqd:complexes[k].iqd,sample_count:complexes[k].sampleCount})).filter(r=>Number.isFinite(r.price_per_m2_iqd));
       if(!rows.length){holder.innerHTML='<div class="trend-empty">표시할 월말 단지 시세가 없습니다.</div>';return;}
       const W=900,H=285,P=42,max=Math.max(...rows.map(r=>r.price_per_m2_iqd)); const bw=Math.min(70,(W-P*2)/rows.length*.62);
-      holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="전체 단지 시세 비교"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${rows.map((r,i)=>{const x=P+(W-P*2)*(i+.5)/rows.length,h=(H-P-48)*r.price_per_m2_iqd/max,y=H-P-h,isBismayah=r.key==='bismayah_complex',fill=isBismayah?'#FF6100':'#8C929C',label=isBismayah?'#9E3500':'#4B515A',usd=Math.round(r.price_per_m2_iqd/RATE);return `<rect x="${x-bw/2}" y="${y}" width="${bw}" height="${h}" rx="5" fill="${fill}"><title>${r.name}: ${trendValueLabel(r.price_per_m2_iqd)} / $${fmt(usd)} · 표본 ${r.sample_count||'-'}건</title></rect><text x="${x}" y="${y-20}" text-anchor="middle" font-size="10" font-weight="700" fill="${label}">${fmt(r.price_per_m2_iqd)} IQD</text><text x="${x}" y="${y-7}" text-anchor="middle" font-size="10" fill="${label}">$${fmt(usd)}</text><text x="${x}" y="${H-18}" text-anchor="middle" font-size="10" font-weight="${isBismayah?'700':'400'}" fill="${label}">${r.name}</text>`}).join('')}</svg>`;
+      holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="전체 단지 시세 비교"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${rows.map((r,i)=>{const x=P+(W-P*2)*(i+.5)/rows.length,h=(H-P-48)*r.price_per_m2_iqd/max,y=H-P-h,isBismayah=r.key==='bismayah_complex',fill=isBismayah?'#FF6100':'#F2F2F2',stroke=isBismayah?'#FF6100':'#D9D9D9',label=isBismayah?'#9E3500':'#4B515A',usd=Math.round(r.price_per_m2_iqd/RATE);return `<rect x="${x-bw/2}" y="${y}" width="${bw}" height="${h}" rx="5" fill="${fill}" stroke="${stroke}"><title>${r.name}: ${trendValueLabel(r.price_per_m2_iqd)} / $${fmt(usd)} · 표본 ${r.sample_count||'-'}건</title></rect><text x="${x}" y="${y-20}" text-anchor="middle" font-size="10" font-weight="700" fill="${label}">${fmt(r.price_per_m2_iqd)} IQD</text><text x="${x}" y="${y-7}" text-anchor="middle" font-size="10" fill="${label}">$${fmt(usd)}</text><text x="${x}" y="${H-18}" text-anchor="middle" font-size="10" font-weight="${isBismayah?'700':'400'}" fill="${label}">${r.name}</text>`}).join('')}</svg>`;
       meta.textContent=`전체 단지 비교 · ${latest.date} 기준 · 비스마야는 주황색(시장가), 나머지는 회색 · IQD/m² 및 USD/m² 병기 · 표본 1건 단지는 단일 매물으로 해석`;
       return;
     }
