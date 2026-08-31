@@ -414,7 +414,7 @@
 <script>
   const RATE = 1320; // 1 USD ≈ 1320 IQD
   let trendHistory = [];
-  let selectedTrendKey = 'bismayah_complex';
+  let selectedTrendKey = 'all';
   let selectedTrendType = 'bar';
   const tierColor = { high:"#D94800", mid:"#FF8A3D", low:"#FFC896", pending:"#C9CDD3" };
 
@@ -902,10 +902,18 @@
     const holder=document.getElementById('trend-chart');
     const meta=document.getElementById('trend-meta');
     const seriesKeys=Object.keys(complexes).filter(k=>complexes[k].iqd);
-    if(!seriesKeys.includes(selectedTrendKey)) selectedTrendKey=seriesKeys[0];
-    controls.innerHTML=`<div class="trend-toolbar"><div>${seriesKeys.map(k=>`<button class="${k===selectedTrendKey?'active':''}" data-trend-key="${k}">${complexes[k].nameKr}</button>`).join('')}</div><div class="trend-type"><button class="${selectedTrendType==='bar'?'active':''}" data-trend-type="bar">막대</button><button class="${selectedTrendType==='line'?'active':''}" data-trend-type="line">선</button></div></div>`;
+    if(selectedTrendKey!=='all'&&!seriesKeys.includes(selectedTrendKey)) selectedTrendKey=seriesKeys[0];
+    controls.innerHTML=`<div class="trend-toolbar"><div><button class="${selectedTrendKey==='all'?'active':''}" data-trend-key="all">전체 단지 비교</button>${seriesKeys.map(k=>`<button class="${k===selectedTrendKey?'active':''}" data-trend-key="${k}">${complexes[k].nameKr}</button>`).join('')}</div><div class="trend-type"><button class="${selectedTrendType==='bar'?'active':''}" data-trend-type="bar">막대</button><button class="${selectedTrendType==='line'?'active':''}" data-trend-type="line">선</button></div></div>`;
     controls.querySelectorAll('[data-trend-key]').forEach(b=>b.addEventListener('click',()=>{selectedTrendKey=b.dataset.trendKey;renderTrend();}));
     controls.querySelectorAll('[data-trend-type]').forEach(b=>b.addEventListener('click',()=>{selectedTrendType=b.dataset.trendType;renderTrend();}));
+    if(selectedTrendKey==='all'){
+      const latest=trendHistory.at(-1); const rows=seriesKeys.map(k=>({key:k,name:complexes[k].nameKr,...(latest?.by_complex?.[k]||{})})).filter(r=>Number.isFinite(r.price_per_m2_iqd));
+      if(!rows.length){holder.innerHTML='<div class="trend-empty">표시할 월말 단지 시세가 없습니다.</div>';return;}
+      const W=900,H=285,P=42,max=Math.max(...rows.map(r=>r.price_per_m2_iqd)); const bw=Math.min(70,(W-P*2)/rows.length*.62);
+      holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="전체 단지 시세 비교"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${rows.map((r,i)=>{const x=P+(W-P*2)*(i+.5)/rows.length,h=(H-P-35)*r.price_per_m2_iqd/max,y=H-P-h;return `<rect x="${x-bw/2}" y="${y}" width="${bw}" height="${h}" rx="5" fill="#FF6100"><title>${r.name}: ${trendValueLabel(r.price_per_m2_iqd)} · 표본 ${r.sample_count||'-'}건</title></rect><text x="${x}" y="${y-8}" text-anchor="middle" font-size="10" font-weight="700" fill="#9E3500">${(r.price_per_m2_iqd/1000000).toFixed(2)}M</text><text x="${x}" y="${H-18}" text-anchor="middle" font-size="10" fill="#6B6D72">${r.name}</text>`}).join('')}</svg>`;
+      meta.textContent=`전체 단지 비교 · ${latest.date} 기준 · 막대 위 M은 백만 IQD/m² · 표본 1건 단지는 단일 매물로 해석`;
+      return;
+    }
     const points=trendHistory.map(s=>({date:s.date,value:s.by_complex?.[selectedTrendKey]?.price_per_m2_iqd,sample:s.by_complex?.[selectedTrendKey]?.sample_count})).filter(p=>Number.isFinite(p.value));
     if(!points.length){holder.innerHTML='<div class="trend-empty">누적된 월말 시세가 아직 없습니다. 이번 8월 말 값을 첫 기준점으로 저장한 뒤, 다음 월말부터 변동 폭과 표본 수를 함께 표시합니다.</div>';return;}
     const vals=points.map(p=>p.value), min=Math.min(...vals), max=Math.max(...vals), range=Math.max(max-min, Math.max(1,max*.03));
