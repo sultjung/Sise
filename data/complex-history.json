@@ -4,15 +4,15 @@
     "source": "공개 매물 원문·단지별 검증값",
     "method": "단지별 매매 호가의 m²당 중앙값; 비스마야는 시장가",
     "by_complex": {
-      "mansour_city": {"price_per_m2_iqd": 2005000, "sample_count": 1},
-      "iraq_gate": {"price_per_m2_iqd": 2451000, "sample_count": 1},
-      "palm_towers": {"price_per_m2_iqd": 2366000, "sample_count": 1},
-      "royal_city": {"price_per_m2_iqd": 2756500, "sample_count": 1},
-      "baghdad_marina": {"price_per_m2_iqd": 1833000, "sample_count": 1},
-      "jawahir_dijla": {"price_per_m2_iqd": 2244000, "sample_count": 1},
+      "mansour_city": {"price_per_m2_iqd": 2020000, "sample_count": 5},
+      "iraq_gate": {"price_per_m2_iqd": 2160000, "sample_count": 5},
+      "palm_towers": {"price_per_m2_iqd": 2120000, "sample_count": 4},
+      "royal_city": {"price_per_m2_iqd": 1710000, "sample_count": 3},
+      "baghdad_marina": {"price_per_m2_iqd": 1900000, "sample_count": 5},
+      "jawahir_dijla": {"price_per_m2_iqd": 2610000, "sample_count": 4},
       "nasim_city": {"price_per_m2_iqd": 2250000, "sample_count": 5},
-      "al_wud": {"price_per_m2_iqd": 1575000, "sample_count": 2},
-      "bismayah_complex": {"price_per_m2_iqd": 1083000, "sample_count": 1}
+      "al_wud": {"price_per_m2_iqd": 1602000, "sample_count": 2},
+      "bismayah_complex": {"price_per_m2_iqd": 1110000, "sample_count": 15}
     }
   }
 ]
