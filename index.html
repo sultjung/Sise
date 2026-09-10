@@ -209,6 +209,16 @@
   .trend-empty{ color:var(--hw-ink-soft); font-size:12px; padding:22px 0 6px; }
   .trend-chart{ width:100%; min-height:205px; }
   .trend-meta{ margin-top:9px; font-size:10.5px; color:var(--hw-ink-soft); }
+  .comparison-table-wrap{ margin-top:16px; overflow-x:auto; border:1px solid var(--hw-border); border-radius:8px; }
+  .comparison-table{ width:100%; border-collapse:collapse; min-width:620px; font-size:11px; }
+  .comparison-table th,.comparison-table td{ padding:9px 10px; border-bottom:1px solid var(--hw-border); text-align:right; white-space:nowrap; }
+  .comparison-table th{ background:#F7F7F8; color:var(--hw-ink-soft); font-size:10px; font-weight:700; }
+  .comparison-table th:first-child,.comparison-table td:first-child{ text-align:left; }
+  .comparison-table tr:last-child td{ border-bottom:0; }
+  .comparison-table .up{ color:var(--hw-up); font-weight:700; }
+  .comparison-table .down{ color:var(--hw-down); font-weight:700; }
+  .comparison-table .flat{ color:var(--hw-ink-soft); }
+  .comparison-table small{ display:block; color:var(--hw-ink-soft); font-size:9px; margin-top:2px; }
   .bar-row{ display:grid; grid-template-columns:150px 1fr 110px 60px; align-items:center; gap:12px; margin-bottom:12px; }
   .bar-row:last-child{ margin-bottom:0; }
   .bar-label{ font-size:12.5px; font-weight:600; }
@@ -392,6 +402,7 @@
   <div class="trend-panel">
     <div class="trend-controls" id="trend-controls"></div>
     <div id="trend-chart" class="trend-chart"></div>
+    <div id="comparison-table" class="comparison-table-wrap"></div>
     <div class="trend-meta" id="trend-meta">월말 기준 공개 매물 호가 중앙값 · IQD/m²</div>
   </div>
 
@@ -483,8 +494,8 @@
   const complexes = {
     mansour_city: {
       nameKr:"만수르 시티", nameEn:"MANSOUR CITY", nameAr:"المنصور ستي", district:"알바이지야 · 만수르",
-      iqd:2020000, sourceKind:"sample", priceMethod:"공개 매물 호가 5건 중앙값", sampleCount:5, checked:"2026.08.30",
-      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"복수 주거 타워", sizes:"표본 172–239.5m²", centroid:[33.33522,44.35553],
+      iqd:1515000, sourceKind:"sample", priceMethod:"9월 공개 매물 호가 3건 중앙값", sampleCount:3, checked:"2026.09.10",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"복수 주거 타워", sizes:"9월 표본 172–198.5m²", centroid:[33.33522,44.35553],
       sources:[
         {label:"Raqi · 172m² / 320M IQD",url:"https://www.raqi.app/ar/posts/11177664-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%85%D9%86%D8%B5%D9%88%D8%B1-%D8%B3%D8%AA%D9%8A-%D9%A1%D9%A7%D9%A2%D9%85-%D9%A3-%D8%BA%D8%B1%D9%81-%D9%88%D8%B5%D8%A7%D9%84%D8%A9"},
         {label:"Raqi · 173m² / 350M IQD",url:"https://www.raqi.app/ar/posts/11181562-%D8%A7%D9%84%D9%85%D9%86%D8%B5%D9%88%D8%B1-%D8%B3%D8%AA%D9%8A-%D9%A1%D9%A7%D9%A3%D9%85-%D9%85%D8%A4%D8%AC%D8%B1%D8%A9"},
@@ -496,12 +507,12 @@
         {label:"단지 기본정보 · Riadi",url:"https://riadi.iq/en/al-mansour-city-towers-complex/"},
         {label:"위치 · OpenStreetMap",url:"https://mapcarta.com/W1434588091"}
       ],
-      sourceNote:"현재 열리는 서로 다른 매물 5건을 ㎡당 가격으로 환산한 뒤 중앙값을 1만 IQD 단위로 반올림했습니다."
+      sourceNote:"2026.09.10 검색 결과에서 매매 총액이 확인되는 최신 매물 3건을 사용했습니다. ㎡당 환산 중앙값이며 거래 완료 가격이 아닌 공개 호가입니다."
     },
     iraq_gate: {
       nameKr:"이라크 게이트", nameEn:"IRAQ GATE", nameAr:"بوابة العراق", district:"다마스쿠스 거리 · 자우라 공원 앞",
-      iqd:2160000, sourceKind:"sample", priceMethod:"공개 매물 호가 5건 중앙값", sampleCount:5, checked:"2026.08.30",
-      units:4750, unitsLabel:"4,750세대(계획)", buildings:"49개동", sizes:"표본 198–228m²", centroid:[33.31931,44.37463],
+      iqd:2423000, sourceKind:"sample", priceMethod:"9월 공개 매물 호가 3건 중앙값", sampleCount:3, checked:"2026.09.10",
+      units:4750, unitsLabel:"4,750세대(계획)", buildings:"49개동", sizes:"9월 표본 211–227m²", centroid:[33.31931,44.37463],
       sources:[
         {label:"Raqi · 198m² / 506.6M IQD",url:"https://www.raqi.app/ar/posts/11152179-%D9%85%D8%AC%D9%85%D8%B9-%D8%A8%D9%88%D8%A7%D8%A8%D8%A9-%D8%A7%D9%84%D8%B9%D8%B1%D8%A7%D9%82-%D9%A1%D9%A9%D9%A8%D9%85-%D8%A5%D8%B7%D9%84%D8%A7%D9%84%D8%A9-%D8%B3%D8%A7%D9%8A%D8%AF%D9%8A%D9%86"},
         {label:"Raqi · 227m² / 429M IQD",url:"https://www.raqi.app/ar/posts/11129008-%D8%A8%D9%88%D8%A7%D8%A8%D8%A9-%D8%A7%D9%84%D8%B9%D8%B1%D8%A7%D9%82-%D8%A7%D9%84%D8%A8%D8%AD%D9%8A%D8%B1%D8%A9-%D9%A2%D9%A2%D9%A7%D9%852-%D8%A5%D8%B7%D9%84%D8%A7%D9%84%D8%A9-%D8%AE%D8%A7%D8%B1%D8%AC%D9%8A%D8%A9"},
@@ -513,7 +524,7 @@
         {label:"계획 세대수 · 2025 연구 PDF",url:"https://jjce.just.edu.jo/Download.ashx?f=AogHw1U60EFM43aJXljIgZprb9RM4EZaecxnPRfhoUg%3D"},
         {label:"위치 · Waze",url:"https://www.waze.com/live-map/directions/iq/baghdad-governorate/baghdad/iraq-gate-apartment-complex?to=place.ChIJZSiOrhZ_VxURX9LTqi9eT3M"}
       ],
-      sourceNote:"가구·층·조망 조건이 다른 5건의 ㎡당 호가 중앙값입니다. 거래 완료 가격이 아닙니다."
+      sourceNote:"2026.09.10 검색 결과에서 총액이 확인되는 3건을 사용했습니다. 계약금·잔금승계 가능성이 있는 저가 광고는 제외했습니다."
     },
     palm_towers: {
       nameKr:"팜 타워스", nameEn:"PALM TOWERS", nameAr:"أبراج النخلة", district:"알무탄나 · 만수르",
@@ -533,8 +544,8 @@
     },
     royal_city: {
       nameKr:"로열 시티", nameEn:"ROYAL CITY", nameAr:"رويال ستي", district:"알바이지야 · 만수르",
-      iqd:1710000, sourceKind:"sample", priceMethod:"공개 매물 호가 3건 중앙값", sampleCount:3, checked:"2026.08.30",
-      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"기존동·신규 Zone 혼재", sizes:"표본 198–214.86m²", centroid:[33.33786,44.35001],
+      iqd:1717000, sourceKind:"sample", priceMethod:"9월 공개 매물 호가 1건", sampleCount:1, checked:"2026.09.10",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"기존동·신규 Zone 혼재", sizes:"9월 표본 198m²", centroid:[33.33786,44.35001],
       sources:[
         {label:"Raqi · 214.86m² / 390M IQD",url:"https://www.raqi.app/ar/posts/11165447-%D9%85%D8%AC%D9%85%D8%B9-%D8%B1%D9%88%D9%8A%D8%A7%D9%84-%D8%B3%D9%8A%D8%AA%D9%8A-%D9%A2%D9%A1%D9%A4-%D9%A8%D9%A6%D9%85-%D9%A3-%D8%BA%D8%B1%D9%81"},
         {label:"Raqi · 210.25m² / 360M IQD",url:"https://raqi.app/ar/posts/6008012-%D9%85%D8%AC%D9%85%D8%B9-%D8%B1%D9%88%D9%8A%D8%A7%D9%84-%D8%B3%D9%8A%D8%AA%D9%8A-%D9%A2%D9%A1%D9%A0%D9%85-%D9%A3-%D8%BA%D8%B1%D9%81"},
@@ -544,7 +555,7 @@
         {label:"프로젝트 확인 · HexaCorp",url:"https://hexagroup.net/projects-single.php?project_id=222"},
         {label:"위치 · OpenStreetMap",url:"https://mapcarta.com/W1145007792"}
       ],
-      sourceNote:"같은 214.86m² 매물의 중복 게시물을 한 건으로 처리했습니다. 공개 확인이 어려운 기존 226세대 표기는 제거했습니다."
+      sourceNote:"9월 검색에서 총액과 면적이 함께 확인되는 매물은 1건입니다. 단일 매물 기준입니다."
     },
     baghdad_marina: {
       nameKr:"바그다드 마리나", nameEn:"BAGHDAD MARINA", nameAr:"بغداد مارينا", district:"사이디야 · 자드리야 교량 인근",
@@ -686,6 +697,39 @@
       sourceNote:"공개 매물에 단지명·면적은 확인되나, 독립적인 공식 단지 자료와 표본이 부족해 정보 확인 대상으로 표시했습니다."
     }
   };
+
+  /* 2026.09.10 verified refresh: use live Raqi detail pages for the latest snapshot. */
+  Object.assign(complexes.mansour_city, {
+    iqd:1515000, sampleCount:3, checked:"2026.09.10", priceMethod:"9월 공개 매물 호가 3건 중앙값",
+    sources:[
+      {label:"Raqi · 198m² / 300M IQD · 9월 9일",url:"https://raqi.app/ar/posts/11857142"},
+      {label:"Raqi · 198.5m² / 220M IQD · 9월 9일",url:"https://raqi.app/ar/posts/11839924"},
+      {label:"Raqi · 172m² / 350M IQD · 9월 8일",url:"https://raqi.app/ar/posts/11820772"}
+    ],
+    sourceNote:"2026.09.10 검색 결과에서 매매 총액이 확인되는 최신 매물 3건을 사용했습니다. 거래 완료 가격이 아닌 공개 호가입니다."
+  });
+  Object.assign(complexes.iraq_gate, {
+    iqd:2423000, sampleCount:3, checked:"2026.09.10", priceMethod:"9월 공개 매물 호가 3건 중앙값",
+    sources:[
+      {label:"Raqi · 211m² / 491.7M IQD · 9월 9일",url:"https://raqi.app/ar/posts/11830916"},
+      {label:"Raqi · 227m² / 596M IQD · 9월 9일",url:"https://raqi.app/ar/posts/11830415"},
+      {label:"Raqi · 227m² / 550M IQD · 9월 9일",url:"https://raqi.app/ar/posts/11828679"}
+    ],
+    sourceNote:"2026.09.10 검색 결과에서 총액이 확인되는 3건을 사용했습니다. 계약금·잔금승계 가능성이 있는 저가 광고는 제외했습니다."
+  });
+  Object.assign(complexes.royal_city, {
+    iqd:1717000, sampleCount:1, checked:"2026.09.10", priceMethod:"9월 공개 매물 호가 1건",
+    sources:[{label:"Raqi · 198m² / 340M IQD · 9월 8일",url:"https://raqi.app/ar/posts/11774958"}],
+    sourceNote:"9월 검색에서 총액과 면적이 함께 확인되는 매물은 1건입니다. 단일 매물 기준입니다."
+  });
+  Object.assign(complexes.jawahir_dijla, {
+    iqd:2608000, sampleCount:2, checked:"2026.09.10", priceMethod:"9월 공개 매물 호가 2건 중앙값",
+    sources:[
+      {label:"Raqi · 182m² / 461.01M IQD · 8월 17일",url:"https://raqi.app/ar/posts/10834279"},
+      {label:"Raqi · 203m² / 544.45M IQD · 8월 15일",url:"https://raqi.app/ar/posts/10698690"}
+    ],
+    sourceNote:"9월 10일 현재 열리는 매매 총액 확인 매물 2건의 m²당 호가 중앙값입니다."
+  });
 
   function complexListingLinks(keys){
     return keys.flatMap(key=>{
@@ -900,10 +944,27 @@
   }
 
   function trendValueLabel(v){ return `${fmt(v)} IQD/m²`; }
+  function renderComparisonTable(){
+    const el=document.getElementById('comparison-table');
+    if(!el) return;
+    const aug=trendHistory.find(s=>s.date==='2026-08-30')?.by_complex||{};
+    const sep=trendHistory.find(s=>s.date==='2026-09-10')?.by_complex||{};
+    const keys=Object.keys(complexes).filter(k=>Number.isFinite(sep[k]?.price_per_m2_iqd));
+    const rows=keys.map(k=>{
+      const a=aug[k]?.price_per_m2_iqd, b=sep[k]?.price_per_m2_iqd;
+      const diff=Number.isFinite(a)&&Number.isFinite(b)?b-a:null;
+      const pct=Number.isFinite(diff)&&a?diff/a*100:null;
+      const cls=diff>0?'up':diff<0?'down':'flat';
+      const change=diff===null?'—':`${diff>0?'+':''}${fmt(diff)} (${pct>0?'+':''}${pct.toFixed(1)}%)`;
+      return `<tr><td>${complexes[k].nameKr}<small>표본 ${sep[k]?.sample_count||'-'}건</small></td><td>${Number.isFinite(a)?fmt(a):'—'}</td><td>${fmt(b)}</td><td class="${cls}">${change}</td></tr>`;
+    }).join('');
+    el.innerHTML=`<table class="comparison-table"><thead><tr><th>단지</th><th>8월 기준<br>IQD/m²</th><th>9월 기준<br>IQD/m²</th><th>변동</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
   function renderTrend(){
     const controls=document.getElementById('trend-controls');
     const holder=document.getElementById('trend-chart');
     const meta=document.getElementById('trend-meta');
+    renderComparisonTable();
     const seriesKeys=Object.keys(complexes).filter(k=>complexes[k].iqd);
     if(selectedTrendKey!=='all'&&!seriesKeys.includes(selectedTrendKey)) selectedTrendKey=seriesKeys[0];
     controls.innerHTML=`<div class="trend-toolbar"><div><button class="${selectedTrendKey==='all'?'active':''}" data-trend-key="all">전체 단지 비교</button>${seriesKeys.map(k=>`<button class="${k===selectedTrendKey?'active':''}" data-trend-key="${k}">${complexes[k].nameKr}</button>`).join('')}</div><div class="trend-type"><button class="${selectedTrendType==='bar'?'active':''}" data-trend-type="bar">막대</button><button class="${selectedTrendType==='line'?'active':''}" data-trend-type="line">선</button></div></div>`;
