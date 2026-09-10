@@ -1,6 +1,51 @@
 {
-  "updated_at": "2026-08-30",
-  "source": "aiqarat.com",
-  "method": "매매 주거용 공개 호가의 m²당 중앙값 (아파트 우선, 1건은 단일 매물 표기)",
-  "by_district": {}
+  "updated_at": "2026-09-10",
+  "source": "Raqi 공개 매물 원문 재확인",
+  "method": "매매 총액과 면적이 함께 확인되는 공개 호가의 m²당 중앙값; 계약금·잔금승계·임대·가격 합의 매물 제외",
+  "by_district": {
+    "mansour": {
+      "price_per_m2_iqd": 1717000,
+      "sample_count": 8,
+      "property_type": "아파트",
+      "listing_sources": [
+        "https://raqi.app/ar/posts/11857142",
+        "https://raqi.app/ar/posts/11839924",
+        "https://raqi.app/ar/posts/11820772",
+        "https://raqi.app/ar/posts/11830916",
+        "https://raqi.app/ar/posts/11830415",
+        "https://raqi.app/ar/posts/11828679",
+        "https://raqi.app/ar/posts/11774958"
+      ]
+    },
+    "kadhimiya": {
+      "price_per_m2_iqd": 2608000,
+      "sample_count": 2,
+      "property_type": "아파트",
+      "listing_sources": ["https://raqi.app/ar/posts/10834279", "https://raqi.app/ar/posts/10698690"]
+    },
+    "amiriya": {
+      "price_per_m2_iqd": 1602000,
+      "sample_count": 2,
+      "property_type": "아파트",
+      "listing_sources": ["https://raqi.app/ar/posts/10539867", "https://raqi.app/ar/posts/10523547"]
+    },
+    "saydiya": {
+      "price_per_m2_iqd": 1900000,
+      "sample_count": 5,
+      "property_type": "아파트",
+      "listing_sources": []
+    },
+    "jihad": {
+      "price_per_m2_iqd": 2250000,
+      "sample_count": 5,
+      "property_type": "아파트",
+      "listing_sources": []
+    },
+    "bismayah": {
+      "price_per_m2_iqd": 1110000,
+      "sample_count": 15,
+      "property_type": "아파트",
+      "listing_sources": ["https://raqi.app/ar/posts/10660760", "https://raqi.app/ar/posts/11883086", "https://raqi.app/ar/posts/11891911"]
+    }
+  }
 }
