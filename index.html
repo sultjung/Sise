@@ -1361,7 +1361,7 @@
       d.checked=snapshot.updated_at;
       d.sourceKind=key==='bismayah' ? 'dual' : (summary.sample_count===1 ? 'single' : 'sample');
       d.propertyType=summary.property_type || '아파트';
-      if(summary.listing_sources?.length) d.sources=summary.listing_sources;
+      if(summary.listing_sources?.length) d.sources=summary.listing_sources.map((url,i)=>({label:`9월 확인 매물 ${i+1}`,url}));
       d.source=`${snapshot.source} · ${snapshot.updated_at} · 매물 ${summary.sample_count}건 중앙값`;
       if(!calloutSets.region.labels[key]) addCallout('region',key,d,tierColor[tierForDistrict(d)]);
     });
