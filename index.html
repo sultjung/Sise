@@ -269,7 +269,7 @@
     </div>
   </div>
   <div class="top-controls">
-    <div class="updated">LAST UPDATED · 2026.08.30</div>
+    <div class="updated">LAST UPDATED · 2026.09.10</div>
     <div class="toggle">
       <button id="btn-iqd" aria-pressed="false">IQD</button>
       <button id="btn-usd" class="active" aria-pressed="true">USD</button>
@@ -278,7 +278,7 @@
 </div>
 
 <div class="disclaimer">
-  ※ <b>단지별 시세</b>는 2026.08.30에 재확인한 최근 공개 매물만 사용했습니다. 민간시장 값은 매도자의 <b>호가 중앙값</b>으로 등기된 실거래가가 아닙니다. 임대·대출 승계/미납잔금 광고는 제외했으며, 1 USD ≈ 1,320 IQD로 환산했습니다.
+  ※ <b>단지별 시세</b>는 2026.09.10에 재확인한 공개 매물 호가입니다. 민간시장 값은 매도자의 <b>호가 중앙값</b>으로 등기된 실거래가가 아닙니다. 임대·대출 승계/미납잔금 광고는 제외했으며, 1 USD ≈ 1,320 IQD로 환산했습니다.
 </div>
 
 <div class="page">
@@ -289,7 +289,7 @@
       <div class="bar"></div>
       <h2>비스마야 세대별 시세</h2>
       <span class="sub-en">BISMAYAH · PRICE PER M²</span>
-      <span class="sub-en" id="bismayah-update-date">LAST UPDATE · 2026.08.30</span>
+      <span class="sub-en" id="bismayah-update-date">LAST UPDATE · 2026.09.10</span>
     </div>
     <span class="badge dual">공식 분양가 + 민간시장 호가</span>
   </div>
@@ -369,7 +369,7 @@
     </div>
 
   </div>
-  <div class="section-note" style="margin-top:8px;">공식 분양가는 2025년 등록자 대상 공표값입니다. 민간시장가는 2026.08.25 기준 매도 호가이며, 계약 승계금·보증인 교체·미납 잔금 광고는 제외했습니다. 실제 등기 거래금액은 공개 자료가 없어 ‘실거래가’로 표기하지 않습니다.</div>
+  <div class="section-note" style="margin-top:8px;">공식 분양가는 2025년 등록자 대상 공표값입니다. 민간시장가는 2026.09.10에 다시 확인한 매도 호가 표본이며, 계약 승계금·보증인 교체·미납 잔금 광고는 제외했습니다. 실제 등기 거래금액은 공개 자료가 없어 ‘실거래가’로 표기하지 않습니다.</div>
 
   <!-- DISTRICTS + MAP -->
   <div class="section-head">
@@ -622,7 +622,7 @@
     },
     bismayah_complex: {
       nameKr:"비스마야 신도시", nameEn:"BISMAYAH NEW CITY", nameAr:"مدينة بسماية", district:"바그다드 남동부",
-      iqd:1110000, officialIqd:990000, officialUsd:750, sourceKind:"dual", priceMethod:"공식 분양가 + 현금·완납성 매물 15건 중앙값", sampleCount:15, checked:"2026.08.30",
+      iqd:1110000, officialIqd:990000, officialUsd:750, sourceKind:"dual", priceMethod:"공식 분양가 + 현금·완납성 매물 15건 중앙값", sampleCount:15, checked:"2026.09.10",
       units:100080, unitsLabel:"100,080세대(계획)", buildings:"834개 주거동(계획)", sizes:"100·120·140m²", centroid:[33.195289,44.619737],
       sources:[
         {label:"공식 · 은행 공문 인용 750 USD/m²",url:"https://964media.com/296624/"},
@@ -646,7 +646,7 @@
         {label:"사업 규모 · Hanwha 공식",url:"https://www.hanwha.com/newsroom/media-library/media-assets/bismayah-new-city-near-baghdad.do"},
         {label:"위치 · OpenStreetMap",url:"https://mapcarta.com/N10916647741"}
       ],
-      sourceNote:"대표 시장가는 100·120·140m²별 5건씩 총 15건의 ㎡당 호가 중앙값 1.11M IQD입니다. 승계금·미납잔금·보증인 교체 광고는 제외했습니다."
+      sourceNote:"9월 10일 현재 열리는 기존 현금·완납성 매물 15건의 ㎡당 호가 중앙값 1.11M IQD입니다. 새로 확인된 계약조건 불명·분할납부 광고는 산정에서 제외했습니다."
     },
     dar_alsalam: {
       nameKr:"다르 알살람", nameEn:"DAR AL SALAM", nameAr:"مجمع دار السلام السكني", district:"바그다드 · 세부 위치 추가 확인 중",
@@ -729,6 +729,16 @@
       {label:"Raqi · 203m² / 544.45M IQD · 8월 15일",url:"https://raqi.app/ar/posts/10698690"}
     ],
     sourceNote:"9월 10일 현재 열리는 매매 총액 확인 매물 2건의 m²당 호가 중앙값입니다."
+  });
+  Object.assign(complexes.bismayah_complex, {
+    checked:"2026.09.10",
+    sources:[
+      {label:"공식 · 750 USD/m² · 은행 공문 인용",url:"https://964media.com/296624/"},
+      {label:"기존 현금·완납성 공개 매물 15건 · 시장가 산정 표본",url:"https://raqi.app/ar/posts/10660760"},
+      {label:"최근 검색 · 100m² / 48M IQD · 계약조건 불명(산정 제외)",url:"https://raqi.app/ar/posts/11883086"},
+      {label:"최근 검색 · 120m² · 가격 합의(산정 제외)",url:"https://raqi.app/ar/posts/11891911"}
+    ],
+    sourceNote:"2026.09.10 재검색 결과, 새 매물 중 총액이 확인되는 현금·완납성 표본은 확인되지 않았습니다. 계약조건 불명 또는 가격 합의 매물은 시장가 산정에서 제외하고, 실제 확인 가능한 링크를 함께 표시했습니다."
   });
 
   function complexListingLinks(keys){
@@ -950,6 +960,7 @@
     const aug=trendHistory.find(s=>s.date==='2026-08-30')?.by_complex||{};
     const sep=trendHistory.find(s=>s.date==='2026-09-10')?.by_complex||{};
     const keys=Object.keys(complexes).filter(k=>Number.isFinite(sep[k]?.price_per_m2_iqd));
+    if(!keys.length){ el.innerHTML='<div class="trend-empty">8월·9월 비교 데이터를 불러오는 중입니다.</div>'; return; }
     const rows=keys.map(k=>{
       const a=aug[k]?.price_per_m2_iqd, b=sep[k]?.price_per_m2_iqd;
       const diff=Number.isFinite(a)&&Number.isFinite(b)?b-a:null;
@@ -971,7 +982,7 @@
     controls.querySelectorAll('[data-trend-key]').forEach(b=>b.addEventListener('click',()=>{selectedTrendKey=b.dataset.trendKey;renderTrend();}));
     controls.querySelectorAll('[data-trend-type]').forEach(b=>b.addEventListener('click',()=>{selectedTrendType=b.dataset.trendType;renderTrend();}));
     if(selectedTrendKey==='all'){
-      const latest=trendHistory.at(-1); const rows=seriesKeys.map(k=>({key:k,name:complexes[k].nameKr,price_per_m2_iqd:complexes[k].iqd,sample_count:complexes[k].sampleCount})).filter(r=>Number.isFinite(r.price_per_m2_iqd));
+      const latest=trendHistory.at(-1)||{date:'2026-09-10'}; const rows=seriesKeys.map(k=>({key:k,name:complexes[k].nameKr,price_per_m2_iqd:complexes[k].iqd,sample_count:complexes[k].sampleCount})).filter(r=>Number.isFinite(r.price_per_m2_iqd));
       if(!rows.length){holder.innerHTML='<div class="trend-empty">표시할 월말 단지 시세가 없습니다.</div>';return;}
       const W=900,H=285,P=42,max=Math.max(...rows.map(r=>r.price_per_m2_iqd)); const bw=Math.min(70,(W-P*2)/rows.length*.62);
       holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="전체 단지 시세 비교"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${rows.map((r,i)=>{const x=P+(W-P*2)*(i+.5)/rows.length,h=(H-P-48)*r.price_per_m2_iqd/max,y=H-P-h,isBismayah=r.key==='bismayah_complex',fill=isBismayah?'#FF6100':'#AEB3BB',stroke=isBismayah?'#FF6100':'#9BA1AA',label=isBismayah?'#9E3500':'#4B515A',usd=Math.round(r.price_per_m2_iqd/RATE);return `<rect x="${x-bw/2}" y="${y}" width="${bw}" height="${h}" rx="5" fill="${fill}" stroke="${stroke}"><title>${r.name}: ${trendValueLabel(r.price_per_m2_iqd)} / $${fmt(usd)} · 표본 ${r.sample_count||'-'}건</title></rect><text x="${x}" y="${y-20}" text-anchor="middle" font-size="10" font-weight="700" fill="${label}">${fmt(r.price_per_m2_iqd)} IQD</text><text x="${x}" y="${y-7}" text-anchor="middle" font-size="10" fill="${label}">$${fmt(usd)}</text><text x="${x}" y="${H-18}" text-anchor="middle" font-size="10" font-weight="${isBismayah?'700':'400'}" fill="${label}">${r.name}</text>`}).join('')}</svg>`;
