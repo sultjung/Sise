@@ -4,12 +4,11 @@
   "method": "매매 총액과 면적이 함께 확인되는 공개 호가의 m²당 중앙값; 계약금·잔금승계·임대·가격 합의 매물 제외",
   "by_district": {
     "mansour": {
-      "price_per_m2_iqd": 1717000,
-      "sample_count": 7,
+      "price_per_m2_iqd": 1775000,
+      "sample_count": 6,
       "property_type": "아파트",
       "listing_sources": [
         "https://raqi.app/ar/posts/11857142",
-        "https://raqi.app/ar/posts/11839924",
         "https://raqi.app/ar/posts/11820772",
         "https://raqi.app/ar/posts/11830916",
         "https://raqi.app/ar/posts/11830415",
