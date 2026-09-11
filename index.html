@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 28743)
-Total output lines: 1425
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -54,6 +51,7 @@ Total output lines: 1425
   .disclaimer{ background:var(--hw-orange-light); border-bottom:1px solid var(--hw-orange-dim); text-align:center; font-size:12px; color:#9A4400; padding:8px 16px; line-height:1.6; }
   .disclaimer b{ font-weight:700; }
   .audit-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 22px}.audit-card{background:var(--hw-white);border:1px solid var(--hw-border);border-radius:9px;padding:12px 14px}.audit-card b{display:block;font-size:17px;font-family:'IBM Plex Mono',monospace;margin:3px 0}.audit-card span{font-size:11px;color:var(--hw-ink-soft)}.audit-card.warn{border-color:#F0C78A;background:#FFFAF2}.method-box{background:#232428;color:#fff;border-radius:10px;padding:18px 20px;margin-top:14px;display:grid;grid-template-columns:1.15fr 1fr;gap:24px}.method-box h3{font-size:15px;margin-bottom:7px}.method-box p,.method-box li{font-size:12px;line-height:1.65;color:#D6D8DC}.method-box ul{padding-left:18px}
+  .data-tools{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin:-6px 0 12px}.data-tools label{font-size:12px;color:var(--hw-ink-soft)}.data-tools select,.data-tools button{border:1px solid var(--hw-border);background:#fff;border-radius:7px;padding:7px 9px;font:600 12px 'Pretendard',sans-serif;color:var(--hw-ink);cursor:pointer}.data-tools button{background:var(--hw-ink);color:#fff;border-color:var(--hw-ink)}.registry{margin-top:18px;border:1px solid var(--hw-border);border-radius:10px;background:#fff;overflow:hidden}.registry-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--hw-border)}.registry-head h3{font-size:14px}.registry-head span{font:600 10px 'IBM Plex Mono',monospace;color:var(--hw-ink-soft)}.registry table{width:100%;border-collapse:collapse;font-size:11px}.registry th,.registry td{padding:10px 12px;border-bottom:1px solid var(--hw-border);text-align:left;vertical-align:top}.registry th{background:#f7f7f8;color:var(--hw-ink-soft);font-size:10px}.status{display:inline-block;border-radius:99px;padding:3px 7px;font-weight:700;font-size:10px}.status.pending{background:#f1f1f2;color:#6b6d72}.status.official{background:#e8f6ec;color:#1a8a3f}.update-log{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.update-log>div{padding:12px;border:1px solid var(--hw-border);border-radius:8px;background:#fff}.update-log b{display:block;font-size:12px;margin-bottom:4px}.update-log span{font-size:11px;color:var(--hw-ink-soft);line-height:1.5}@media print{.topbar,.toggle,.view-switch,.data-tools,#map,.leaflet-control-container{display:none!important}.page{max-width:none;padding:0}.audit-strip{grid-template-columns:repeat(4,1fr)}.panel{border:1px solid #bbb}.section-head{margin-top:18px}.source-details{display:none}.method-box{background:#fff;color:#222;border:1px solid #bbb}.method-box p,.method-box li{color:#444}}
 
   .page{ max-width:1440px; margin:0 auto; padding:24px 32px 64px; }
   .section-head{ display:flex; align-items:baseline; justify-content:space-between; margin:32px 0 14px; }
@@ -389,6 +387,7 @@ Total output lines: 1425
     </div>
   </div>
   <div class="section-note" id="view-section-note" style="margin:-7px 0 12px;">리스트 또는 지도 클릭 시 해당 단지로 이동하고 매물 정보가 열립니다 · 지도는 마우스 휠로 확대·축소</div>
+  <div class="data-tools"><label for="quality-filter">표시 기준</label><select id="quality-filter"><option value="all">전체 상태</option><option value="verified">검증 완료만</option><option value="pending">재검증 대상만</option></select><button id="print-report" type="button">보고서용 인쇄</button></div>
 
   <div class="split">
     <div class="panel">
@@ -420,6 +419,10 @@ Total output lines: 1425
     </div>
   </div>
   <div class="compare-panel" id="compare-panel"></div>
+
+  <div class="section-head"><div class="section-title"><div class="bar"></div><h2>출처 검증 원장</h2><span class="sub-en">SOURCE REGISTER</span></div></div>
+  <section class="registry"><div class="registry-head"><h3>가격 반영 전 확인 항목</h3><span>PRICE · AREA · LIVE LINK · SALE TYPE</span></div><table><thead><tr><th>대상</th><th>현재 상태</th><th>가격 반영 조건</th><th>다음 조치</th></tr></thead><tbody><tr><td>바그다드 단지 민간 호가</td><td><span class="status pending">전수 재검증 중</span></td><td>단지명·매매 총액·면적·현재 열리는 원문 링크</td><td>검증 완료 표본 3건 이상 시 중앙값 반영</td></tr><tr><td>비스마야 공식 분양가</td><td><span class="status official">공식 근거 분리</span></td><td>공표 문서 또는 금융기관 공문</td><td>등록자·면적형·적용일을 함께 관리</td></tr><tr><td>비스마야 민간 재판매 호가</td><td><span class="status pending">전수 재검증 중</span></td><td>현금·완납 조건 및 총액·면적 확인</td><td>양도권·미납잔금·분할납부 광고 제외</td></tr></tbody></table></section>
+  <section class="update-log" aria-label="업데이트 이력"><div><b>2026.09.11 · 데이터 기준 정비</b><span>삭제 링크 및 가격·면적 누락 게시물은 가격 비교에서 제외하도록 변경</span></div><div><b>월말 스냅샷 체계 적용</b><span>월중 값은 비교표에 사용하지 않고, 확정 월말값만 추세로 누적</span></div><div><b>보고서 인용 문구 정비</b><span>‘실거래가’ 대신 ‘검증된 공개 매물 호가 중앙값’으로 표시</span></div></section>
 
   <div class="footer-note">
     <b>가격 해석:</b> ‘공식가’는 기관 공표값, ‘시장가’는 원문 링크·총액·면적이 확인된 공개 매물의 호가 중앙값입니다. 거래 완료 가격을 뜻하지 않으며, 검증 전 값은 지도 순위·비교표에 반영하지 않습니다.
@@ -493,7 +496,326 @@ Total output lines: 1425
     }
   };
 
-  /* Apartment-complex prices: o…8743 tokens truncated…om/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D9%85%D8%AF%D9%8A%D9%86%D8%A9-%D8%A7%D9%84%D8%B5%D8%AF%D8%B1/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9"},
+  /* Apartment-complex prices: only public source material is included.
+     Multi-listing values are medians of asking prices, not completed transactions.
+     knownOnly entries are confirmed projects without a defensible current price. */
+  const complexes = {
+    mansour_city: {
+      nameKr:"만수르 시티", nameEn:"MANSOUR CITY", nameAr:"المنصور ستي", district:"알바이지야 · 만수르",
+      iqd:1775000, sourceKind:"sample", priceMethod:"9월 공개 매물 호가 2건 중앙값", sampleCount:2, checked:"2026.09.10",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"복수 주거 타워", sizes:"9월 표본 172–198.5m²", centroid:[33.33522,44.35553],
+      sources:[
+        {label:"Raqi · 198m² / 385M IQD",url:"https://www.raqi.app/ar/posts/10946031-%D8%A7%D9%84%D9%85%D9%86%D8%B5%D9%88%D8%B1-%D8%B3%D8%AA%D9%8A-%D9%A1%D9%A9%D9%A8%D9%852-%D8%A5%D8%B7%D9%84%D8%A7%D9%84%D8%A9-%D8%AD%D8%AF%D9%8A%D9%82%D8%A9"},
+        {label:"Raqi · 172m² / 350M IQD",url:"https://www.raqi.app/ar/posts/10944201-%D8%A7%D9%84%D9%85%D9%86%D8%B5%D9%88%D8%B1-%D8%B3%D8%AA%D9%8A-%D9%A1%D9%A7%D9%A2%D9%85-%D9%A3-%D8%BA%D8%B1%D9%81"},
+        {label:"Raqi · 239.5m² / 600M IQD",url:"https://www.raqi.app/ar/posts/11160385-%D8%A7%D8%A8%D8%B1%D8%A7%D8%AC-%D8%A7%D9%84%D9%85%D9%86%D8%B5%D9%88%D8%B1-%D8%B3%D9%8A%D8%AA%D9%8A-%D9%A2%D9%A3%D9%A9%D9%AB%D9%A5%D9%852-%D9%A4-%D8%BA%D8%B1%D9%81-%D9%86%D9%88%D9%85"}
+      ],
+      infoSources:[
+        {label:"단지 기본정보 · Riadi",url:"https://riadi.iq/en/al-mansour-city-towers-complex/"},
+        {label:"위치 · OpenStreetMap",url:"https://mapcarta.com/W1434588091"}
+      ],
+      sourceNote:"2026.09.10 검색 결과에서 매매 총액이 확인되는 최신 매물 3건을 사용했습니다. ㎡당 환산 중앙값이며 거래 완료 가격이 아닌 공개 호가입니다."
+    },
+    iraq_gate: {
+      nameKr:"이라크 게이트", nameEn:"IRAQ GATE", nameAr:"بوابة العراق", district:"다마스쿠스 거리 · 자우라 공원 앞",
+      iqd:2423000, sourceKind:"sample", priceMethod:"9월 공개 매물 호가 3건 중앙값", sampleCount:3, checked:"2026.09.10",
+      units:4750, unitsLabel:"4,750세대(계획)", buildings:"49개동", sizes:"9월 표본 211–227m²", centroid:[33.31931,44.37463],
+      sources:[
+        {label:"Raqi · 198m² / 506.6M IQD",url:"https://www.raqi.app/ar/posts/11152179-%D9%85%D8%AC%D9%85%D8%B9-%D8%A8%D9%88%D8%A7%D8%A8%D8%A9-%D8%A7%D9%84%D8%B9%D8%B1%D8%A7%D9%82-%D9%A1%D9%A9%D9%A8%D9%85-%D8%A5%D8%B7%D9%84%D8%A7%D9%84%D8%A9-%D8%B3%D8%A7%D9%8A%D8%AF%D9%8A%D9%86"},
+        {label:"Raqi · 227m² / 429M IQD",url:"https://www.raqi.app/ar/posts/11129008-%D8%A8%D9%88%D8%A7%D8%A8%D8%A9-%D8%A7%D9%84%D8%B9%D8%B1%D8%A7%D9%82-%D8%A7%D9%84%D8%A8%D8%AD%D9%8A%D8%B1%D8%A9-%D9%A2%D9%A2%D9%A7%D9%852-%D8%A5%D8%B7%D9%84%D8%A7%D9%84%D8%A9-%D8%AE%D8%A7%D8%B1%D8%AC%D9%8A%D8%A9"},
+        {label:"Raqi · 227m² / 435M IQD",url:"https://www.raqi.app/ar/posts/11119475-%D9%85%D8%AC%D9%85%D8%B9-%D8%A8%D9%88%D8%A7%D8%A8%D8%A9-%D8%A7%D9%84%D8%B9%D8%B1%D8%A7%D9%82-%D9%A2%D9%A2%D9%A7%D9%85-%D8%A7%D8%B7%D9%84%D8%A7%D9%84%D8%A9-%D8%AE%D8%A7%D8%B1%D8%AC%D9%8A%D8%A9"},
+        {label:"Raqi · 228m² / 536.4M IQD",url:"https://www.raqi.app/ar/posts/11061175-%D9%85%D8%AC%D9%85%D8%B9-%D8%A8%D9%88%D8%A7%D8%A8%D8%A9-%D8%A7%D9%84%D8%B9%D8%B1%D8%A7%D9%82-%D9%A2%D9%A2%D9%A8%D9%85-%D8%B2%D9%8A%D8%B1%D9%88"},
+        {label:"Raqi · 228m² / 491.7M IQD",url:"https://www.raqi.app/ar/posts/11021112-%D8%B4%D9%82%D8%A9-%D8%A8%D9%88%D8%A7%D8%A8%D8%A9-%D8%A7%D9%84%D8%B9%D8%B1%D8%A7%D9%82-%D9%A2%D9%A2%D9%A8%D9%85"}
+      ],
+      infoSources:[
+        {label:"계획 세대수 · 2025 연구 PDF",url:"https://jjce.just.edu.jo/Download.ashx?f=AogHw1U60EFM43aJXljIgZprb9RM4EZaecxnPRfhoUg%3D"},
+        {label:"위치 · Waze",url:"https://www.waze.com/live-map/directions/iq/baghdad-governorate/baghdad/iraq-gate-apartment-complex?to=place.ChIJZSiOrhZ_VxURX9LTqi9eT3M"}
+      ],
+      sourceNote:"2026.09.10 검색 결과에서 총액이 확인되는 3건을 사용했습니다. 계약금·잔금승계 가능성이 있는 저가 광고는 제외했습니다."
+    },
+    palm_towers: {
+      nameKr:"팜 타워스", nameEn:"PALM TOWERS", nameAr:"أبراج النخلة", district:"알무탄나 · 만수르",
+      iqd:2120000, sourceKind:"sample", priceMethod:"공개 매물 호가 4건 중앙값", sampleCount:4, checked:"2026.08.30",
+      units:null, unitsLabel:"세대수 미공개", buildings:"20개 주거 타워", sizes:"표본 221–224m²", centroid:[33.32939,44.36235],
+      sources:[
+        {label:"Raqi · 224m² / 515M IQD",url:"https://www.raqi.app/ar/posts/10479028-%D9%85%D8%AC%D9%85%D8%B9-%D8%A3%D8%A8%D8%B1%D8%A7%D8%AC-%D8%A7%D9%84%D9%86%D8%AE%D9%84%D8%A9-%D9%A2%D9%A2%D9%A4%D9%85-%D8%B4%D9%82%D8%A9-%D8%B1%D9%83%D9%86%D9%8A%D8%A9"},
+        {label:"Raqi · 221m² / 460M IQD",url:"https://www.raqi.app/ar/posts/10663800-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D8%A8%D8%B1%D8%A7%D8%AC-%D8%A7%D9%84%D9%86%D8%AE%D9%84%D8%A9-%D9%A2%D9%A2%D9%A1%D9%85-%D9%A3-%D8%BA%D8%B1%D9%81"},
+        {label:"Raqi · 221m² / 475M IQD",url:"https://www.raqi.app/ar/posts/10547071-%D8%A3%D8%A8%D8%B1%D8%A7%D8%AC-%D8%A7%D9%84%D9%86%D8%AE%D9%84%D8%A9-%D9%A2%D9%A2%D9%A1%D9%85-%D8%B3%D9%83%D9%86-%D8%B9%D8%A7%D8%A6%D9%84%D9%8A"},
+        {label:"Raqi · 224m² / 470M IQD",url:"https://www.raqi.app/ar/posts/10409053-%D8%A3%D8%A8%D8%B1%D8%A7%D8%AC-%D8%A7%D9%84%D9%86%D8%AE%D9%84%D8%A9-%D9%A2%D9%A2%D9%A4%D9%85-%D9%A3-%D8%BA%D8%B1%D9%81"}
+      ],
+      infoSources:[
+        {label:"단지 공식 사이트 · 20개 타워",url:"https://palmtowersiq.com/"},
+        {label:"위치 좌표 · Iraqi Geological Journal",url:"https://igj-iraq.org/igj/index.php/igj/article/download/1316/1106/15297"}
+      ],
+      sourceNote:"현재 열리는 221–224m² 매물 4건을 각각 환산해 중앙값을 사용했습니다."
+    },
+    royal_city: {
+      nameKr:"로열 시티", nameEn:"ROYAL CITY", nameAr:"رويال ستي", district:"알바이지야 · 만수르",
+      iqd:1717000, sourceKind:"sample", priceMethod:"9월 공개 매물 호가 1건", sampleCount:1, checked:"2026.09.10",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"기존동·신규 Zone 혼재", sizes:"9월 표본 198m²", centroid:[33.33786,44.35001],
+      sources:[
+        {label:"Raqi · 214.86m² / 390M IQD",url:"https://www.raqi.app/ar/posts/11165447-%D9%85%D8%AC%D9%85%D8%B9-%D8%B1%D9%88%D9%8A%D8%A7%D9%84-%D8%B3%D9%8A%D8%AA%D9%8A-%D9%A2%D9%A1%D9%A4-%D9%A8%D9%A6%D9%85-%D9%A3-%D8%BA%D8%B1%D9%81"},
+        {label:"Raqi · 210.25m² / 360M IQD",url:"https://raqi.app/ar/posts/6008012-%D9%85%D8%AC%D9%85%D8%B9-%D8%B1%D9%88%D9%8A%D8%A7%D9%84-%D8%B3%D9%8A%D8%AA%D9%8A-%D9%A2%D9%A1%D9%A0%D9%85-%D9%A3-%D8%BA%D8%B1%D9%81"},
+        {label:"Raqi · 198m² / 330M IQD",url:"https://raqi.app/ar/posts/10222246-%D9%85%D8%AC%D9%85%D8%B9-%D8%B1%D9%88%D9%8A%D8%A7%D9%84-%D8%B3%D9%8A%D8%AA%D9%8A-%D9%A1%D9%A9%D9%A8%D9%852-%D8%B2%D9%8A%D8%B1%D9%88"}
+      ],
+      infoSources:[
+        {label:"프로젝트 확인 · HexaCorp",url:"https://hexagroup.net/projects-single.php?project_id=222"},
+        {label:"위치 · OpenStreetMap",url:"https://mapcarta.com/W1145007792"}
+      ],
+      sourceNote:"9월 검색에서 총액과 면적이 함께 확인되는 매물은 1건입니다. 단일 매물 기준입니다."
+    },
+    baghdad_marina: {
+      nameKr:"바그다드 마리나", nameEn:"BAGHDAD MARINA", nameAr:"بغداد مارينا", district:"사이디야 · 자드리야 교량 인근",
+      iqd:1900000, sourceKind:"sample", priceMethod:"공개 매물 호가 5건 중앙값", sampleCount:5, checked:"2026.08.30",
+      units:3000, unitsLabel:"3,000세대 이상", buildings:"29개동 · 19층", sizes:"표본 145–200m²", centroid:[33.25991,44.36628],
+      sources:[
+        {label:"Raqi · 171m² / 317M IQD",url:"https://www.raqi.app/ar/posts/10461390-%D9%85%D8%AC%D9%85%D8%B9-%D9%85%D8%A7%D8%B1%D9%8A%D9%86%D8%A7-%D9%A1%D9%A7%D9%A1%D9%852-%D8%B7%D8%A7%D8%A8%D9%82-%D9%A1%D9%A6"},
+        {label:"Raqi · 145m² / 275M IQD",url:"https://www.raqi.app/ar/posts/10468570-%D8%B4%D9%82%D8%A9-%D9%A1%D9%A4%D9%A5%D9%85-%D8%B7%D8%A7%D8%A8%D9%82-%D8%AE%D8%A7%D9%85%D8%B3"},
+        {label:"Raqi · 171m² / 330M IQD",url:"https://www.raqi.app/ar/posts/10461411-%D9%85%D8%AC%D9%85%D8%B9-%D9%85%D8%A7%D8%B1%D9%8A%D9%86%D8%A7-%D9%A1%D9%A7%D9%A1%D9%85-%D8%A5%D8%B7%D9%84%D8%A7%D9%84%D8%A9-%D8%A8%D9%88%D9%84%D9%8A%D9%81%D8%A7%D8%B1%D8%AF"},
+        {label:"Raqi · 180m² / 335M IQD",url:"https://www.raqi.app/ar/posts/10535406-%D9%85%D8%AC%D9%85%D8%B9-%D9%85%D8%A7%D8%B1%D9%8A%D9%86%D8%A7-%D9%A1%D9%A8%D9%A0%D9%85-%D8%A7%D8%B7%D9%84%D8%A7%D9%84%D9%87-%D8%AF%D8%A7%D8%AE%D9%84%D9%8A%D9%87"},
+        {label:"Raqi · 200m² / 400M IQD",url:"https://www.raqi.app/ar/posts/10408806-%D9%85%D8%AC%D9%85%D8%B9-%D9%85%D8%A7%D8%B1%D9%8A%D9%86%D8%A7-%D9%A2%D9%A0%D9%A0%D9%85-%D9%A3%D8%BA%D8%B1%D9%81"}
+      ],
+      infoSources:[
+        {label:"세대수·동수 · Riadi",url:"https://riadi.iq/en/baghdad-marina-residential-complex/"},
+        {label:"단지 사이트",url:"https://baghdadmarina.com/"}
+      ],
+      sourceNote:"내부 상태·층·조망 차이가 있어 5건의 ㎡당 가격 중앙값만 대표값으로 사용했습니다."
+    },
+    jawahir_dijla: {
+      nameKr:"자와히르 디즐라", nameEn:"JAWAHIR DIJLA", nameAr:"جواهر دجلة", district:"카지미야 · 알무히트 거리",
+      iqd:2610000, sourceKind:"sample", priceMethod:"공개 매물 호가 4건 중앙값", sampleCount:4, checked:"2026.08.30",
+      units:1500, unitsLabel:"1,500세대", buildings:"15개동", sizes:"표본 182–203m²", centroid:[33.38587,44.34499],
+      sources:[
+        {label:"Raqi · 203m² / 559.57M IQD",url:"https://raqi.app/ar/posts/10791881-%D8%AC%D9%88%D8%A7%D9%87%D8%B1-%D8%AF%D8%AC%D9%84%D9%87-%D9%A2%D9%A0%D9%A3%D9%85-%D9%83%D8%B1%D8%B3%D8%AA%D8%A7%D9%84-%D8%B7%D8%A7%D8%A8%D9%82-%D9%A1%D9%A1"},
+        {label:"Raqi · 203m² / 514.20M IQD",url:"https://raqi.app/ar/posts/10792018-%D9%85%D8%AC%D9%85%D8%B9-%D8%AC%D9%88%D8%A7%D9%87%D8%B1-%D8%AF%D8%AC%D9%84%D9%87-%D9%A2%D9%A0%D9%A3%D9%85-%D8%A7%D8%B7%D9%84%D8%A7%D9%84%D8%A9-%D9%86%D9%87%D8%B1"},
+        {label:"Raqi · 203m² / 544.45M IQD",url:"https://raqi.app/ar/posts/10698690-%D8%AC%D9%88%D8%A7%D9%87%D8%B1-%D8%AF%D8%AC%D9%84%D8%A9-%D8%B7%D9%84%D8%A9-%D8%B9%D9%84%D9%89-%D8%A7%D9%84%D9%86%D9%87%D8%B1-%D8%B4%D9%82%D8%A9-%D8%B5%D9%81%D8%B1-%D9%A2%D9%A0%D9%A3%D9%85"},
+        {label:"Raqi · 182m² / 461.01M IQD",url:"https://raqi.app/ar/posts/10834279-%D8%AC%D9%88%D8%A7%D9%87%D8%B1-%D8%AF%D8%AC%D9%84%D8%A9-%D9%A1%D9%A8%D9%A2%D9%85-%D9%88%D8%A7%D8%AC%D9%87%D8%A9-%D8%AC%D8%A7%D9%86%D8%A8%D9%8A%D8%A9"}
+      ],
+      infoSources:[
+        {label:"세대수·동수 · Riadi",url:"https://riadi.iq/en/jawahir-dijla-residential-complex/"},
+        {label:"설계·15개 타워 · Manhal Habbobi",url:"https://www.manhal-habbobi.co.uk/jawahir-dijlah-compound"}
+      ],
+      sourceNote:"현재 열리는 4건의 ㎡당 호가 중앙값입니다. 기존 Facebook 단일 매물 링크는 제거했습니다."
+    },
+    nasim_city: {
+      nameKr:"나심 시티", nameEn:"NASIM CITY", nameAr:"النسيم ستي", district:"하이 알후세인 · 알지하드",
+      iqd:2250000, sourceKind:"sample", priceMethod:"현재 공개 매물 호가 5건 중앙값", sampleCount:5, checked:"2026.08.25",
+      units:2666, unitsLabel:"2,666세대", buildings:"43개동 · 16층", sizes:"표본 140–191m²", centroid:[33.27593,44.30042],
+      sources:[
+        {label:"Raqi · 191m² / 340M IQD",url:"https://www.raqi.app/ar/posts/11167001-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%86%D8%B3%D9%8A%D9%85-%D9%A1%D9%A9%D9%A1%D9%85-%D9%82%D8%B1%D8%B6-%D8%B9%D9%82%D8%A7%D8%B1%D9%8A"},
+        {label:"Raqi · 165m² / 290M IQD",url:"https://www.raqi.app/ar/posts/11123150-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%86%D8%B3%D9%8A%D9%85-%D9%A1%D9%A6%D9%A5%D9%85-%D8%A5%D8%B7%D9%84%D8%A7%D9%84%D8%A9-%D8%A8%D9%88%D9%84%D9%8A%D9%81%D8%A7%D8%B1%D8%AF"},
+        {label:"Raqi · 140m² / 328M IQD",url:"https://www.raqi.app/ar/posts/11160944-%D9%A1%D9%A4%D9%A0%D9%85-%D8%A8%D8%AF%D9%88%D9%86-%D9%81%D8%A7%D8%A6%D8%AF%D8%A9-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%86%D8%B3%D9%8A%D9%85-%D8%B3%D8%AA%D9%8A"},
+        {label:"Raqi · 140m² / 316M IQD",url:"https://www.raqi.app/ar/posts/11085364-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%86%D8%B3%D9%8A%D9%85-%D9%A1%D9%A4%D9%A0%D9%85-%D8%A7%D8%B7%D9%84%D8%A7%D9%84%D8%A9-%D8%AD%D8%AF%D8%A7%D8%A6%D9%82"},
+        {label:"Raqi · 140m² / 315M IQD",url:"https://www.raqi.app/ar/posts/11072104-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%86%D8%B3%D9%8A%D9%85-%D9%A1%D9%A4%D9%A0%D9%85-%D9%82%D8%B1%D8%B6-%D8%A7%D9%84%D9%85%D8%B5%D8%B1%D9%81-%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%B1%D9%8A"}
+      ],
+      infoSources:[
+        {label:"세대수·동수 · Riadi",url:"https://riadi.iq/en/nasim-city-residential-complex/"},
+        {label:"위치 · OpenStreetMap",url:"https://mapcarta.com/W1151201755"}
+      ],
+      sourceNote:"삭제된 8253735 링크를 제거했습니다. 가구·대출·납부 조건 차이로 표본 범위가 약 1.76–2.34M IQD/m²로 넓습니다."
+    },
+    al_wud: {
+      nameKr:"알와드 주거단지", nameEn:"AL-WUD RESIDENTIAL COMPLEX", nameAr:"مجمع الود السكني", district:"알아미리야 교차로 인근",
+      iqd:1602000, sourceKind:"sample", priceMethod:"공개 매물 호가 2건 중앙값", sampleCount:2, checked:"2026.08.30",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"주거동", sizes:"표본 180–230m²", centroid:[33.299216,44.286448],
+      sources:[
+        {label:"알와드 주거단지 · 180m² / 298M IQD",url:"https://raqi.app/ar/posts/10539867-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%88%D8%AF-%D9%A1%D9%A8%D9%A0%D9%85-%D9%85%D8%A4%D8%AC%D8%B1%D8%A9"},
+        {label:"알와드 주거단지 · 230m² / 356M IQD",url:"https://raqi.app/ar/posts/10523547-%D9%A2%D9%A3%D9%A0%D9%85-%D8%A7%D9%84%D8%B7%D8%A7%D8%A8%D9%82-%D8%A7%D9%84%D8%B1%D8%A7%D8%A8%D8%B9-%D9%82%D8%B1%D8%B6-%D8%B9%D9%82%D8%A7%D8%B1%D9%8A"}
+      ],
+      infoSources:[
+        {label:"위치·단지명 · 공개 매물 표기",url:"https://raqi.app/ar/posts/10539867-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%88%D8%AF-%D9%A1%D9%A8%D9%A0%D9%85-%D9%85%D8%A4%D8%AC%D8%B1%D8%A9"}
+      ],
+      sourceNote:"알아미리야 교차로 인근으로 표기된 공개 매물 2건의 m²당 호가 중앙값입니다. 지도 좌표는 지역 중심의 참고 위치입니다."
+    },
+    bismayah_complex: {
+      nameKr:"비스마야 신도시", nameEn:"BISMAYAH NEW CITY", nameAr:"مدينة بسماية", district:"바그다드 남동부",
+      iqd:1110000, officialIqd:990000, officialUsd:750, sourceKind:"dual", priceMethod:"공식 분양가 + 현금·완납성 매물 15건 중앙값", sampleCount:15, checked:"2026.09.10",
+      units:100080, unitsLabel:"100,080세대(계획)", buildings:"834개 주거동(계획)", sizes:"100·120·140m²", centroid:[33.195289,44.619737],
+      sources:[
+        {label:"공식 · 은행 공문 인용 750 USD/m²",url:"https://964media.com/296624/"},
+        {label:"100m² · 113M IQD · 완납 현금",url:"https://www.raqi.app/ar/posts/10660760-%D9%A1%D9%A0%D9%A0%D9%85-%D8%B4%D8%B1%D9%82%D9%8A-%D8%AA%D8%AD%D9%88%D9%8A%D9%84-%D9%81%D9%88%D8%B1%D9%8A"},
+        {label:"100m² · 112M IQD · 현금",url:"https://www.raqi.app/ar/posts/10609043-%D9%A1%D9%A0%D9%A0%D9%85-%D8%B7%D8%A7%D8%A8%D9%82%D9%A8-%D9%85%D8%A4%D8%AB%D8%AB%D8%A9"},
+        {label:"100m² · 114.5M IQD · 현금",url:"https://www.raqi.app/ar/posts/10596103-%D9%A1%D9%A0%D9%A0%D9%85-%D8%BA%D8%B1%D8%A8%D9%8A-%D9%83%D8%A7%D8%B4"},
+        {label:"100m² · 115M IQD · 완납 기준",url:"https://www.raqi.app/ar/posts/11047795-%D8%BA%D8%B1%D8%A8%D9%8A-%D8%A8%D9%A3-%D9%A1%D9%A0%D9%A0%D9%85-%D8%B7%D8%A7%D8%A8%D9%82-%D9%A7"},
+        {label:"100m² · 114M IQD · 현금",url:"https://www.raqi.app/ar/posts/11043280-%D8%B4%D9%82%D8%A9-%D9%A1%D9%A0%D9%A0-%D9%83%D8%A7%D8%B4-%D9%85%D8%AC%D9%85%D8%B9-a8"},
+        {label:"120m² · 130M IQD · 완납",url:"https://www.raqi.app/ar/posts/10662466-a6-%D8%B79-%D9%A1%D9%A2%D9%A0%D9%85-%D8%AF%D9%8A%D9%83%D9%88%D8%B1%D8%A7%D8%AA"},
+        {label:"120m² · 126M IQD · 현금",url:"https://www.raqi.app/ar/posts/10583019-%D8%A8%D8%B3%D9%85%D8%A7%D9%8A%D8%A9-%D9%A1%D9%A2%D9%A0%D9%85-%D9%83%D8%A7%D8%B4"},
+        {label:"120m² · 140M IQD · 완납",url:"https://www.raqi.app/ar/posts/10656189-%D8%A8%D8%B3%D9%85%D8%A7%D9%8A%D8%A9-%D8%A8%D9%84%D9%88%D9%83-b1-%D9%A1%D9%A2%D9%A0%D9%85-%D9%85%D8%A4%D8%AB%D8%AB%D8%A9"},
+        {label:"120m² · 135M IQD · 완납",url:"https://www.raqi.app/ar/posts/11035429-%D8%B4%D9%82%D8%A9-%D9%A1%D9%A2%D9%A0%D9%85-%D8%B7%D8%A7%D8%A8%D9%82-%D9%A5"},
+        {label:"120m² · 128M IQD · 직접 이전",url:"https://www.raqi.app/ar/posts/10925500-%D9%A1%D9%A2%D9%A0%D9%85-%D9%85%D8%AC%D9%85%D8%B9-a1-%D8%B7%D8%A7%D8%A8%D9%82-%D8%B3%D8%A7%D8%A8%D8%B9"},
+        {label:"140m² · 153M IQD · 완납",url:"https://www.raqi.app/ar/posts/10224270-%D9%A1%D9%A4%D9%A0%D9%85-%D8%B7%D8%A7%D8%A8%D9%82%D9%A2-%D9%81%D8%A7%D8%B6%D9%8A%D8%A9"},
+        {label:"140m² · 153M IQD · 완납",url:"https://www.raqi.app/ar/posts/10634319-%D9%A1%D9%A4%D9%A0%D9%85-%D9%85%D8%A4%D8%AB%D8%AB%D8%A9-%D9%86%D8%B8%D8%A7%D9%85-%D8%B4%D8%B1%D9%82%D9%8A"},
+        {label:"140m² · 155M IQD · 완납",url:"https://www.raqi.app/ar/posts/10630989-%D8%A8%D9%84%D9%88%D9%83-a6-%D9%A1%D9%A4%D9%A0%D9%85-%D8%AF%D9%88%D8%B1-%D8%B3%D8%A7%D8%A8%D8%B9"},
+        {label:"140m² · 156M IQD · 현금",url:"https://www.raqi.app/ar/posts/10632042-%D8%B4%D9%82%D8%A9-a6-%D9%A1%D9%A4%D9%A0%D9%85-%D9%83%D8%A7%D8%B4"},
+        {label:"140m² · 135M IQD · 완납 현금",url:"https://www.raqi.app/ar/posts/10584948-%D8%B4%D9%82%D9%87-%D9%A1%D9%A4%D9%A0%D9%85-%D9%83%D8%A7%D8%B4"}
+      ],
+      infoSources:[
+        {label:"사업 규모 · Hanwha 공식",url:"https://www.hanwha.com/newsroom/media-library/media-assets/bismayah-new-city-near-baghdad.do"},
+        {label:"위치 · OpenStreetMap",url:"https://mapcarta.com/N10916647741"}
+      ],
+      sourceNote:"9월 10일 현재 열리는 기존 현금·완납성 매물 15건의 ㎡당 호가 중앙값 1.11M IQD입니다. 새로 확인된 계약조건 불명·분할납부 광고는 산정에서 제외했습니다."
+    },
+    dar_alsalam: {
+      nameKr:"다르 알살람", nameEn:"DAR AL SALAM", nameAr:"مجمع دار السلام السكني", district:"바그다드 · 세부 위치 추가 확인 중",
+      iqd:null, sourceKind:"known", knownOnly:true, priceMethod:"공개 매매 호가 표본 수집 중", sampleCount:0, checked:"2026.08.28",
+      units:1346, unitsLabel:"1,346세대(1단계)", buildings:"134㎡ 1,096세대 · 205㎡ 250세대", sizes:"134·205m²", centroid:[33.304,44.395],
+      sources:[], infoSources:[
+        {label:"1단계 준공·세대수 · Baghdad Today",url:"https://baghdadtoday.news/250427-%D9%88%D8%B2%D9%8A%D8%B1-%D8%A7%D9%84%D8%B9%D9%85%D9%84-%D9%8A%D9%88%D8%B2%D8%B9-%D8%A7%D9%84%D9%88%D8%AC%D8%A8%D8%A9-%D8%A7%D9%84%D8%A7%D9%88%D9%84%D9%89-%D9%85%D9%86-%D8%A7%D9%84%D9%88%D8%AD%D8%AF%D8%A7%D8%AA-%D8%A7%D9%84%D8%B3%D9%83%D9%86%D9%8A%D8%A9-%D9%81%D9%8A-%D9%85%D8%AC%D9%85%D8%B9-%D8%AF%D8%A7%D8%B1-%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85-%D8%A7%D9%84%D8%B3%D9%83%D9%86%D9%8A.html"},
+        {label:"최근 공개 매물 표기 · Raqi",url:"https://www.raqi.app/ar/posts/10318933-%D8%B4%D9%82%D8%A9-%D8%B7%D8%A7%D8%A8%D9%82-%D9%A9-%D8%A3%D9%82%D8%B3%D8%A7%D8%B7-%D9%84%D8%AD%D8%AF-%D8%B4%D9%87%D8%B1-%D9%A8"}
+      ], sourceNote:"2024년 1단계 주택 배정이 확인됐습니다. 광고가 잔여 할부금·승계 조건을 함께 적는 경우가 있어, 현재는 m² 단가를 산정하지 않았습니다."
+    },
+    millennium: {
+      nameKr:"밀레니엄 주거단지", nameEn:"MILLENNIUM", nameAr:"مجمع ملينيوم السكني", district:"알아미리야 · 바그다드",
+      iqd:null, sourceKind:"known", knownOnly:true, priceMethod:"공개 매물 표본 추가 수집 중", sampleCount:0, checked:"2026.08.28",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"복수 주거동", sizes:"확인 매물 154·208·255m²", centroid:[33.299216,44.286448],
+      sources:[], infoSources:[
+        {label:"154m² 공개 매물 · Raqi",url:"https://raqi.app/ar/posts/10354029-%D9%84%D9%84%D8%A8%D9%8A%D8%B9-%D8%B4%D9%82%D8%A9-%D9%81%D9%8A-%D9%85%D8%AC%D9%85%D8%B9-%D9%85%D9%84%D9%8A%D9%86%D9%8A%D9%88%D9%85-%D8%A7%D9%84%D9%85%D8%B3%D8%A7%D8%AD%D8%A9-154-%D9%852-%D8%A7%D9%84%D8%A8%D8%B1%D8%AC-%D8%A7%D9%84%D8%A3%D9%88%D9%84-%D8%B9%D8%AF%D8%AF-%D8%BA"},
+        {label:"개발사 단지 소개 · Ramlah",url:"https://play.google.com/store/apps/details?hl=ar&id=com.lamassu.ramlah"}
+      ], sourceNote:"아미리야의 입주형 아파트 단지로 공개 매물이 확인됩니다. 서로 다른 면적·가구 상태를 충분히 확보한 뒤 대표 m² 호가를 추가합니다."
+    },
+    yarmouk_compound: {
+      nameKr:"알야르무크 컴파운드", nameEn:"AL-YARMOUK COMPOUND", nameAr:"مجمع اليرموك السكني", district:"야르무크 · 카르크 · 바그다드",
+      iqd:null, sourceKind:"known", knownOnly:true, priceMethod:"분양·매물 가격 표본 수집 중", sampleCount:0, checked:"2026.08.28",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"수직형 아파트 단지", sizes:"공개 안내 340·438m²", centroid:[33.295233,44.335369],
+      sources:[], infoSources:[
+        {label:"단지 공식 사이트",url:"https://ycompound.com/"},
+        {label:"위치·최근 안내 · Yarmouk Compound",url:"https://www.findglocal.com/IQ/Baghdad/108542478670714/Yarmouk-Compound--%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%8A%D8%B1%D9%85%D9%88%D9%83-%D8%A7%D9%84%D8%B3%D9%83%D9%86%D9%8A"}
+      ], sourceNote:"야르무크 지역 단독주택 시세와 별개인 고급 수직형 컴파운드입니다. 단지별 공개 매매 호가가 충분하지 않아 가격 비교에서는 제외했습니다."
+    },
+    sama_baghdad: {
+      nameKr:"사마 바그다드", nameEn:"SAMA BAGHDAD", nameAr:"مجمع سما بغداد السكني", district:"바그다드 · 세부 위치 추가 확인 중",
+      iqd:null, sourceKind:"known", knownOnly:true, priceMethod:"공개 매물·사업 규모 확인 중", sampleCount:0, checked:"2026.08.28",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"주거단지", sizes:"면적 공개 확인 안 됨", centroid:[33.315,44.365],
+      sources:[], infoSources:[{label:"개발사 프로젝트 목록",url:"https://wafaa-alfurat.iq/projects"}],
+      sourceNote:"개발사 프로젝트 목록에서 바그다드 주거단지로 확인했습니다. 위치·세대수·가격은 추가 원문 확인 후 보완합니다."
+    },
+    al_salam_district: {
+      nameKr:"알살람 주거단지", nameEn:"AL-SALAM DISTRICT", nameAr:"مجمع حي السلام السكني", district:"바그다드 · 세부 위치 추가 확인 중",
+      iqd:null, sourceKind:"known", knownOnly:true, priceMethod:"공개 매물·사업 규모 확인 중", sampleCount:0, checked:"2026.08.28",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"주거단지", sizes:"면적 공개 확인 안 됨", centroid:[33.267,44.354],
+      sources:[], infoSources:[{label:"단지 분류·기본정보 · Riadi",url:"https://riadi.iq/en/category/residential-complexes/"}],
+      sourceNote:"다르 알살람과 명칭이 유사하지만 별도 단지로 분류했습니다. 현 단계에서는 가격을 표시하지 않습니다."
+    },
+    al_khulood: {
+      nameKr:"알쿨루드 주거단지", nameEn:"AL-KHULOOD", nameAr:"مجمع الخلود السكني", district:"바그다드 · 세부 위치 추가 확인 중",
+      iqd:null, sourceKind:"known", knownOnly:true, priceMethod:"공개 매물·사업 규모 확인 중", sampleCount:0, checked:"2026.08.28",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"주거동", sizes:"확인 매물 193m²", centroid:[33.325,44.385],
+      sources:[], infoSources:[{label:"193m² 공개 매물 표기 · Raqi",url:"https://raqi.app/ar/posts/11244809-%D8%B4%D9%82%D9%82-%D9%84%D9%84%D8%A8%D9%8A%D8%B9-%D9%88%D8%A7%D9%84%D8%A7%D9%8A%D8%AC%D8%A7%D8%B1-%D9%85%D8%A7%D8%B1%D9%8A%D9%86%D8%A7-b5-%D8%AC%D9%88%D8%A7%D9%87%D8%B1-%D8%AF%D8%AC%D9%84%D8%A9"}],
+      sourceNote:"공개 매물에 단지명·면적은 확인되나, 독립적인 공식 단지 자료와 표본이 부족해 정보 확인 대상으로 표시했습니다."
+    }
+  };
+
+  /* 2026.09.10 verified refresh: use live Raqi detail pages for the latest snapshot. */
+  Object.assign(complexes.mansour_city, {
+    iqd:1775000, sampleCount:2, checked:"2026.09.10", priceMethod:"9월 공개 매물 호가 2건 중앙값",
+    sources:[
+      {label:"Raqi · 198m² / 300M IQD · 9월 9일",url:"https://raqi.app/ar/posts/11857142"},
+      {label:"Raqi · 172m² / 350M IQD · 9월 8일",url:"https://raqi.app/ar/posts/11820772"}
+    ],
+    sourceNote:"2026.09.10 검색 결과에서 매매 총액이 확인되는 최신 매물 3건을 사용했습니다. 거래 완료 가격이 아닌 공개 호가입니다."
+  });
+  Object.assign(complexes.iraq_gate, {
+    iqd:2423000, sampleCount:3, checked:"2026.09.10", priceMethod:"9월 공개 매물 호가 3건 중앙값",
+    sources:[
+      {label:"Raqi · 211m² / 491.7M IQD · 9월 9일",url:"https://raqi.app/ar/posts/11830916"},
+      {label:"Raqi · 227m² / 596M IQD · 9월 9일",url:"https://raqi.app/ar/posts/11830415"},
+      {label:"Raqi · 227m² / 550M IQD · 9월 9일",url:"https://raqi.app/ar/posts/11828679"}
+    ],
+    sourceNote:"2026.09.10 검색 결과에서 총액이 확인되는 3건을 사용했습니다. 계약금·잔금승계 가능성이 있는 저가 광고는 제외했습니다."
+  });
+  Object.assign(complexes.royal_city, {
+    iqd:1717000, sampleCount:1, checked:"2026.09.10", priceMethod:"9월 공개 매물 호가 1건",
+    sources:[{label:"Raqi · 198m² / 340M IQD · 9월 8일",url:"https://raqi.app/ar/posts/11774958"}],
+    sourceNote:"9월 검색에서 총액과 면적이 함께 확인되는 매물은 1건입니다. 단일 매물 기준입니다."
+  });
+  Object.assign(complexes.jawahir_dijla, {
+    iqd:2608000, sampleCount:2, checked:"2026.09.10", priceMethod:"9월 공개 매물 호가 2건 중앙값",
+    sources:[
+      {label:"Raqi · 182m² / 461.01M IQD · 8월 17일",url:"https://raqi.app/ar/posts/10834279"},
+      {label:"Raqi · 203m² / 544.45M IQD · 8월 15일",url:"https://raqi.app/ar/posts/10698690"}
+    ],
+    sourceNote:"9월 10일 현재 열리는 매매 총액 확인 매물 2건의 m²당 호가 중앙값입니다."
+  });
+  Object.assign(complexes.bismayah_complex, {
+    checked:"2026.09.10",
+    sources:[
+      {label:"공식 · 750 USD/m² · 은행 공문 인용",url:"https://964media.com/296624/"},
+      {label:"기존 현금·완납성 공개 매물 15건 · 시장가 산정 표본",url:"https://raqi.app/ar/posts/10660760"},
+      {label:"최근 검색 · 100m² / 48M IQD · 계약조건 불명(산정 제외)",url:"https://raqi.app/ar/posts/11883086"},
+      {label:"최근 검색 · 120m² · 가격 합의(산정 제외)",url:"https://raqi.app/ar/posts/11891911"}
+    ],
+    sourceNote:"2026.09.10 재검색 결과, 새 매물 중 총액이 확인되는 현금·완납성 표본은 확인되지 않았습니다. 계약조건 불명 또는 가격 합의 매물은 시장가 산정에서 제외하고, 실제 확인 가능한 링크를 함께 표시했습니다."
+  });
+  Object.assign(complexes.baghdad_marina, {
+    iqd:null, sampleCount:0, sourceKind:"pending", checked:"2026.09.11", priceMethod:"면적·매매 총액 동시 확인 매물 재검색 중",
+    sources:[
+      {label:"Instagram · 189m² 매물 게시물(총액 미공개)",url:"https://www.instagram.com/reel/DSfmbomlF04/"},
+      {label:"Instagram · 205m² 매물 게시물(총액 미공개)",url:"https://www.instagram.com/reel/DSfmbomlF04/"}
+    ],
+    sourceNote:"2026.09.11 검색에서 현재 매물 면적은 확인되지만, 같은 게시물에서 매매 총액이 확인되지 않아 단가 산정에서 제외했습니다."
+  });
+  districts.saydiya.iqd=null; districts.saydiya.sampleCount=0; districts.saydiya.sourceKind="pending";
+  districts.saydiya.source="면적·매매 총액 동시 확인 매물 재검색 중";
+  Object.assign(complexes.al_wud, {
+    checked:"2026.09.11",
+    sources:[{label:"Facebook · 180·190·200m² 매물 공개 게시물",url:"https://www.facebook.com/61586675747483/videos/1009049881942008/"}],
+    sourceNote:"2026.09.11 검색에서 현재 제공 면적이 확인되는 판매 게시물입니다. 총액이 공개되지 않아 기존 단가 산정값에는 포함하지 않았습니다."
+  });
+  Object.assign(complexes.nasim_city, {
+    iqd:1893000, sampleCount:3, checked:"2026.09.11", priceMethod:"9월 공개 매물 호가 3건 중앙값",
+    sources:[
+      {label:"Instagram · 140m² / 265M IQD · 매매",url:"https://www.instagram.com/reel/DBO6HurKcjZ/"},
+      {label:"Instagram · 191m² / 410M IQD · 현금 매매",url:"https://www.instagram.com/reel/DW7I89BCOuE/"},
+      {label:"Instagram · 191m² / 305M IQD · 매매",url:"https://www.instagram.com/reel/DKboMzEour7/"}
+    ],
+    sourceNote:"2026.09.11 검색 결과에서 면적과 매매 총액이 함께 확인되는 공개 매물 3건의 m²당 호가 중앙값입니다."
+  });
+  Object.assign(complexes.palm_towers, {
+    checked:"2026.09.11",
+    sources:[{label:"Facebook · 224m² 매물 공개 게시물",url:"https://www.facebook.com/alsiraf.lileaqar/videos/1191116986470359/"}],
+    sourceNote:"2026.09.11 검색에서 현재 매물 면적이 확인되는 공개 게시물입니다. 총액이 검색 결과에 표시되지 않아 기존 단가 산정값에는 포함하지 않았습니다."
+  });
+
+  function complexListingLinks(keys){
+    return keys.flatMap(key=>{
+      const complex=complexes[key];
+      return (complex?.sources || []).map(source=>({
+        ...source,
+        label:`${complex.nameKr} · ${source.label.replace(/^[^·]+ · /,'')}`
+      }));
+    });
+  }
+  districts.mansour.sources=complexListingLinks(['mansour_city','iraq_gate','palm_towers','royal_city']);
+  districts.bismayah.sources=complexListingLinks(['bismayah_complex']);
+  districts.saydiya.sources=complexListingLinks(['baghdad_marina']);
+  districts.kadhimiya.sources=complexListingLinks(['jawahir_dijla']);
+  districts.jihad.sources=complexListingLinks(['nasim_city']);
+  districts.amiriya.sources=[
+    {label:"알와드 주거단지 · 180m² / 298M IQD",url:"https://raqi.app/ar/posts/10539867-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%88%D8%AF-%D9%A1%D9%A8%D9%A0%D9%85-%D9%85%D8%A4%D8%AC%D8%B1%D8%A9"},
+    {label:"알와드 주거단지 · 230m² / 356M IQD",url:"https://raqi.app/ar/posts/10523547-%D9%A2%D9%A3%D9%A0%D9%85-%D8%A7%D9%84%D8%B7%D8%A7%D8%A8%D9%82-%D8%A7%D9%84%D8%B1%D8%A7%D8%A8%D8%B9-%D9%82%D8%B1%D8%B6-%D8%B9%D9%82%D8%A7%D8%B1%D9%8A"}
+  ];
+  districts.yarmouk.sources=[
+    {label:"야르무크 주택 · 452m² / 1,704.04M IQD",url:"https://iq.opensooq.com/ar/search/286043614"},
+    {label:"야르무크 주택 · 182m² / 1,184M IQD",url:"https://iq.opensooq.com/ar/search/284519224"},
+    {label:"야르무크 주택 · 370m² / 2,414.25M IQD",url:"https://iq.opensooq.com/ar/search/285454750"}
+  ];
+  districts.zayouna.sources=[
+    {label:"자야우나 주택 · 65m² / 450M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D8%B2%D9%8A%D9%88%D9%86%D8%A9/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9"},
+    {label:"자야우나 주택 · 150m² / 855.5M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D8%B2%D9%8A%D9%88%D9%86%D8%A9/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9"},
+    {label:"자야우나 주택 · 230m² / 1,567.45M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D8%B2%D9%8A%D9%88%D9%86%D8%A9/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9"}
+  ];
+  districts.newbaghdad.sources=[
+    {label:"뉴바그다드 주택 · 90m² / 270M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF-%D8%A7%D9%84%D8%AC%D8%AF%D9%8A%D8%AF%D8%A9/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9/%D9%A4-%D8%BA%D8%B1%D9%81-%D9%86%D9%88%D9%85"},
+    {label:"뉴바그다드 주택 · 75m² / 210M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF-%D8%A7%D9%84%D8%AC%D8%AF%D9%8A%D8%AF%D8%A9/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9/%D9%A4-%D8%BA%D8%B1%D9%81-%D9%86%D9%88%D9%85"}
+  ];
+  districts.karrada.sources=[
+    {label:"카라다 주택 · 73m² / 400M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D8%A7%D9%84%D9%83%D8%B1%D8%A7%D8%AF%D8%A9/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9"},
+    {label:"카라다 주택 · 55m² / 200M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D8%A7%D9%84%D9%83%D8%B1%D8%A7%D8%AF%D8%A9/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9"},
+    {label:"카라다 주택 · 76m² / 507.5M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D8%A7%D9%84%D9%83%D8%B1%D8%A7%D8%AF%D8%A9/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9"}
+  ];
+  districts.sadrcity.sources=[
+    {label:"사드르시티 주택 · 72m² / 140M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D9%85%D8%AF%D9%8A%D9%86%D8%A9-%D8%A7%D9%84%D8%B5%D8%AF%D8%B1/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9"},
+    {label:"사드르시티 주택 · 200m² / 365M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D9%85%D8%AF%D9%8A%D9%86%D8%A9-%D8%A7%D9%84%D8%B5%D8%AF%D8%B1/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9"},
+    {label:"사드르시티 주택 · 75m² / 165M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D9%85%D8%AF%D9%8A%D9%86%D8%A9-%D8%A7%D9%84%D8%B5%D8%AF%D8%B1/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9"},
     {label:"사드르시티 주택 · 200m² / 300M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D9%85%D8%AF%D9%8A%D9%86%D8%A9-%D8%A7%D9%84%D8%B5%D8%AF%D8%B1/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9"},
     {label:"사드르시티 주택 · 75m² / 260M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D9%85%D8%AF%D9%8A%D9%86%D8%A9-%D8%A7%D9%84%D8%B5%D8%AF%D8%B1/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9"}
   ];
@@ -619,7 +941,8 @@ Total output lines: 1425
       return;
     }
 
-    orderedComplexKeys.forEach((key,i)=>{
+    const visibleKeys=orderedComplexKeys.filter(key=>qualityFilter==='all'||(qualityFilter==='verified'?complexes[key].sourceKind==='verified':complexes[key].sourceKind==='pending'));
+    visibleKeys.forEach((key,i)=>{
       const d = complexes[key];
       const row = document.createElement('div');
       row.className = 'district-row complex-row';
@@ -1092,8 +1415,16 @@ Total output lines: 1425
     Object.values(complexes).forEach(c=>{if(c.iqd!==null){c.iqd=null;c.sampleCount=0;c.sourceKind='pending';c.priceMethod='원문 링크·매매 총액·면적 전수 재검증 중';c.sourceNote='이전 표본은 현재 링크 상태와 가격·면적 동시 표기 여부를 다시 확인 중입니다. 검증 전 수치는 순위·비교에 사용하지 않습니다.';}});
     Object.values(districts).forEach(d=>{if(d.sourceKind!=='official'){d.iqd=null;d.sampleCount=0;d.sourceKind='pending';d.source='대표 단지 매물 전수 재검증 중';}});
     refreshOrderedRegions();
+    document.querySelectorAll('.unit-price-block.market').forEach(el=>{
+      el.innerHTML='<div class="price-caption"><span>민간 재판매 호가</span><small>전수 재검증 중</small></div><div class="price-row"><div class="price-primary">—<span class="unit-label">표시 보류</span></div></div><div class="unit-meta"><span>원문 링크·총액·면적 확인 후 반영</span></div>';
+    });
+    document.querySelectorAll('.unit-sources').forEach(el=>{el.open=false;el.querySelector('summary').textContent='민간 매물 원문 · 검증 후 공개';});
   }
   applyDataQualityGate();
+
+  let qualityFilter='all';
+  document.getElementById('quality-filter').addEventListener('change',e=>{qualityFilter=e.target.value;renderList();});
+  document.getElementById('print-report').addEventListener('click',()=>window.print());
 
   renderList();renderChart();renderTrend();updateLegend();scheduleCalloutLayout();
   fetch('./data/complex-history.json',{cache:'no-store'})
