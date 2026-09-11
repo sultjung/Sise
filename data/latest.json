@@ -28,17 +28,11 @@
       "property_type": "아파트",
       "listing_sources": ["https://raqi.app/ar/posts/10539867", "https://raqi.app/ar/posts/10523547"]
     },
-    "saydiya": {
-      "price_per_m2_iqd": 2106000,
-      "sample_count": 1,
-      "property_type": "아파트",
-      "listing_sources": ["https://www.instagram.com/reel/DSurEeqD7Rf/"]
-    },
     "jihad": {
-      "price_per_m2_iqd": 2250000,
-      "sample_count": 5,
+      "price_per_m2_iqd": 1893000,
+      "sample_count": 3,
       "property_type": "아파트",
-      "listing_sources": []
+      "listing_sources": ["https://www.instagram.com/reel/DBO6HurKcjZ/", "https://www.instagram.com/reel/DW7I89BCOuE/", "https://www.instagram.com/reel/DKboMzEour7/"]
     },
     "bismayah": {
       "price_per_m2_iqd": 1110000,
