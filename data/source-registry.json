@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "as_of": "2026-09-11",
+  "required_fields": ["complex_id", "checked_at", "source_url", "source_live", "sale_price_iqd", "area_m2", "sale_type"],
+  "eligibility": {
+    "include": ["아파트", "매매", "총액과 면적 동시 표기", "현재 열리는 원문 링크"],
+    "exclude": ["임대", "가격협의", "토지", "상가", "빌라/단독주택", "양도권", "미납잔금", "분할납부", "보증인 변경"]
+  },
+  "records": []
+}
