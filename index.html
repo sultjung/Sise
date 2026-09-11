@@ -993,7 +993,7 @@
     const el=document.getElementById('comparison-table');
     if(!el) return;
     const sepSnapshot=trendHistory.find(s=>s.date==='2026-09-10');
-    if(!sepSnapshot || sepSnapshot.status!=='verified_month_end'){el.innerHTML='<div class="trend-empty">9월은 아직 월말 검증 스냅샷이 확정되지 않았습니다. 현재 중간 검증값은 월별 비교표에 반영하지 않습니다.</div>';return;}
+    if(!sepSnapshot){el.innerHTML='<div class="trend-empty">비교 기준 데이터를 불러오는 중입니다.</div>';return;}
     const aug=trendHistory.find(s=>s.date==='2026-08-30')?.by_complex||{};
     const sep=trendHistory.find(s=>s.date==='2026-09-10')?.by_complex||{};
     const keys=Object.keys(complexes).filter(k=>Number.isFinite(sep[k]?.price_per_m2_iqd));
@@ -1006,7 +1006,7 @@
       const change=diff===null?'—':`${diff>0?'+':''}${fmt(diff)} (${pct>0?'+':''}${pct.toFixed(1)}%)`;
       return `<tr><td>${complexes[k].nameKr}<small>표본 ${sep[k]?.sample_count||'-'}건</small></td><td>${Number.isFinite(a)?fmt(a):'—'}</td><td>${fmt(b)}</td><td class="${cls}">${change}</td></tr>`;
     }).join('');
-    el.innerHTML=`<table class="comparison-table"><thead><tr><th>단지</th><th>8월 기준<br>IQD/m²</th><th>9월 기준<br>IQD/m²</th><th>변동</th></tr></thead><tbody>${rows}</tbody></table>`;
+    el.innerHTML=`<table class="comparison-table"><thead><tr><th>단지</th><th>8월 기준<br>IQD/m²</th><th>9월 중간 기준<br>IQD/m²</th><th>변동</th></tr></thead><tbody>${rows}</tbody></table><div class="trend-meta">※ 9월 값은 월말 확정 전 중간 집계입니다. 링크 재검증 결과에 따라 표본과 중앙값이 변경될 수 있습니다.</div>`;
   }
   function renderTrend(){
     const controls=document.getElementById('trend-controls');
@@ -1412,13 +1412,11 @@
   }
 
   function applyDataQualityGate(){
-    Object.values(complexes).forEach(c=>{if(c.iqd!==null){c.iqd=null;c.sampleCount=0;c.sourceKind='pending';c.priceMethod='원문 링크·매매 총액·면적 전수 재검증 중';c.sourceNote='이전 표본은 현재 링크 상태와 가격·면적 동시 표기 여부를 다시 확인 중입니다. 검증 전 수치는 순위·비교에 사용하지 않습니다.';}});
-    Object.values(districts).forEach(d=>{if(d.sourceKind!=='official'){d.iqd=null;d.sampleCount=0;d.sourceKind='pending';d.source='대표 단지 매물 전수 재검증 중';}});
+    Object.values(complexes).forEach(c=>{if(c.iqd!==null){if(c.sourceKind!=='dual')c.sourceKind='pending';c.priceMethod=`${c.checked||'기준일'} 공개 매물 호가 · 원문 재검증 중`;c.sourceNote='표시값은 이전 기준일의 공개 매물 호가 중앙값입니다. 현재 링크 상태와 가격·면적 동시 표기를 재확인 중이며, 검증 완료 전에는 잠정 참고값으로 해석해야 합니다.';}});
+    Object.values(districts).forEach(d=>{if(d.iqd!==null&&d.sourceKind!=='official'&&d.sourceKind!=='dual'){d.sourceKind='pending';d.source=`${d.source||'대표 단지 공개 매물 호가'} · 원문 재검증 중`;}});
     refreshOrderedRegions();
-    document.querySelectorAll('.unit-price-block.market').forEach(el=>{
-      el.innerHTML='<div class="price-caption"><span>민간 재판매 호가</span><small>전수 재검증 중</small></div><div class="price-row"><div class="price-primary">—<span class="unit-label">표시 보류</span></div></div><div class="unit-meta"><span>원문 링크·총액·면적 확인 후 반영</span></div>';
-    });
-    document.querySelectorAll('.unit-sources').forEach(el=>{el.open=false;el.querySelector('summary').textContent='민간 매물 원문 · 검증 후 공개';});
+    document.querySelectorAll('.unit-price-block.market .price-caption small').forEach(el=>{el.textContent='잠정 참고값 · 재검증 중';});
+    document.querySelectorAll('.unit-sources').forEach(el=>{el.open=false;});
   }
   applyDataQualityGate();
 
