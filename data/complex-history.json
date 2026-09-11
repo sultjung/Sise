@@ -1,7 +1,8 @@
 [
   {
     "date": "2026-08-30",
-    "source": "공개 매물 원문·단지별 검증값",
+    "status": "archived_unverified",
+    "source": "이전 공개 매물 기록 — 현 링크 상태 재검증 전",
     "method": "단지별 매매 호가의 m²당 중앙값; 비스마야는 시장가",
     "by_complex": {
       "mansour_city": {"price_per_m2_iqd": 2020000, "sample_count": 5},
@@ -17,7 +18,8 @@
   },
   {
     "date": "2026-09-10",
-    "source": "Raqi 공개 매물 원문 재검증",
+    "status": "interim_unverified",
+    "source": "9월 중간 기록 — 월말·원문 재검증 전",
     "method": "9월 10일 검색 기준 매매 총액이 확인되는 공개 호가의 m²당 중앙값; 계약금·잔금승계·임대 매물 제외",
     "by_complex": {
       "mansour_city": {"price_per_m2_iqd": 1775000, "sample_count": 2},
