@@ -1422,6 +1422,27 @@
     }
   }
 
+  function applyIbaitySnapshot(snapshot){
+    if(!snapshot || !snapshot.by_complex) return;
+    const query=new URLSearchParams(snapshot.query||{});
+    const sourceUrl=snapshot.api ? `${snapshot.api}?${query.toString()}` : 'https://ibaity.com/realestate?offerType=SELL&cityIds=G76HDC&categoryId=C8D46D&searchCountry=IQ&currency=IQD';
+    Object.values(snapshot.by_complex).forEach(summary=>{
+      const key=summary.complex_key;
+      const d=key ? complexes[key] : null;
+      const value=summary.median_price_per_m2_iqd;
+      if(!d || !Number.isFinite(value)) return;
+      d.iqd=value;
+      d.sampleCount=summary.sample_count||0;
+      d.checked=snapshot.updated_at;
+      d.sourceKind=d.sampleCount===1?'single':'sample';
+      d.priceMethod=`ibaity 공개 매물 호가 ${d.sampleCount}건 중앙값`;
+      d.sources=[{label:`ibaity API · ${d.sampleCount}건`,url:sourceUrl}];
+      d.sourceNote='ibaity 공개 client API에서 수집한 승인 매매 아파트의 등록 호가입니다. 실거래가가 아니며, 가격·면적이 확인된 매물만 중앙값에 포함했습니다.';
+    });
+    refreshComplexOrdering();
+    renderList();renderChart();updateCalloutTexts();updateLegend();scheduleCalloutLayout();
+  }
+
   function applyDataQualityGate(){
     Object.values(complexes).forEach(c=>{if(c.iqd!==null){if(c.sourceKind!=='dual')c.sourceKind='pending';c.priceMethod=`${c.checked||'기준일'} 공개 매물 호가 · 원문 재검증 중`;c.sourceNote='표시값은 이전 기준일의 공개 매물 호가 중앙값입니다. 현재 링크 상태와 가격·면적 동시 표기를 재확인 중이며, 검증 완료 전에는 잠정 참고값으로 해석해야 합니다.';}});
     Object.values(districts).forEach(d=>{if(d.iqd!==null&&d.sourceKind!=='official'&&d.sourceKind!=='dual'){d.sourceKind='pending';d.source=`${d.source||'대표 단지 공개 매물 호가'} · 원문 재검증 중`;}});
@@ -1445,6 +1466,10 @@
     .then(response=>response.ok ? response.json() : null)
     .then(applyLatestPrices)
     .catch(()=>{ /* latest snapshot unavailable: retain embedded verified values */ });
+  fetch('./data/ibaity-latest.json',{cache:'no-store'})
+    .then(response=>response.ok ? response.json() : null)
+    .then(applyIbaitySnapshot)
+    .catch(()=>{ /* ibaity snapshot unavailable: retain embedded values */ });
 </script>
 
 </body>
