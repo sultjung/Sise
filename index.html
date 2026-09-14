@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
 <title>바그다드 부동산 시세</title>
 <!-- 2026-09-14: force Pages rebuild after map/list rendering hardening -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
@@ -1115,7 +1116,11 @@
   }).addTo(map);
 
   function popupHtml(d){
-    if(!hasPrice(d)) return `<div class="map-popup"><div class="popup-place">${d.district}</div><h4>${d.nameKr} · ${d.nameEn}</h4><div class="popup-price" style="font-size:15px">시세 미확인</div><div class="popup-meta">${d.unitsLabel} · ${d.buildings}<br>${d.sizes}<br>${d.priceMethod}<br>자료 확인 ${d.checked}</div><a href="${d.infoSources[0].url}" target="_blank" rel="noopener">단지 정보 원문 열기 ↗</a></div>`;
+    if(!hasPrice(d)) {
+      const infoSources = Array.isArray(d.infoSources) ? d.infoSources : [];
+      const sourceLink = infoSources[0]?.url ? `<a href="${infoSources[0].url}" target="_blank" rel="noopener">단지 정보 원문 열기 ↗</a>` : '<span class="popup-meta">확인된 원문 링크 없음</span>';
+      return `<div class="map-popup"><div class="popup-place">${d.district}</div><h4>${d.nameKr} · ${d.nameEn}</h4><div class="popup-price" style="font-size:15px">시세 미확인</div><div class="popup-meta">${d.unitsLabel} · ${d.buildings}<br>${d.sizes}<br>${d.priceMethod}<br>자료 확인 ${d.checked}</div>${sourceLink}</div>`;
+    }
     const price=d.sourceKind==='dual'
       ? `<div class="popup-price-dual"><span class="official">공식 ${officialCalloutPrice(d)} / m²</span><span class="market">시장 ${calloutPrice(d)} / m²</span></div>`
       : `<div class="popup-price">${calloutPrice(d)} / m²</div>`;
