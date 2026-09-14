@@ -1,7 +1,21 @@
 {
-  "updated_at": "2026-09-11",
-  "status": "verification_in_progress",
-  "source": "공개 매물 원문 전수 재검증",
+  "updated_at": "2026-09-14",
+  "status": "partially_verified",
+  "source": "Raqi 공개 매물 원문 재검증",
   "method": "원문 링크가 현재 열리고 단지명·매매 총액·면적이 함께 확인되는 아파트 매물만 중앙값 산정에 포함한다. 임대·가격협의·양도권·미납잔금·분할납부·보증인 변경 광고는 제외한다.",
-  "by_district": {}
+  "by_district": {
+    "bismayah": {
+      "district_kr": "비스마야",
+      "price_per_m2_iqd": 1120417,
+      "sample_count": 4,
+      "complexes_seen": ["Bismayah New City"],
+      "property_type": "아파트",
+      "listing_sources": [
+        {"label": "100m² / 115,000,000 IQD · 완납", "url": "https://www.raqi.app/ar/posts/11047795-%D8%BA%D8%B1%D8%A8%D9%8A-%D8%A8%D9%A3-%D9%A1%D9%A0%D9%85-%D8%B7%D8%A7%D8%A8%D9%82-%D9%A7"},
+        {"label": "100m² / 114,000,000 IQD · 현금", "url": "https://www.raqi.app/ar/posts/11043280-%D8%B4%D9%82%D8%A9-%D9%A1%D9%A0%D9%A0-%D9%83%D8%A7%D8%B4-%D9%85%D8%AC%D9%85%D8%B9-a8"},
+        {"label": "120m² / 135,000,000 IQD · 완납", "url": "https://www.raqi.app/ar/posts/11035429-%D8%B4%D9%82%D8%A9-%D9%A1%D9%A2%D9%A0%D9%85-%D8%B7%D8%A7%D8%A8%D9%82-%D9%A5"},
+        {"label": "120m² / 128,000,000 IQD · 직접 이전", "url": "https://www.raqi.app/ar/posts/10925500-%D9%A1%D9%A2%D9%A0%D9%85-%D9%85%D8%AC%D9%85%D8%B9-a1-%D8%B7%D8%A7%D8%A8%D9%82-%D8%B3%D8%A7%D8%A8%D8%B9"}
+      ]
+    }
+  }
 }
