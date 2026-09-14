@@ -2,6 +2,10 @@ name: Ibaity apartment-price update
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "scripts/scrape_ibaity.py"
+      - ".github/workflows/ibaity-price-update.yml"
   schedule:
     # Daily at 03:20 UTC (12:20 KST), so the dashboard receives fresh listings.
     - cron: "20 3 * * *"
