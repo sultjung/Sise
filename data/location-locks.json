@@ -1,0 +1,20 @@
+{
+  "policy": "User-confirmed coordinates are immutable unless the user explicitly approves a change.",
+  "confirmed_at": "2026-09-14",
+  "locations": {
+    "iraq_gate": { "name": "이라크 게이트", "latitude": 33.321294, "longitude": 44.371762, "locked": true },
+    "jawahir_dijla": { "name": "자와히르 디즐라", "latitude": 33.385082, "longitude": 44.345059, "locked": true },
+    "palm_towers": { "name": "팜 타워스", "latitude": 33.331846, "longitude": 44.363864, "locked": true },
+    "mansour_city": { "name": "만수르 시티", "latitude": 33.334381, "longitude": 44.355395, "locked": true },
+    "nasim_city": { "name": "나심 시티", "latitude": 33.276254, "longitude": 44.299203, "locked": true },
+    "yamama_city": { "name": "야마마 시티", "latitude": 33.333962, "longitude": 44.302692, "locked": true },
+    "royal_city": { "name": "로열 시티", "latitude": 33.337161, "longitude": 44.349058, "locked": true },
+    "al_wud": { "name": "알와드 주거단지", "latitude": 33.313423, "longitude": 44.222265, "locked": true },
+    "bismayah_complex": { "name": "비스마야", "latitude": 33.192584, "longitude": 44.604706, "locked": true },
+    "dar_alsalam": { "name": "다르 알살람", "latitude": 33.336312, "longitude": 44.357106, "locked": true },
+    "millennium": { "name": "밀레니엄 주거단지", "latitude": 33.315031, "longitude": 44.255361, "locked": true },
+    "baghdad_marina": { "name": "바그다드 마리나", "latitude": 33.259301, "longitude": 44.366331, "locked": true },
+    "yarmouk_compound": { "name": "알야르무크 컴파운드", "latitude": 33.299778, "longitude": 44.346665, "locked": true }
+  },
+  "removed_without_user_coordinates": ["sama_baghdad", "al_salam_district", "al_khulood"]
+}
