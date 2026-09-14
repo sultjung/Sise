@@ -205,7 +205,16 @@ def write_latest(entry: dict) -> None:
 
     표본이 1건뿐인 지역도 공개하되, 대시보드에서 단일 매물임을 명확히 표시한다.
     """
+    # Retain the last confirmed value for an area when individual listings
+    # expire or are temporarily unavailable. A missing listing is not a price
+    # of zero and must not erase the historical series.
     published = {}
+    if LATEST_PATH.exists():
+        try:
+            previous = json.loads(LATEST_PATH.read_text(encoding="utf-8"))
+            published = previous.get("by_district", {}).copy()
+        except (json.JSONDecodeError, OSError):
+            published = {}
     for key, summary in entry["by_district"].items():
         median = summary.get("median_price_per_m2_iqd")
         if summary.get("sample_count", 0) >= MIN_PUBLISHABLE_SAMPLES and median:
@@ -216,6 +225,8 @@ def write_latest(entry: dict) -> None:
                 "complexes_seen": summary["complexes_seen"],
                 "listing_sources": summary.get("listing_sources", []),
                 "property_type": summary.get("property_type") or "아파트",
+                "last_confirmed_at": entry["date"],
+                "listing_status": "current",
             }
     payload = {
         "updated_at": entry["date"],
