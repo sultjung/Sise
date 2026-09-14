@@ -425,7 +425,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script>
   const RATE = 1320; // 1 USD ≈ 1320 IQD
   let trendHistory = [];
@@ -1350,6 +1350,23 @@
   document.getElementById('btn-region-view').addEventListener('click',()=>switchMode('region'));
   document.getElementById('btn-complex-view').addEventListener('click',()=>switchMode('complex'));
 
+  function applyExcelSheetStyle(ws, rowCount, colCount, widths){
+    ws['!sheetViews']=[{showGridLines:false}];
+    ws['!views']=[{showGridLines:false}];
+    ws['!cols']=widths.map(w=>({wch:w}));
+    const headerStyle={
+      font:{bold:true,color:{rgb:'232428'}},
+      fill:{patternType:'solid',fgColor:{rgb:'E7E7E9'}},
+      alignment:{horizontal:'center',vertical:'center',wrapText:true},
+      border:{bottom:{style:'thin',color:{rgb:'C9CDD3'}}}
+    };
+    for(let col=0;col<colCount;col++){
+      const cell=XLSX.utils.encode_cell({r:0,c:col});
+      if(ws[cell]) ws[cell].s=headerStyle;
+    }
+    ws['!rows']=[{hpt:24}];
+    ws['!autofilter']={ref:`A1:${XLSX.utils.encode_col(colCount-1)}${rowCount+1}`};
+  }
   function downloadListingHistory(){
     if(!listingHistory.length){
       alert('누적 매물 원장을 불러오는 중이거나 저장된 기록이 없습니다.');
@@ -1359,23 +1376,59 @@
       alert('Excel 파일 생성 모듈을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
       return;
     }
-    const rows=listingHistory.map(item=>({
-      '확인일':item.observed_at || '',
-      '단지명':item.complex_name || '',
-      '세대수':item.units ?? item.units_label ?? '',
-      '해당 세대 면적 (m²)':item.unit_area_m2,
-      '매매가 (IQD)':item.asking_price_iqd,
-      '단가 (IQD/m²)':item.unit_price_iqd,
-      '원문 상태':item.source_status==='current' ? '현재 확인' : '마지막 확인값'
-    }));
-    const ws=XLSX.utils.json_to_sheet(rows);
-    ws['!autofilter']={ref:`A1:G${rows.length+1}`};
-    ws['!cols']=[{wch:12},{wch:24},{wch:20},{wch:20},{wch:19},{wch:20},{wch:15}];
+    const RATE_IQD_PER_USD=1320;
+    const rows=listingHistory.map(item=>{
+      const askingIqd=Number(item.asking_price_iqd)||0;
+      const unitIqd=Number(item.unit_price_iqd)||0;
+      return {
+        '확인일':item.observed_at || '',
+        '단지명':item.complex_name || '',
+        '세대수':item.units ?? item.units_label ?? '',
+        '해당 세대 면적 (m²)':Number(item.unit_area_m2)||0,
+        '매매가 (IQD)':askingIqd,
+        '매매가 (USD)':Math.round(askingIqd/RATE_IQD_PER_USD),
+        '단가 (USD/m²)':Math.round(unitIqd/RATE_IQD_PER_USD*100)/100,
+        '단가 (IQD/m²)':unitIqd,
+        '원문 상태':item.source_status==='current' ? '현재 확인' : '마지막 확인값'
+      };
+    });
+    const detailWs=XLSX.utils.json_to_sheet(rows);
+    applyExcelSheetStyle(detailWs,rows.length,9,[12,24,20,20,19,19,19,19,15]);
     for(let row=2;row<=rows.length+1;row++){
-      ['C','D','E','F'].forEach(col=>{if(ws[`${col}${row}`]) ws[`${col}${row}`].z='#,##0';});
+      ['C','D','E','F','G','H'].forEach(col=>{
+        if(detailWs[`${col}${row}`]) detailWs[`${col}${row}`].z=col==='G' ? '#,##0.00' : '#,##0';
+      });
+    }
+    const groups=new Map();
+    for(const item of listingHistory){
+      const key=item.complex_name || '미분류';
+      if(!groups.has(key)) groups.set(key,{name:key,units:item.units ?? item.units_label ?? '',count:0,asking:0,unitIqd:0});
+      const g=groups.get(key);
+      g.count++;
+      g.asking+=Number(item.asking_price_iqd)||0;
+      g.unitIqd+=Number(item.unit_price_iqd)||0;
+      if((g.units===null || g.units===undefined || g.units==='') && item.units_label) g.units=item.units_label;
+    }
+    const summaryRows=[...groups.values()].sort((a,b)=>a.name.localeCompare(b.name,'ko')).map(g=>({
+      '단지명':g.name,
+      '세대수':g.units ?? '',
+      '매물 표본수':g.count,
+      '평균 매매가 (IQD)':Math.round(g.asking/g.count),
+      '평균 매매가 (USD)':Math.round(g.asking/g.count/RATE_IQD_PER_USD),
+      '평균 단가 (IQD/m²)':Math.round(g.unitIqd/g.count),
+      '평균 단가 (USD/m²)':Math.round(g.unitIqd/g.count/RATE_IQD_PER_USD*100)/100
+    }));
+    const summaryWs=XLSX.utils.json_to_sheet(summaryRows);
+    applyExcelSheetStyle(summaryWs,summaryRows.length,7,[24,20,14,20,20,22,22]);
+    for(let row=2;row<=summaryRows.length+1;row++){
+      ['C','D','E','F'].forEach(col=>{
+        if(summaryWs[`${col}${row}`]) summaryWs[`${col}${row}`].z=col==='G' ? '#,##0.00' : '#,##0';
+      });
+      if(summaryWs[`G${row}`]) summaryWs[`G${row}`].z='#,##0.00';
     }
     const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,'누적 매물 원장');
+    XLSX.utils.book_append_sheet(wb,detailWs,'누적 매물 원장');
+    XLSX.utils.book_append_sheet(wb,summaryWs,'단지별 평균');
     XLSX.writeFile(wb,`Baghdad_Bismayah_Listing_History_${new Date().toISOString().slice(0,10)}.xlsx`);
   }
   document.getElementById('download-listing-history').addEventListener('click',downloadListingHistory);
