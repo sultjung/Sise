@@ -26,6 +26,7 @@ PAGE_SIZE = 10
 MAX_PAGES = 500
 REQUEST_DELAY_SEC = 0.35
 TIMEOUT_SEC = 30
+CURRENT_WINDOW_DAYS = 90
 OUT_PATH = Path(__file__).resolve().parent.parent / "data" / "ibaity-latest.json"
 
 COMPLEX_KEY_BY_AR = {
@@ -163,20 +164,40 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
     for record in records:
         key = record.get("complex_id") or f"unmapped:{record.get('complex_name_ar') or 'unknown'}"
         groups.setdefault(key, []).append(record)
+    cutoff = dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=CURRENT_WINDOW_DAYS)
+
+    def is_current(record: dict[str, Any]) -> bool:
+        value = record.get("created_at")
+        if not value:
+            return False
+        try:
+            created = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        except ValueError:
+            return False
+        return created >= cutoff
+
     result: dict[str, Any] = {}
     for key, items in sorted(groups.items()):
-        prices = [x["price_per_m2_iqd"] for x in items]
+        current_items = [x for x in items if is_current(x)]
+        prices = [x["price_per_m2_iqd"] for x in current_items]
+        all_prices = [x["price_per_m2_iqd"] for x in items]
+        latest_created_at = max((x.get("created_at") for x in items if x.get("created_at")), default=None)
         result[key] = {
             "complex_key": next((x.get("complex_key") for x in items if x.get("complex_key")), None),
             "complex_id": items[0].get("complex_id"),
             "complex_name_ar": items[0].get("complex_name_ar"),
             "district_ar": items[0].get("district_ar"),
             "subdistricts_ar": sorted({x.get("subdistrict_ar") for x in items if x.get("subdistrict_ar")}),
-            "median_price_per_m2_iqd": round(statistics.median(prices)),
-            "min_price_per_m2_iqd": min(prices),
-            "max_price_per_m2_iqd": max(prices),
-            "sample_count": len(items),
-            "listing_ids": [x["id"] for x in items],
+            "median_price_per_m2_iqd": round(statistics.median(prices)) if prices else None,
+            "min_price_per_m2_iqd": min(prices) if prices else None,
+            "max_price_per_m2_iqd": max(prices) if prices else None,
+            "sample_count": len(current_items),
+            "all_sample_count": len(items),
+            "all_median_price_per_m2_iqd": round(statistics.median(all_prices)),
+            "current_window_days": CURRENT_WINDOW_DAYS,
+            "latest_created_at": latest_created_at,
+            "listing_ids": [x["id"] for x in current_items],
+            "all_listing_ids": [x["id"] for x in items],
         }
     return result
 
@@ -199,7 +220,7 @@ def main() -> int:
         "query": PARAMS,
         "pages_collected": pages,
         "listing_count": len(records),
-        "method": "APPROVED, active SELL apartment listings; median asking price per m²; duplicate IDs removed",
+        "method": f"APPROVED, active SELL apartment listings; current median uses listings created in the last {CURRENT_WINDOW_DAYS} days; duplicate IDs removed",
         "by_complex": summarize(records),
         "listings": records,
     }
