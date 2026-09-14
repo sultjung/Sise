@@ -39,6 +39,23 @@ COMPLEX_KEY_BY_AR = {
     "مجمع الود السكني": "al_wud",
 }
 
+COMPLEX_KEY_BY_PROVIDER_NAME = {
+    "almnswr sty": "mansour_city",
+    "bghdad maryna": "baghdad_marina",
+    "alnsym a residential city": "nasim_city",
+    "dar alslam residential": "dar_alsalam",
+    "abraj alnkhla residential complex": "palm_towers",
+    "royal city residential complex": "royal_city",
+    "jwahr djla residential complex": "jawahir_dijla",
+    "alwd residential complex": "al_wud",
+    "mylynywm residential towers": "millennium",
+    "alyrmwk residential complex": "yarmouk_compound",
+    "alymama city": "yamama_city",
+    "bsmaya residential": "bismayah_complex",
+    "bwaba alaraq residential": "iraq_gate",
+    "bwaba alaraq alb ra district": "iraq_gate",
+}
+
 PARAMS = {
     "PageSize": PAGE_SIZE,
     "offerType": "SELL",
@@ -58,6 +75,10 @@ def api_url(page: int) -> str:
     query = dict(PARAMS)
     query["PageNumber"] = page
     return f"{API_BASE}?{urlencode(query)}"
+
+
+def detail_url(listing_id: str) -> str:
+    return f"https://ibaity.com/realestate/{listing_id}?searchCountry=IQ&currency=IQD"
 
 
 def fetch_page(page: int) -> list[dict[str, Any]]:
@@ -106,11 +127,11 @@ def clean_listing(item: dict[str, Any], observed_at: str) -> dict[str, Any] | No
         "lng": item.get("lng"),
         "complex_id": complex_info.get("id"),
         "complex_name_ar": complex_info.get("name"),
-        "complex_key": COMPLEX_KEY_BY_AR.get(complex_info.get("name")),
+        "complex_key": COMPLEX_KEY_BY_AR.get(complex_info.get("name")) or COMPLEX_KEY_BY_PROVIDER_NAME.get(str(complex_info.get("name") or "").strip().lower()),
         "district_ar": district.get("name"),
         "subdistrict_ar": subdistrict.get("name"),
         "image": images[0] if images else item.get("image"),
-        # The API currently exposes no individual public detail URL.
+        "source_url": detail_url(str(item.get("id") or "")),
         "source_api_url": api_url(1),
     }
 
