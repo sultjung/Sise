@@ -254,6 +254,16 @@ def main():
         print(f"     {property_type or '매물 없음'} {summary['sample_count']}건, 중앙값 {summary.get('median_price_per_m2_iqd')} IQD/m²")
 
     entry = {"date": today, "source": "aiqarat.com", "by_district": by_district}
+    # A search-layout or bot-blocking failure must never replace the last
+    # verified snapshot with an empty data set. End the run without writes so
+    # the existing dashboard data and audit trail remain intact.
+    verified_count = sum(
+        1 for summary in by_district.values()
+        if summary.get("median_price_per_m2_iqd") and summary.get("sample_count", 0) >= MIN_PUBLISHABLE_SAMPLES
+    )
+    if verified_count == 0:
+        print("[중단] 유효한 매매 표본이 0건입니다. 기존 최신 시세 파일을 변경하지 않습니다.", file=sys.stderr)
+        sys.exit(2)
     append_history(entry)
     write_latest(entry)
     print(f"\n→ {HISTORY_PATH} 및 {LATEST_PATH} 에 저장 완료")
