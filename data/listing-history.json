@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "description": "확인 당시 공개된 매매 호가 원장. 매물 링크가 만료되어도 마지막 확인 기록은 유지한다.",
-  "updated_at": "2026-09-14",
+  "updated_at": "2026.09.14",
   "columns": [
     "observed_at",
     "complex_name",
@@ -657,6 +657,48 @@
       "source_url": "https://www.raqi.app/ar/posts/10479028-%D9%85%D8%AC%D9%85%D8%B9-%D8%A3%D8%A8%D8%B1%D8%A7%D8%AC-%D8%A7%D9%84%D9%86%D8%AE%D9%84%D8%A9-%D9%A2%D9%A2%D9%A4%D9%85-%D8%B4%D9%82%D8%A9-%D8%B1%D9%83%D9%86%D9%8A%D8%A9",
       "source_status": "last_confirmed",
       "region": "알무탄나·만수르"
+    },
+    {
+      "record_id": "mansour_city-20260914-172",
+      "observed_at": "2026.09.14",
+      "complex_id": "mansour_city",
+      "complex_name": "만수르 시티",
+      "region": "만수르",
+      "units": null,
+      "units_label": "세대수 공개 확인 안 됨",
+      "unit_area_m2": 172,
+      "asking_price_iqd": 350000000,
+      "unit_price_iqd": 2034884,
+      "source_url": "https://raqi.app/ar/posts/10918996-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%85%D9%86%D8%B5%D9%88%D8%B1-%D8%B3%D9%8A%D8%AA%D9%8A-%D9%A1%D9%A7%D9%A2%D9%85-%D9%A3-%D8%BA%D8%B1%D9%81-%D9%86%D9%88%D9%85",
+      "source_status": "current"
+    },
+    {
+      "record_id": "iraq_gate-20260914-253",
+      "observed_at": "2026.09.14",
+      "complex_id": "iraq_gate",
+      "complex_name": "이라크 게이트",
+      "region": "다마스쿠스 거리·자우라",
+      "units": null,
+      "units_label": "세대수 공개 확인 안 됨",
+      "unit_area_m2": 253,
+      "asking_price_iqd": 715200000,
+      "unit_price_iqd": 2826877,
+      "source_url": "https://raqi.app/ar/posts/9295853",
+      "source_status": "current"
+    },
+    {
+      "record_id": "royal_city-20260914-198",
+      "observed_at": "2026.09.14",
+      "complex_id": "royal_city",
+      "complex_name": "로열 시티",
+      "region": "알바이지야·만수르",
+      "units": null,
+      "units_label": "세대수 공개 확인 안 됨",
+      "unit_area_m2": 198,
+      "asking_price_iqd": 330000000,
+      "unit_price_iqd": 1666667,
+      "source_url": "https://raqi.app/ar/posts/10222246-%D9%85%D8%AC%D9%85%D8%B9-%D8%B1%D9%88%D9%8A%D8%A7%D9%84-%D8%B3%D9%8A%D8%AA%D9%8A-%D9%A1%D9%A9%D9%A8%D9%85-%D8%B2%D9%8A%D8%B1%D9%88",
+      "source_status": "current"
     }
   ]
 }
