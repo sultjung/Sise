@@ -1,0 +1,28 @@
+name: Ibaity apartment-price update
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Daily at 03:20 UTC (12:20 KST), so the dashboard receives fresh listings.
+    - cron: "20 3 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Collect all Baghdad apartment listings from ibaity
+        run: python scripts/scrape_ibaity.py
+      - name: Commit ibaity snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ibaity-latest.json
+          git diff --cached --quiet || git commit -m "chore: update ibaity apartment listings"
+          git push
