@@ -12,7 +12,7 @@
   },
   "pages_collected": 52,
   "listing_count": 326,
-  "method": "APPROVED, active SELL apartment listings; median asking price per m²; duplicate IDs removed",
+  "method": "APPROVED, active SELL apartment listings; current median uses listings created in the last 90 days; duplicate IDs removed",
   "by_complex": {
     "0C4FB4": {
       "complex_key": null,
@@ -22,11 +22,16 @@
       "subdistricts_ar": [
         "Ameria"
       ],
-      "median_price_per_m2_iqd": 871560,
-      "min_price_per_m2_iqd": 871560,
-      "max_price_per_m2_iqd": 871560,
-      "sample_count": 1,
-      "listing_ids": [
+      "median_price_per_m2_iqd": null,
+      "min_price_per_m2_iqd": null,
+      "max_price_per_m2_iqd": null,
+      "sample_count": 0,
+      "all_sample_count": 1,
+      "all_median_price_per_m2_iqd": 871560,
+      "current_window_days": 90,
+      "latest_created_at": "2026-02-26T19:39:59.592735Z",
+      "listing_ids": [],
+      "all_listing_ids": [
         "D4D30G"
       ]
     },
@@ -38,11 +43,16 @@
       "subdistricts_ar": [
         "Al-Muthanna"
       ],
-      "median_price_per_m2_iqd": 1956522,
-      "min_price_per_m2_iqd": 1956522,
-      "max_price_per_m2_iqd": 1956522,
-      "sample_count": 1,
-      "listing_ids": [
+      "median_price_per_m2_iqd": null,
+      "min_price_per_m2_iqd": null,
+      "max_price_per_m2_iqd": null,
+      "sample_count": 0,
+      "all_sample_count": 1,
+      "all_median_price_per_m2_iqd": 1956522,
+      "current_window_days": 90,
+      "latest_created_at": "2026-01-22T08:58:48.475876Z",
+      "listing_ids": [],
+      "all_listing_ids": [
         "7I8DE0"
       ]
     },
@@ -54,11 +64,21 @@
       "subdistricts_ar": [
         "Mansour"
       ],
-      "median_price_per_m2_iqd": 1906048,
-      "min_price_per_m2_iqd": 1650000,
+      "median_price_per_m2_iqd": 1946250,
+      "min_price_per_m2_iqd": 1791908,
       "max_price_per_m2_iqd": 2369942,
-      "sample_count": 10,
+      "sample_count": 4,
+      "all_sample_count": 10,
+      "all_median_price_per_m2_iqd": 1906048,
+      "current_window_days": 90,
+      "latest_created_at": "2026-09-11T13:28:17.988809Z",
       "listing_ids": [
+        "DD6JFG",
+        "86CF07",
+        "86CE97",
+        "6DFGG8"
+      ],
+      "all_listing_ids": [
         "DD6JFG",
         "86CF07",
         "86CE97",
@@ -79,11 +99,16 @@
       "subdistricts_ar": [
         "Ziyouna"
       ],
-      "median_price_per_m2_iqd": 1273885,
-      "min_price_per_m2_iqd": 1273885,
-      "max_price_per_m2_iqd": 1273885,
-      "sample_count": 1,
-      "listing_ids": [
+      "median_price_per_m2_iqd": null,
+      "min_price_per_m2_iqd": null,
+      "max_price_per_m2_iqd": null,
+      "sample_count": 0,
+      "all_sample_count": 1,
+      "all_median_price_per_m2_iqd": 1273885,
+      "current_window_days": 90,
+      "latest_created_at": "2025-10-15T17:43:21.994787Z",
+      "listing_ids": [],
+      "all_listing_ids": [
         "692G28"
       ]
     },
@@ -96,11 +121,20 @@
         "Safarat",
         "Yarmouk"
       ],
-      "median_price_per_m2_iqd": 2081010,
+      "median_price_per_m2_iqd": 1901840,
       "min_price_per_m2_iqd": 1257669,
-      "max_price_per_m2_iqd": 2164948,
-      "sample_count": 14,
+      "max_price_per_m2_iqd": 2045455,
+      "sample_count": 3,
+      "all_sample_count": 14,
+      "all_median_price_per_m2_iqd": 2081010,
+      "current_window_days": 90,
+      "latest_created_at": "2026-08-27T09:45:53.069125Z",
       "listing_ids": [
+        "GDF3H6",
+        "DC215G",
+        "HB81FE"
+      ],
+      "all_listing_ids": [
         "GDF3H6",
         "DC215G",
         "HB81FE",
@@ -125,11 +159,16 @@
       "subdistricts_ar": [
         "Shaab"
       ],
-      "median_price_per_m2_iqd": 1653394,
-      "min_price_per_m2_iqd": 1602564,
-      "max_price_per_m2_iqd": 1704225,
-      "sample_count": 2,
-      "listing_ids": [
+      "median_price_per_m2_iqd": null,
+      "min_price_per_m2_iqd": null,
+      "max_price_per_m2_iqd": null,
+      "sample_count": 0,
+      "all_sample_count": 2,
+      "all_median_price_per_m2_iqd": 1653394,
+      "current_window_days": 90,
+      "latest_created_at": "2025-11-29T07:49:27.12019Z",
+      "listing_ids": [],
+      "all_listing_ids": [
         "7F2980",
         "C57EFD"
       ]
@@ -142,11 +181,16 @@
       "subdistricts_ar": [
         "Al Adel"
       ],
-      "median_price_per_m2_iqd": 2125749,
-      "min_price_per_m2_iqd": 2100000,
-      "max_price_per_m2_iqd": 2148000,
-      "sample_count": 3,
-      "listing_ids": [
+      "median_price_per_m2_iqd": null,
+      "min_price_per_m2_iqd": null,
+      "max_price_per_m2_iqd": null,
+      "sample_count": 0,
+      "all_sample_count": 3,
+      "all_median_price_per_m2_iqd": 2125749,
+      "current_window_days": 90,
+      "latest_created_at": "2025-11-17T05:57:59.204193Z",
+      "listing_ids": [],
+      "all_listing_ids": [
         "I57I2C",
         "C5CA2D",
         "C511BD"
@@ -160,11 +204,16 @@
       "subdistricts_ar": [
         "airpot street"
       ],
-      "median_price_per_m2_iqd": 2290749,
-      "min_price_per_m2_iqd": 2290749,
-      "max_price_per_m2_iqd": 2290749,
-      "sample_count": 1,
-      "listing_ids": [
+      "median_price_per_m2_iqd": null,
+      "min_price_per_m2_iqd": null,
+      "max_price_per_m2_iqd": null,
+      "sample_count": 0,
+      "all_sample_count": 1,
+      "all_median_price_per_m2_iqd": 2290749,
+      "current_window_days": 90,
+      "latest_created_at": "2025-11-20T10:41:53.862118Z",
+      "listing_ids": [],
+      "all_listing_ids": [
         "645BB8"
       ]
     },
@@ -179,8 +228,30 @@
       "median_price_per_m2_iqd": 2550000,
       "min_price_per_m2_iqd": 1245117,
       "max_price_per_m2_iqd": 3000000,
-      "sample_count": 21,
+      "sample_count": 16,
+      "all_sample_count": 21,
+      "all_median_price_per_m2_iqd": 2550000,
+      "current_window_days": 90,
+      "latest_created_at": "2026-09-10T10:32:27.790342Z",
       "listing_ids": [
+        "DD6A0G",
+        "6GD5E8",
+        "24J16F",
+        "CI2AJD",
+        "86D3C7",
+        "HB726E",
+        "6GI448",
+        "B06CAH",
+        "DC23JG",
+        "6GI998",
+        "IF9A8C",
+        "CI47AD",
+        "DC20BG",
+        "6GIHH8",
+        "49A542",
+        "78IDI0"
+      ],
+      "all_listing_ids": [
         "DD6A0G",
         "6GD5E8",
         "24J16F",
@@ -216,7 +287,14 @@
       "min_price_per_m2_iqd": 2700000,
       "max_price_per_m2_iqd": 2700000,
       "sample_count": 1,
+      "all_sample_count": 1,
+      "all_median_price_per_m2_iqd": 2700000,
+      "current_window_days": 90,
+      "latest_created_at": "2026-09-01T13:30:32.699594Z",
       "listing_ids": [
+        "B08B4H"
+      ],
+      "all_listing_ids": [
         "B08B4H"
       ]
     },
@@ -228,11 +306,16 @@
       "subdistricts_ar": [
         "Kadhimiya"
       ],
-      "median_price_per_m2_iqd": 1534726,
-      "min_price_per_m2_iqd": 1520000,
-      "max_price_per_m2_iqd": 1549451,
-      "sample_count": 2,
-      "listing_ids": [
+      "median_price_per_m2_iqd": null,
+      "min_price_per_m2_iqd": null,
+      "max_price_per_m2_iqd": null,
+      "sample_count": 0,
+      "all_sample_count": 2,
+      "all_median_price_per_m2_iqd": 1534726,
+      "current_window_days": 90,
+      "latest_created_at": "2025-12-07T12:01:43.13579Z",
+      "listing_ids": [],
+      "all_listing_ids": [
         "G9FDI6",
         "8489A7"
       ]
@@ -245,11 +328,22 @@
       "subdistricts_ar": [
         "Sabiat"
       ],
-      "median_price_per_m2_iqd": 1416456,
-      "min_price_per_m2_iqd": 1346154,
-      "max_price_per_m2_iqd": 2960000,
-      "sample_count": 14,
+      "median_price_per_m2_iqd": 1434426,
+      "min_price_per_m2_iqd": 1376923,
+      "max_price_per_m2_iqd": 1584000,
+      "sample_count": 5,
+      "all_sample_count": 14,
+      "all_median_price_per_m2_iqd": 1416456,
+      "current_window_days": 90,
+      "latest_created_at": "2026-08-30T12:43:44.630461Z",
       "listing_ids": [
+        "DCFAFG",
+        "86D147",
+        "HB8A2E",
+        "F25JHI",
+        "86FCA7"
+      ],
+      "all_listing_ids": [
         "DCFAFG",
         "86D147",
         "HB8A2E",
@@ -274,11 +368,20 @@
       "subdistricts_ar": [
         "Baijia"
       ],
-      "median_price_per_m2_iqd": 2078670,
-      "min_price_per_m2_iqd": 2053571,
+      "median_price_per_m2_iqd": 2232143,
+      "min_price_per_m2_iqd": 2081448,
       "max_price_per_m2_iqd": 2262443,
-      "sample_count": 8,
+      "sample_count": 3,
+      "all_sample_count": 8,
+      "all_median_price_per_m2_iqd": 2078670,
+      "current_window_days": 90,
+      "latest_created_at": "2026-08-30T08:46:41.553238Z",
       "listing_ids": [
+        "HBG7JE",
+        "86D1F7",
+        "CFC64D"
+      ],
+      "all_listing_ids": [
         "HBG7JE",
         "86D1F7",
         "CFC64D",
@@ -297,11 +400,41 @@
       "subdistricts_ar": [
         "Mansour"
       ],
-      "median_price_per_m2_iqd": 2587719,
-      "min_price_per_m2_iqd": 1842105,
+      "median_price_per_m2_iqd": 2573272,
+      "min_price_per_m2_iqd": 2134387,
       "max_price_per_m2_iqd": 3028846,
-      "sample_count": 41,
+      "sample_count": 24,
+      "all_sample_count": 41,
+      "all_median_price_per_m2_iqd": 2587719,
+      "current_window_days": 90,
+      "latest_created_at": "2026-09-03T07:25:16.822602Z",
       "listing_ids": [
+        "IF2EAC",
+        "CIFA0D",
+        "07841B",
+        "GDC576",
+        "F24B2I",
+        "786J60",
+        "86G127",
+        "DCIHBG",
+        "6GDAH8",
+        "0783HB",
+        "786170",
+        "GDCHD6",
+        "IF272C",
+        "2496JF",
+        "F248JI",
+        "HB7HJE",
+        "495HA2",
+        "GDFJE6",
+        "HB8I0E",
+        "CI414D",
+        "CI41ED",
+        "DC21CG",
+        "HB83CE",
+        "GD2JI6"
+      ],
+      "all_listing_ids": [
         "IF2EAC",
         "CIFA0D",
         "07841B",
@@ -353,11 +486,18 @@
       "subdistricts_ar": [
         "Kadhimiya"
       ],
-      "median_price_per_m2_iqd": 2300000,
-      "min_price_per_m2_iqd": 2300000,
+      "median_price_per_m2_iqd": 2400000,
+      "min_price_per_m2_iqd": 2400000,
       "max_price_per_m2_iqd": 2400000,
-      "sample_count": 3,
+      "sample_count": 1,
+      "all_sample_count": 3,
+      "all_median_price_per_m2_iqd": 2300000,
+      "current_window_days": 90,
+      "latest_created_at": "2026-07-14T13:12:13.981628Z",
       "listing_ids": [
+        "B70A4H"
+      ],
+      "all_listing_ids": [
         "B70A4H",
         "I5445C",
         "DJE74G"
@@ -371,11 +511,58 @@
       "subdistricts_ar": [
         "Jihad"
       ],
-      "median_price_per_m2_iqd": 1787879,
+      "median_price_per_m2_iqd": 1780105,
       "min_price_per_m2_iqd": 1361257,
       "max_price_per_m2_iqd": 2714286,
-      "sample_count": 47,
+      "sample_count": 41,
+      "all_sample_count": 47,
+      "all_median_price_per_m2_iqd": 1787879,
+      "current_window_days": 90,
+      "latest_created_at": "2026-09-10T10:20:46.143798Z",
       "listing_ids": [
+        "00HJ0B",
+        "CICG4D",
+        "786210",
+        "F24ACI",
+        "49J772",
+        "86D287",
+        "HB7DBE",
+        "86D2G7",
+        "493EA2",
+        "GDIA86",
+        "IF40IC",
+        "24J84F",
+        "F2974I",
+        "86D037",
+        "78DD50",
+        "07GI4B",
+        "78DFE0",
+        "86C4G7",
+        "07GF9B",
+        "86C9D7",
+        "78D910",
+        "78DAD0",
+        "GD25H6",
+        "245BDF",
+        "78C9B0",
+        "B0G4BH",
+        "DC4ACG",
+        "HB627E",
+        "CI9E9D",
+        "GD2146",
+        "DC4A5G",
+        "6GF538",
+        "CI9EHD",
+        "07D93B",
+        "78CJ10",
+        "78C370",
+        "B0G90H",
+        "491G72",
+        "GD4I76",
+        "F432EI",
+        "I211HC"
+      ],
+      "all_listing_ids": [
         "00HJ0B",
         "CICG4D",
         "786210",
@@ -433,11 +620,20 @@
       "subdistricts_ar": [
         "Baijia"
       ],
-      "median_price_per_m2_iqd": 902439,
-      "min_price_per_m2_iqd": 783582,
-      "max_price_per_m2_iqd": 2361538,
-      "sample_count": 27,
+      "median_price_per_m2_iqd": 2029851,
+      "min_price_per_m2_iqd": 2029851,
+      "max_price_per_m2_iqd": 2089552,
+      "sample_count": 3,
+      "all_sample_count": 27,
+      "all_median_price_per_m2_iqd": 902439,
+      "current_window_days": 90,
+      "latest_created_at": "2026-09-06T13:06:00.659675Z",
       "listing_ids": [
+        "HBBG0E",
+        "866A37",
+        "86IE47"
+      ],
+      "all_listing_ids": [
         "HBBG0E",
         "866A37",
         "86IE47",
@@ -476,10 +672,17 @@
         "Al Adel"
       ],
       "median_price_per_m2_iqd": 1658031,
-      "min_price_per_m2_iqd": 1562500,
-      "max_price_per_m2_iqd": 1700000,
-      "sample_count": 4,
+      "min_price_per_m2_iqd": 1658031,
+      "max_price_per_m2_iqd": 1658031,
+      "sample_count": 1,
+      "all_sample_count": 4,
+      "all_median_price_per_m2_iqd": 1658031,
+      "current_window_days": 90,
+      "latest_created_at": "2026-08-26T08:32:52.472753Z",
       "listing_ids": [
+        "6GI008"
+      ],
+      "all_listing_ids": [
         "6GI008",
         "2301HF",
         "6F1608",
@@ -495,10 +698,17 @@
         "Kadhimiya"
       ],
       "median_price_per_m2_iqd": 2550000,
-      "min_price_per_m2_iqd": 2500000,
-      "max_price_per_m2_iqd": 2700000,
-      "sample_count": 4,
+      "min_price_per_m2_iqd": 2550000,
+      "max_price_per_m2_iqd": 2550000,
+      "sample_count": 1,
+      "all_sample_count": 4,
+      "all_median_price_per_m2_iqd": 2550000,
+      "current_window_days": 90,
+      "latest_created_at": "2026-08-26T09:00:02.813192Z",
       "listing_ids": [
+        "IF9G4C"
+      ],
+      "all_listing_ids": [
         "IF9G4C",
         "B64G4H",
         "6FB1I8",
@@ -517,7 +727,27 @@
       "min_price_per_m2_iqd": 1833333,
       "max_price_per_m2_iqd": 1929825,
       "sample_count": 14,
+      "all_sample_count": 14,
+      "all_median_price_per_m2_iqd": 1896552,
+      "current_window_days": 90,
+      "latest_created_at": "2026-09-07T18:12:36.155258Z",
       "listing_ids": [
+        "6G67D8",
+        "6GC1E8",
+        "GDF4C6",
+        "495A52",
+        "DC294G",
+        "6GI228",
+        "6GI248",
+        "07GC2B",
+        "GDF416",
+        "IF93BC",
+        "F2J58I",
+        "B06D1H",
+        "B065GH",
+        "86CB97"
+      ],
+      "all_listing_ids": [
         "6G67D8",
         "6GC1E8",
         "GDF4C6",
@@ -542,11 +772,16 @@
       "subdistricts_ar": [
         "Saidiya"
       ],
-      "median_price_per_m2_iqd": 1678082,
-      "min_price_per_m2_iqd": 1369863,
-      "max_price_per_m2_iqd": 1986301,
-      "sample_count": 2,
-      "listing_ids": [
+      "median_price_per_m2_iqd": null,
+      "min_price_per_m2_iqd": null,
+      "max_price_per_m2_iqd": null,
+      "sample_count": 0,
+      "all_sample_count": 2,
+      "all_median_price_per_m2_iqd": 1678082,
+      "current_window_days": 90,
+      "latest_created_at": "2026-05-27T10:28:03.042498Z",
+      "listing_ids": [],
+      "all_listing_ids": [
         "8GEDI7",
         "D27J5G"
       ]
@@ -563,7 +798,15 @@
       "min_price_per_m2_iqd": 2247423,
       "max_price_per_m2_iqd": 2342857,
       "sample_count": 2,
+      "all_sample_count": 2,
+      "all_median_price_per_m2_iqd": 2295140,
+      "current_window_days": 90,
+      "latest_created_at": "2026-09-03T06:57:15.735363Z",
       "listing_ids": [
+        "DCIA2G",
+        "GDI9F6"
+      ],
+      "all_listing_ids": [
         "DCIA2G",
         "GDI9F6"
       ]
@@ -580,7 +823,23 @@
       "min_price_per_m2_iqd": 1431373,
       "max_price_per_m2_iqd": 1950000,
       "sample_count": 10,
+      "all_sample_count": 10,
+      "all_median_price_per_m2_iqd": 1711039,
+      "current_window_days": 90,
+      "latest_created_at": "2026-09-05T12:53:16.161999Z",
       "listing_ids": [
+        "DCCB3G",
+        "CI2B1D",
+        "6GI9J8",
+        "243HDF",
+        "F2JEDI",
+        "86CJG7",
+        "GDF546",
+        "GDFB16",
+        "495D62",
+        "6GIHB8"
+      ],
+      "all_listing_ids": [
         "DCCB3G",
         "CI2B1D",
         "6GI9J8",
@@ -601,11 +860,21 @@
       "subdistricts_ar": [
         "Khadra"
       ],
-      "median_price_per_m2_iqd": 2600000,
-      "min_price_per_m2_iqd": 2250000,
+      "median_price_per_m2_iqd": 2930952,
+      "min_price_per_m2_iqd": 2400000,
       "max_price_per_m2_iqd": 3794643,
-      "sample_count": 5,
+      "sample_count": 4,
+      "all_sample_count": 5,
+      "all_median_price_per_m2_iqd": 2600000,
+      "current_window_days": 90,
+      "latest_created_at": "2026-09-03T07:03:07.632538Z",
       "listing_ids": [
+        "24902F",
+        "493FI2",
+        "IF98BC",
+        "DC9BFG"
+      ],
+      "all_listing_ids": [
         "24902F",
         "493FI2",
         "IF98BC",
@@ -621,11 +890,18 @@
       "subdistricts_ar": [
         "Al Adel"
       ],
-      "median_price_per_m2_iqd": 1994432,
-      "min_price_per_m2_iqd": 1871658,
+      "median_price_per_m2_iqd": 2200000,
+      "min_price_per_m2_iqd": 2200000,
       "max_price_per_m2_iqd": 2200000,
-      "sample_count": 4,
+      "sample_count": 1,
+      "all_sample_count": 4,
+      "all_median_price_per_m2_iqd": 1994432,
+      "current_window_days": 90,
+      "latest_created_at": "2026-06-22T16:02:58.712082Z",
       "listing_ids": [
+        "GCJH96"
+      ],
+      "all_listing_ids": [
         "GCJH96",
         "C2J1ED",
         "8FB457",
@@ -644,7 +920,15 @@
       "min_price_per_m2_iqd": 587500,
       "max_price_per_m2_iqd": 1475000,
       "sample_count": 2,
+      "all_sample_count": 2,
+      "all_median_price_per_m2_iqd": 1031250,
+      "current_window_days": 90,
+      "latest_created_at": "2026-08-26T08:00:06.140765Z",
       "listing_ids": [
+        "DC268G",
+        "86BCD7"
+      ],
+      "all_listing_ids": [
         "DC268G",
         "86BCD7"
       ]
@@ -661,7 +945,14 @@
       "min_price_per_m2_iqd": 1454545,
       "max_price_per_m2_iqd": 1454545,
       "sample_count": 1,
+      "all_sample_count": 1,
+      "all_median_price_per_m2_iqd": 1454545,
+      "current_window_days": 90,
+      "latest_created_at": "2026-06-27T20:47:25.430055Z",
       "listing_ids": [
+        "F4121I"
+      ],
+      "all_listing_ids": [
         "F4121I"
       ]
     },
@@ -677,7 +968,14 @@
       "min_price_per_m2_iqd": 1608187,
       "max_price_per_m2_iqd": 1608187,
       "sample_count": 1,
+      "all_sample_count": 1,
+      "all_median_price_per_m2_iqd": 1608187,
+      "current_window_days": 90,
+      "latest_created_at": "2026-08-27T11:09:52.368645Z",
       "listing_ids": [
+        "HB8CBE"
+      ],
+      "all_listing_ids": [
         "HB8CBE"
       ]
     },
@@ -693,7 +991,14 @@
       "min_price_per_m2_iqd": 1031250,
       "max_price_per_m2_iqd": 1031250,
       "sample_count": 1,
+      "all_sample_count": 1,
+      "all_median_price_per_m2_iqd": 1031250,
+      "current_window_days": 90,
+      "latest_created_at": "2026-08-23T12:42:09.190529Z",
       "listing_ids": [
+        "78CAG0"
+      ],
+      "all_listing_ids": [
         "78CAG0"
       ]
     },
@@ -705,11 +1010,18 @@
       "subdistricts_ar": [
         "Yarmouk"
       ],
-      "median_price_per_m2_iqd": 2514286,
+      "median_price_per_m2_iqd": 2100000,
       "min_price_per_m2_iqd": 2100000,
-      "max_price_per_m2_iqd": 2928571,
-      "sample_count": 2,
+      "max_price_per_m2_iqd": 2100000,
+      "sample_count": 1,
+      "all_sample_count": 2,
+      "all_median_price_per_m2_iqd": 2514286,
+      "current_window_days": 90,
+      "latest_created_at": "2026-08-31T09:47:48.21092Z",
       "listing_ids": [
+        "78GIJ0"
+      ],
+      "all_listing_ids": [
         "78GIJ0",
         "I5212C"
       ]
@@ -725,8 +1037,27 @@
       "median_price_per_m2_iqd": 1526316,
       "min_price_per_m2_iqd": 1368421,
       "max_price_per_m2_iqd": 1727749,
-      "sample_count": 22,
+      "sample_count": 13,
+      "all_sample_count": 22,
+      "all_median_price_per_m2_iqd": 1526316,
+      "current_window_days": 90,
+      "latest_created_at": "2026-08-31T08:31:00.923085Z",
       "listing_ids": [
+        "DCF96G",
+        "CI2E0D",
+        "07691B",
+        "78GJE0",
+        "IF4HDC",
+        "243A6F",
+        "78D450",
+        "78D4B0",
+        "86C127",
+        "GDFE36",
+        "IF90EC",
+        "86C0J7",
+        "DI4ICG"
+      ],
+      "all_listing_ids": [
         "DCF96G",
         "CI2E0D",
         "07691B",
@@ -759,11 +1090,16 @@
       "subdistricts_ar": [
         "Ameria"
       ],
-      "median_price_per_m2_iqd": 1233333,
-      "min_price_per_m2_iqd": 1233333,
-      "max_price_per_m2_iqd": 1233333,
-      "sample_count": 1,
-      "listing_ids": [
+      "median_price_per_m2_iqd": null,
+      "min_price_per_m2_iqd": null,
+      "max_price_per_m2_iqd": null,
+      "sample_count": 0,
+      "all_sample_count": 1,
+      "all_median_price_per_m2_iqd": 1233333,
+      "current_window_days": 90,
+      "latest_created_at": "2025-12-03T17:02:59.991598Z",
+      "listing_ids": [],
+      "all_listing_ids": [
         "7FC260"
       ]
     },
@@ -775,11 +1111,25 @@
       "subdistricts_ar": [
         "Baijia"
       ],
-      "median_price_per_m2_iqd": 1958763,
+      "median_price_per_m2_iqd": 1955077,
       "min_price_per_m2_iqd": 1350000,
       "max_price_per_m2_iqd": 3229167,
-      "sample_count": 19,
+      "sample_count": 8,
+      "all_sample_count": 19,
+      "all_median_price_per_m2_iqd": 1958763,
+      "current_window_days": 90,
+      "latest_created_at": "2026-09-05T12:57:16.934783Z",
       "listing_ids": [
+        "24463F",
+        "6GC1A8",
+        "78GB20",
+        "CI43FD",
+        "GDFJF6",
+        "78D2H0",
+        "DC25DG",
+        "B062BH"
+      ],
+      "all_listing_ids": [
         "24463F",
         "6GC1A8",
         "78GB20",
@@ -811,9 +1161,22 @@
       ],
       "median_price_per_m2_iqd": 796460,
       "min_price_per_m2_iqd": 575221,
-      "max_price_per_m2_iqd": 1953125,
-      "sample_count": 9,
+      "max_price_per_m2_iqd": 1878788,
+      "sample_count": 7,
+      "all_sample_count": 9,
+      "all_median_price_per_m2_iqd": 796460,
+      "current_window_days": 90,
+      "latest_created_at": "2026-09-05T12:55:23.724923Z",
       "listing_ids": [
+        "243C3F",
+        "7881I0",
+        "DC298G",
+        "CI4AHD",
+        "B06ACH",
+        "CI4GBD",
+        "B0GBFH"
+      ],
+      "all_listing_ids": [
         "243C3F",
         "7881I0",
         "DC298G",
@@ -836,8 +1199,34 @@
       "median_price_per_m2_iqd": 1116667,
       "min_price_per_m2_iqd": 260000,
       "max_price_per_m2_iqd": 1250000,
-      "sample_count": 24,
+      "sample_count": 20,
+      "all_sample_count": 24,
+      "all_median_price_per_m2_iqd": 1116667,
+      "current_window_days": 90,
+      "latest_created_at": "2026-08-22T08:28:26.728024Z",
       "listing_ids": [
+        "GD4956",
+        "241BGF",
+        "IF3H3C",
+        "49A7E2",
+        "6G25J8",
+        "07C9JB",
+        "IF3H8C",
+        "2410DF",
+        "B0D9BH",
+        "DC9ECG",
+        "IF3B5C",
+        "49A8H2",
+        "78I310",
+        "IF3B6C",
+        "86F1D7",
+        "86F1I7",
+        "6G2HA8",
+        "6G2HE8",
+        "CIJ77D",
+        "07C1AB"
+      ],
+      "all_listing_ids": [
         "GD4956",
         "241BGF",
         "IF3H3C",
@@ -873,11 +1262,16 @@
         "Al Baladiyat",
         "Kadhimiya"
       ],
-      "median_price_per_m2_iqd": 1832454,
-      "min_price_per_m2_iqd": 1724138,
-      "max_price_per_m2_iqd": 1940771,
-      "sample_count": 2,
-      "listing_ids": [
+      "median_price_per_m2_iqd": null,
+      "min_price_per_m2_iqd": null,
+      "max_price_per_m2_iqd": null,
+      "sample_count": 0,
+      "all_sample_count": 2,
+      "all_median_price_per_m2_iqd": 1832454,
+      "current_window_days": 90,
+      "latest_created_at": "2025-10-20T10:34:55.507698Z",
+      "listing_ids": [],
+      "all_listing_ids": [
         "BI659H",
         "BIG7EH"
       ]
