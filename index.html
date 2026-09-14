@@ -948,7 +948,7 @@
         <div class="rank">${String(i+1).padStart(2,'0')}</div>
         <div class="district-info">
           <span class="name-kr">${d.nameKr}</span><span class="name-en">${d.nameEn} · ${d.nameAr}</span>
-          <div class="complex-location">${d.district}</div>
+          <div class="complex-location">${d.region?d.region+" · ":""}${d.district}</div>
           <div class="complex-facts"><span><b>${d.unitsLabel}</b></span><span>${d.buildings}</span><span>${d.sizes}</span></div>
           <div class="price-method">${d.priceMethod} · 확인 ${d.checked}</div>
         </div>
