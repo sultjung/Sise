@@ -1,10 +1,15 @@
 {
   "schema_version": "1.0",
-  "as_of": "2026-09-11",
+  "as_of": "2026-09-14",
   "required_fields": ["complex_id", "checked_at", "source_url", "source_live", "sale_price_iqd", "area_m2", "sale_type"],
   "eligibility": {
     "include": ["아파트", "매매", "총액과 면적 동시 표기", "현재 열리는 원문 링크"],
     "exclude": ["임대", "가격협의", "토지", "상가", "빌라/단독주택", "양도권", "미납잔금", "분할납부", "보증인 변경"]
   },
-  "records": []
+  "records": [
+    {"complex_id":"bismayah_complex","checked_at":"2026-09-14","source_url":"https://www.raqi.app/ar/posts/11047795-%D8%BA%D8%B1%D8%A8%D9%8A-%D8%A8%D9%A3-%D9%A1%D9%A0%D9%85-%D8%B7%D8%A7%D8%A8%D9%82-%D9%A7","source_live":true,"sale_price_iqd":115000000,"area_m2":100,"sale_type":"완납"},
+    {"complex_id":"bismayah_complex","checked_at":"2026-09-14","source_url":"https://www.raqi.app/ar/posts/11043280-%D8%B4%D9%82%D8%A9-%D9%A1%D9%A0%D9%A0-%D9%83%D8%A7%D8%B4-%D9%85%D8%AC%D9%85%D8%B9-a8","source_live":true,"sale_price_iqd":114000000,"area_m2":100,"sale_type":"현금"},
+    {"complex_id":"bismayah_complex","checked_at":"2026-09-14","source_url":"https://www.raqi.app/ar/posts/11035429-%D8%B4%D9%82%D8%A9-%D9%A1%D9%A2%D9%A0%D9%85-%D8%B7%D8%A7%D8%A8%D9%82-%D9%A5","source_live":true,"sale_price_iqd":135000000,"area_m2":120,"sale_type":"완납·직접 이전"},
+    {"complex_id":"bismayah_complex","checked_at":"2026-09-14","source_url":"https://www.raqi.app/ar/posts/10925500-%D9%A1%D9%A2%D9%A0%D9%85-%D9%85%D8%AC%D9%85%D8%B9-a1-%D8%B7%D8%A7%D8%A8%D9%82-%D8%B3%D8%A7%D8%A8%D8%B9","source_live":true,"sale_price_iqd":128000000,"area_m2":120,"sale_type":"직접 이전"}
+  ]
 }
