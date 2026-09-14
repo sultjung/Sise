@@ -699,6 +699,20 @@
       "unit_price_iqd": 1666667,
       "source_url": "https://raqi.app/ar/posts/10222246-%D9%85%D8%AC%D9%85%D8%B9-%D8%B1%D9%88%D9%8A%D8%A7%D9%84-%D8%B3%D9%8A%D8%AA%D9%8A-%D9%A1%D9%A9%D9%A8%D9%85-%D8%B2%D9%8A%D8%B1%D9%88",
       "source_status": "current"
+    },
+    {
+      "record_id": "yamama_city-20260914-167",
+      "observed_at": "2026.09.14",
+      "complex_id": "yamama_city",
+      "complex_name": "야마마 시티",
+      "region": "알아دل",
+      "units": null,
+      "units_label": "세대수 공개 확인 안 됨",
+      "unit_area_m2": 167,
+      "asking_price_iqd": 288600000,
+      "unit_price_iqd": 1728144,
+      "source_url": "https://www.iraqre.com/ar/sell/%D8%B4%D9%82%D8%A9-%D9%84%D9%84%D8%A8%D9%8A%D8%B9-%D9%81%D9%8A-%D9%85%D8%AC%D9%85%D8%B9-%D8%A7%D9%84%D9%8A%D9%85%D8%A7%D9%85%D8%A9",
+      "source_status": "current"
     }
   ]
 }
