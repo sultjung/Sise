@@ -815,6 +815,13 @@
     {label:"사드르시티 주택 · 200m² / 300M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D9%85%D8%AF%D9%8A%D9%86%D8%A9-%D8%A7%D9%84%D8%B5%D8%AF%D8%B1/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9"},
     {label:"사드르시티 주택 · 75m² / 260M IQD",url:"https://iq.opensooq.com/ar/%D8%A8%D8%BA%D8%AF%D8%A7%D8%AF/%D9%85%D8%AF%D9%8A%D9%86%D8%A9-%D8%A7%D9%84%D8%B5%D8%AF%D8%B1/%D8%B9%D9%82%D8%A7%D8%B1%D8%A7%D8%AA/%D8%A8%D9%8A%D9%88%D8%AA-%D9%88%D9%85%D9%86%D8%A7%D8%B2%D9%84-%D9%84%D9%84%D8%A8%D9%8A%D8%B9"}
   ];
+  // Villa and detached-house advertisements are intentionally excluded from
+  // the apartment-region view, even if an older static source list remains.
+  ['yarmouk','zayouna','newbaghdad','karrada','sadrcity'].forEach(key=>{
+    districts[key].propertyType='아파트';
+    districts[key].sources=[];
+    districts[key].source='아파트 단지 매물 확인 중';
+  });
 
   const varGreenZone = '#149764';
   const greenZone = {
@@ -902,6 +909,11 @@
     amiriya:['al_wud','millennium'],
     yarmouk:['yarmouk_compound'],
     bismayah:['bismayah_complex']
+  };
+  const additionalComplexIdsByDistrict = {
+    karrada:['DECCG8'],
+    newbaghdad:['D58DG8'],
+    zayouna:['2E44F6']
   };
 
   const listEl = document.getElementById('district-list');
@@ -1490,18 +1502,34 @@
 
   function applyIbaityRegionPrices(snapshot){
     const summariesByKey={};
+    const summariesById={};
     Object.values(snapshot.by_complex||{}).forEach(summary=>{
+      if(summary.complex_id) summariesById[summary.complex_id]=summary;
       const key=summary.complex_key;
       if(!key || !Number.isFinite(summary.median_price_per_m2_iqd) || !(summary.sample_count>0)) return;
       if(!summariesByKey[key] || summary.sample_count>summariesByKey[key].sample_count) summariesByKey[key]=summary;
     });
-    Object.entries(complexKeysByDistrict).forEach(([districtKey,complexKeys])=>{
+    const districtGroups={...complexKeysByDistrict};
+    Object.entries(additionalComplexIdsByDistrict).forEach(([districtKey,ids])=>{
+      districtGroups[districtKey]=[...(districtGroups[districtKey]||[]),...ids.map(id=>({complexId:id}))];
+    });
+    Object.entries(districtGroups).forEach(([districtKey,complexKeys])=>{
       const d=districts[districtKey];
       if(!d) return;
-      const included=complexKeys.map(key=>({key,summary:summariesByKey[key]})).filter(x=>x.summary);
+      const included=complexKeys.map(group=>{
+        const key=typeof group==='string'?group:null;
+        const summary=key?summariesByKey[key]:summariesById[group.complexId];
+        return {key,summary};
+      }).filter(x=>x.summary);
       if(!included.length){
         d.iqd=null;d.sampleCount=0;d.sourceKind='pending';
-        d.source=`최근 90일 확인 매물 없음 · 지역 대표값 산출 대기`;
+        d.propertyType='아파트';d.complex='아파트 단지 매물 미확인';
+        const hasHistorical=included.length===0 && (complexKeys||[]).some(group=>{
+          const summary=typeof group==='string'?summariesByKey[group]:summariesById[group.complexId];
+          return summary&&summary.all_sample_count>0;
+        });
+        d.source=hasHistorical?'단지 매물은 확인되었으나 최근 90일 매물 없음':'현재 수집 데이터에서 아파트 단지 매물 미확인';
+        d.priceMethod=hasHistorical?'최근 90일 공개 매물 없음':'아파트 단지 표본 없음';
         d.sources=[];return;
       }
       const complexPrices=included.map(x=>x.summary.median_price_per_m2_iqd).sort((a,b)=>a-b);
@@ -1518,7 +1546,7 @@
       d.source=`ibaity 공개 매물 · 단지 ${included.length}곳 · 최근 매물 ${listingCount}건 · 단지 중앙값의 중앙값`;
       const sourceIds=new Set(included.flatMap(x=>x.summary.listing_ids||[]));
       d.sources=(snapshot.listings||[]).filter(listing=>sourceIds.has(listing.id)&&listing.source_url).slice(0,12).map(listing=>({
-        label:`${listing.complex_key} · ${listing.area_m2}m² / ${Number(listing.price_iqd).toLocaleString('en-US')} IQD`,url:listing.source_url
+        label:`${listing.complex_name_ar||listing.complex_key||'Ibaity'} · ${listing.area_m2}m² / ${Number(listing.price_iqd).toLocaleString('en-US')} IQD`,url:listing.source_url
       }));
       d.sourceNote=`지역 대표값은 ${included.length}개 단지의 최근 ${snapshot.current_window_days||90}일 단지별 중앙값을 동일 가중치로 다시 계산한 중앙값입니다. 전체 매물 통합 중앙값이 아니며, 실제 거래가가 아닌 공개 매도 호가입니다.`;
     });
