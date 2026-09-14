@@ -1436,7 +1436,11 @@
       d.checked=snapshot.updated_at;
       d.sourceKind=d.sampleCount===1?'single':'sample';
       d.priceMethod=`ibaity 공개 매물 호가 ${d.sampleCount}건 중앙값`;
-      d.sources=[{label:`ibaity API · ${d.sampleCount}건`,url:sourceUrl}];
+      const listingSources=(snapshot.listings||[])
+        .filter(listing=>listing.complex_key===key && listing.source_url)
+        .slice(0,12)
+        .map((listing,index)=>({label:`ibaity · ${listing.area_m2}m² / ${Number(listing.price_iqd).toLocaleString('en-US')} IQD`,url:listing.source_url}));
+      d.sources=listingSources.length ? listingSources : [{label:`ibaity API · ${d.sampleCount}건`,url:sourceUrl}];
       d.sourceNote='ibaity 공개 client API에서 수집한 승인 매매 아파트의 등록 호가입니다. 실거래가가 아니며, 가격·면적이 확인된 매물만 중앙값에 포함했습니다.';
     });
     refreshComplexOrdering();
