@@ -391,7 +391,7 @@
 
   <div class="split">
     <div class="panel">
-      <div class="panel-head"><h3 id="list-panel-title">아파트·컴파운드</h3><div class="count" id="list-panel-count">15 PROJECTS</div></div>
+      <div class="panel-head"><h3 id="list-panel-title">아파트·컴파운드</h3><div class="count" id="list-panel-count">14 PROJECTS</div></div>
       <div class="district-list" id="district-list"></div>
     </div>
     <div class="panel">
@@ -687,6 +687,13 @@
       units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"주거단지", sizes:"면적 공개 확인 안 됨", centroid:[33.333962,44.302692], location_locked:true, location_source:"사용자 제공 좌표 · 2026.09.14",
       sources:[], infoSources:[],
       sourceNote:"위치 좌표는 사용자가 직접 확정한 기준값입니다. 가격 자료는 별도 검증이 필요합니다."
+    },
+    al_zahraa: {
+      nameKr:"알 자흐라 주거단지", nameEn:"AL ZAHRAA RESIDENTIAL COMPLEX", nameAr:"مجمع الزهراء السكني", district:"자프라니야 · 바그다드",
+      iqd:1350000, sourceKind:"official", priceMethod:"개발사 공개 시작가", sampleCount:0, checked:"2026.09.14",
+      units:null, unitsLabel:"세대수 공개 확인 안 됨", buildings:"공개 안내 기준", sizes:"185m²", centroid:[33.272274,44.474394], location_locked:true, location_source:"사용자 제공 좌표 · 2026.09.14",
+      sources:[], infoSources:[{label:"개발사 공식 홈페이지 · 시작가 1,350,000 IQD/m²",url:"https://alzahraacomplex.com/"}],
+      sourceNote:"개발사 홈페이지에 공개된 1,350,000 IQD/m² 시작가입니다. 층수와 상환기간에 따라 가격이 달라질 수 있어 민간 실거래·매물 중앙값으로 해석하지 않습니다."
     }
   };
 
@@ -862,12 +869,20 @@
     if(ap!==bp) return ap?-1:1;
     return ap ? districts[b].iqd-districts[a].iqd : districts[a].nameKr.localeCompare(districts[b].nameKr,'ko');
   });
-  const orderedComplexKeys = Object.keys(complexes).sort((a,b)=>{
+  let orderedComplexKeys = Object.keys(complexes).sort((a,b)=>{
     const ap=hasPrice(complexes[a]),bp=hasPrice(complexes[b]);
     if(ap!==bp) return ap?-1:1;
     return ap ? complexes[b].iqd-complexes[a].iqd : complexes[a].nameKr.localeCompare(complexes[b].nameKr,'ko');
   });
-  const pricedComplexKeys = orderedComplexKeys.filter(key=>hasPrice(complexes[key]));
+  let pricedComplexKeys = orderedComplexKeys.filter(key=>hasPrice(complexes[key]));
+  function refreshComplexOrdering(){
+    orderedComplexKeys = Object.keys(complexes).sort((a,b)=>{
+      const ap=hasPrice(complexes[a]),bp=hasPrice(complexes[b]);
+      if(ap!==bp) return ap?-1:1;
+      return ap ? complexes[b].iqd-complexes[a].iqd : complexes[a].nameKr.localeCompare(complexes[b].nameKr,'ko');
+    });
+    pricedComplexKeys = orderedComplexKeys.filter(key=>hasPrice(complexes[key]));
+  }
 
   let activeMode = 'complex';
   let currencyMode = 'usd';
@@ -947,7 +962,7 @@
         </div>
         ${sourceLinksHtml(d)}`;
       row.addEventListener('click',()=>selectComplex(key));
-      row.querySelector('.source-details').addEventListener('click',e=>e.stopPropagation());
+      row.querySelector('.source-details')?.addEventListener('click',e=>e.stopPropagation());
       listEl.appendChild(row);
     });
   }
@@ -956,6 +971,7 @@
     chartEl.innerHTML = '';
     const data = activeMode==='region' ? districts : complexes;
     const keys = activeMode==='region' ? orderedRegionKeys.filter(k=>hasPrice(districts[k])) : pricedComplexKeys;
+    if(!keys.length){ chartSubtitle.textContent=`PRICE PER M² · ${currencyMode.toUpperCase()}`; return; }
     const max = Math.max(...keys.map(k=>data[k].iqd));
     keys.forEach(key=>{
       const d = data[key];
@@ -1055,7 +1071,7 @@
     complex:{
       mansour_city:[-108,-62],iraq_gate:[116,38],palm_towers:[98,-70],royal_city:[-116,26],
       baghdad_marina:[86,68],jawahir_dijla:[92,-48],nasim_city:[-92,-54],bismayah_complex:[92,28],
-      dar_alsalam:[84,-68],millennium:[-88,22],yarmouk_compound:[-96,-34],sama_baghdad:[98,-12],al_salam_district:[-88,50],al_khulood:[90,44],al_wud:[94,28]
+      dar_alsalam:[84,-68],millennium:[-88,22],yarmouk_compound:[-96,-34],yamama_city:[98,-12],al_zahraa:[-88,50],al_wud:[94,28]
     }
   };
 
@@ -1328,7 +1344,7 @@
       Object.values(polyLayers).forEach(poly=>{poly.closeTooltip();poly.unbindTooltip();poly.setStyle({color:'#9A9CA2',weight:1,fillOpacity:.07,opacity:.45});});
       viewTitle.textContent='바그다드 아파트 단지별 시세';viewSub.textContent='RESIDENTIAL COMPLEXES';
       viewNote.textContent='리스트 또는 지도 클릭 시 해당 단지로 이동하고 매물 정보가 열립니다 · 팝업에서 각 매물 원문을 바로 열 수 있습니다';
-      listPanelTitle.textContent='아파트·컴파운드';listPanelCount.textContent='15 PROJECTS';mapPanelCount.textContent='확인 위치·참고 위치';
+      listPanelTitle.textContent='아파트·컴파운드';listPanelCount.textContent=`${orderedComplexKeys.length} PROJECTS`;mapPanelCount.textContent='사용자 확정 위치';
       chartTitle.textContent='시세 확인 단지별 m² 단가 비교';
       map.fitBounds(complexBounds,{padding:[24,24]});
     }
@@ -1404,6 +1420,7 @@
     document.querySelectorAll('.unit-price-block.market .price-caption small').forEach(el=>{el.textContent='잠정 참고값 · 재검증 중';});
     document.querySelectorAll('.unit-sources').forEach(el=>{el.open=false;});
   }
+  refreshComplexOrdering();
   applyDataQualityGate();
 
   let qualityFilter='all';
