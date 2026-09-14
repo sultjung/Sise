@@ -273,7 +273,7 @@
     </div>
   </div>
   <div class="top-controls">
-    <div class="updated">LAST UPDATED · 2026.09.10</div>
+    <div class="updated" id="last-updated">LAST UPDATED · 2026.09.14</div>
     <div class="toggle">
       <button id="btn-iqd" aria-pressed="false">IQD</button>
       <button id="btn-usd" class="active" aria-pressed="true">USD</button>
@@ -1397,6 +1397,8 @@
   function applyLatestPrices(snapshot){
     if(!snapshot || !snapshot.by_district) return;
     if(snapshot.updated_at){
+      const headerUpdate=document.getElementById('last-updated');
+      if(headerUpdate) headerUpdate.textContent=`LAST UPDATED · ${snapshot.updated_at.replaceAll('-','.')}`;
       const updateEl=document.getElementById('bismayah-update-date');
       if(updateEl) updateEl.textContent=`LAST UPDATE · ${snapshot.updated_at.replaceAll('-','.')}`;
     }
