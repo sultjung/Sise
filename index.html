@@ -389,7 +389,7 @@
     </div>
   </div>
   <div class="section-note" id="view-section-note" style="margin:-7px 0 12px;">리스트 또는 지도 클릭 시 해당 단지로 이동하고 매물 정보가 열립니다 · 지도는 마우스 휠로 확대·축소</div>
-  <div class="data-tools"><label for="quality-filter">표시 기준</label><select id="quality-filter"><option value="all">전체 상태</option><option value="verified">검증 완료만</option><option value="pending">재검증 대상만</option></select><button id="print-report" type="button">보고서용 인쇄</button></div>
+  <div class="data-tools"><label for="quality-filter">표시 기준</label><select id="quality-filter"><option value="all">전체 상태</option><option value="verified">검증 완료만</option><option value="pending">재검증 대상만</option></select><button id="download-excel" type="button">엑셀 다운로드</button></div>
 
   <div class="split">
     <div class="panel">
@@ -436,6 +436,7 @@
 <script>
   const RATE = 1320; // 1 USD ≈ 1320 IQD
   let trendHistory = [];
+  let ibaitySnapshot = null;
   let selectedTrendKey = 'all';
   let selectedTrendType = 'bar';
   const tierColor = { high:"#D94800", mid:"#FF8A3D", low:"#FFC896", pending:"#C9CDD3" };
@@ -1471,7 +1472,33 @@
 
   let qualityFilter='all';
   document.getElementById('quality-filter').addEventListener('change',e=>{qualityFilter=e.target.value;renderList();});
-  document.getElementById('print-report').addEventListener('click',()=>window.print());
+  function csvCell(value){
+    const text=value===null||value===undefined?'':String(value);
+    return /[",\n]/.test(text) ? `"${text.replaceAll('"','""')}"` : text;
+  }
+  function downloadExcel(){
+    if(!ibaitySnapshot?.listings?.length){
+      alert('아직 매물 데이터를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+    const summaries={};
+    Object.values(ibaitySnapshot.by_complex||{}).forEach(summary=>{
+      if(!summary.complex_key) return;
+      if(!summaries[summary.complex_key] || summary.sample_count>summaries[summary.complex_key].sample_count) summaries[summary.complex_key]=summary;
+    });
+    const headers=['단지명(원문)','단지명(사이트)','매물 ID','등록일','매매가(IQD)','면적(m²)','단가(IQD/m²)','단가(USD/m²)','최근 90일 중앙값(IQD/m²)','최근 90일 표본수','전체 활성 매물수','원문 링크'];
+    const rows=ibaitySnapshot.listings.map(listing=>{
+      const summary=summaries[listing.complex_key]||{};
+      return [listing.complex_name_ar,listing.complex_key||'미분류',listing.id,listing.created_at,listing.price_iqd,listing.area_m2,listing.price_per_m2_iqd,Math.round(listing.price_per_m2_iqd/RATE),summary.median_price_per_m2_iqd||'',summary.sample_count||0,summary.all_sample_count||0,listing.source_url];
+    });
+    const csv='\uFEFF'+[headers,...rows].map(row=>row.map(csvCell).join(',')).join('\r\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;link.download=`sise-ibaity-${ibaitySnapshot.updated_at||'latest'}.csv`;
+    document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+  }
+  document.getElementById('download-excel').addEventListener('click',downloadExcel);
 
   refreshComplexOrdering();
   renderList();renderChart();renderTrend();updateLegend();scheduleCalloutLayout();
@@ -1484,7 +1511,7 @@
     .catch(()=>{ /* latest snapshot unavailable: retain embedded verified values */ });
   fetch('./data/ibaity-latest.json',{cache:'no-store'})
     .then(response=>response.ok ? response.json() : null)
-    .then(applyIbaitySnapshot)
+    .then(snapshot=>{ibaitySnapshot=snapshot;applyIbaitySnapshot(snapshot);})
     .catch(()=>{ /* ibaity snapshot unavailable: retain embedded values */ });
 </script>
 
