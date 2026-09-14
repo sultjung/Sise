@@ -11,6 +11,7 @@ scripts/scrape_prices.py                  ← aiqarat.com에서 지역별 매매
 .github/workflows/monthly-price-update.yml ← 매월 말일(KST) 자동 실행 + 수동 실행 버튼
 data/history.json                         ← 날짜별·지역별 원시 수집 이력
 data/latest.json                          ← 표본 3건 이상인 최신 지역 중앙값
+data/ibaity-latest.json                   ← ibaity 전체 페이지에서 수집한 최신 아파트 매물·단지별 중앙값
 ```
 
 ## 대시보드 (`index.html`)
@@ -25,6 +26,11 @@ data/latest.json                          ← 표본 3건 이상인 최신 지�
 Branch를 `main` / `(root)`로 설정하면 `index.html`이 바로 사이트로 열립니다.
 
 ## 시세 자동 수집 (`scripts/`, `.github/workflows/`)
+
+- `scripts/scrape_ibaity.py`는 ibaity 공개 client API의 `PageNumber=1`부터 마지막 페이지까지 바그다드 아파트 매매 매물을 수집합니다.
+- 승인된 현행 매물만 남기고, 가격·면적이 없는 매물과 판매 완료·만료 매물을 제외합니다. 개인정보(중개인 이름·전화번호)는 저장하지 않습니다.
+- `data/ibaity-latest.json`에는 개별 매물 원장과 단지별 ㎡당 호가 중앙값을 저장합니다. 가격은 실거래가가 아닌 등록 호가입니다.
+- `.github/workflows/ibaity-price-update.yml`가 매일 실행되며, Actions에서 수동 실행도 가능합니다.
 
 - aiqarat.com을 지역명으로 매월 말일 자동 검색해서 매물을 수집
 - "매매(للبيع)"만 남기고 "임대"는 자동 제외
