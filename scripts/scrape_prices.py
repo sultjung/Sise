@@ -76,6 +76,7 @@ REQUEST_DELAY_SEC = 2.0
 MAX_LISTINGS_PER_AREA = 40   # 지역당 너무 많이 긁지 않도록 상한
 HISTORY_PATH = Path(__file__).resolve().parent.parent / "data" / "history.json"
 LATEST_PATH = Path(__file__).resolve().parent.parent / "data" / "latest.json"
+LISTING_HISTORY_PATH = Path(__file__).resolve().parent.parent / "data" / "listing-history.json"
 MIN_PUBLISHABLE_SAMPLES = 1
 
 SALE_KEYWORDS = ["للبيع"]
@@ -193,6 +194,48 @@ def summarize(listings: list[dict]) -> dict:
     }
 
 
+def append_listing_history(listings: list[dict], observed_at: str, area_cfg: dict, property_type: str | None) -> None:
+    """Append each unique listing to the durable download ledger.
+    Expired source links remain as last-confirmed observations; a later crawl
+    may update its status but never deletes the recorded asking price.
+    """
+    if not listings:
+        return
+    base = {
+        "schema_version": "1.0",
+        "description": "확인 당시 공개된 매매 호가 원장. 매물 링크가 만료되어도 마지막 확인 기록은 유지한다.",
+        "updated_at": observed_at,
+        "columns": ["observed_at", "complex_name", "units", "units_label", "unit_area_m2", "asking_price_iqd", "unit_price_iqd", "source_status", "source_url"],
+        "records": [],
+    }
+    if LISTING_HISTORY_PATH.exists():
+        try:
+            base = json.loads(LISTING_HISTORY_PATH.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            pass
+    records = base.setdefault("records", [])
+    existing_urls = {record.get("source_url") for record in records}
+    for item in listings:
+        if item["url"] in existing_urls:
+            continue
+        listing_id = item["url"].rstrip("/").split("/")[-1].split("-")[0]
+        records.append({
+            "record_id": f"{area_cfg['district_key']}-{listing_id}",
+            "observed_at": observed_at,
+            "complex_id": area_cfg["district_key"],
+            "complex_name": item.get("complex_name") or area_cfg["district_kr"],
+            "units": None,
+            "units_label": "세대수 공개 확인 안 됨",
+            "unit_area_m2": item["area_m2"],
+            "asking_price_iqd": item["price_iqd"],
+            "unit_price_iqd": item["price_per_m2_iqd"],
+            "property_type": property_type or "확인 중",
+            "source_url": item["url"],
+            "source_status": "current",
+        })
+    base["updated_at"] = observed_at
+    LISTING_HISTORY_PATH.write_text(json.dumps(base, ensure_ascii=False, indent=2), encoding="utf-8")
+
 def append_history(entry: dict) -> None:
     HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
     history = json.loads(HISTORY_PATH.read_text(encoding="utf-8")) if HISTORY_PATH.exists() else []
@@ -258,6 +301,7 @@ def main():
                 fallback_listings.extend(collect_area(query))
             listings = fallback_listings
             property_type = "빌라/단독주택" if fallback_listings else None
+        append_listing_history(listings, today, area_cfg, property_type)
         summary = summarize(listings)
         summary["district_kr"] = area_cfg["district_kr"]
         summary["property_type"] = property_type
@@ -277,7 +321,7 @@ def main():
         sys.exit(2)
     append_history(entry)
     write_latest(entry)
-    print(f"\n→ {HISTORY_PATH} 및 {LATEST_PATH} 에 저장 완료")
+    print(f"\n→ {HISTORY_PATH}, {LATEST_PATH}, {LISTING_HISTORY_PATH} 에 저장 완료")
 
 
 if __name__ == "__main__":
