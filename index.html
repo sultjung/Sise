@@ -892,6 +892,18 @@
   let selectedDistrictKey = null;
   let selectedComplexKey = null;
 
+  // Region prices are derived from the current complex prices. A complex is
+  // assigned only where its location is sufficiently established in SISE.
+  const complexKeysByDistrict = {
+    mansour:['mansour_city','iraq_gate','palm_towers','royal_city'],
+    saydiya:['baghdad_marina'],
+    kadhimiya:['jawahir_dijla'],
+    jihad:['nasim_city'],
+    amiriya:['al_wud','millennium'],
+    yarmouk:['yarmouk_compound'],
+    bismayah:['bismayah_complex']
+  };
+
   const listEl = document.getElementById('district-list');
   const chartEl = document.getElementById('compare-panel');
   const viewTitle = document.getElementById('view-section-title');
@@ -1456,8 +1468,47 @@
       d.sources=listingSources.length ? listingSources : [{label:`ibaity API · ${d.sampleCount}건`,url:sourceUrl}];
       d.sourceNote=`ibaity 공개 client API에서 수집한 승인 매매 아파트의 등록 호가입니다. 실거래가가 아니며, 최근 ${summary.current_window_days||90}일 등록 매물 중 가격·면적이 확인된 ${d.sampleCount}건을 사용했습니다. 전체 활성 매물 ${summary.all_sample_count||d.sampleCount}건 중 오래된 매물은 현재 중앙값에서 제외했습니다.`;
     });
+    applyIbaityRegionPrices(snapshot);
     refreshComplexOrdering();
     renderList();renderChart();updateCalloutTexts();updateLegend();scheduleCalloutLayout();
+  }
+
+  function applyIbaityRegionPrices(snapshot){
+    const summariesByKey={};
+    Object.values(snapshot.by_complex||{}).forEach(summary=>{
+      const key=summary.complex_key;
+      if(!key || !Number.isFinite(summary.median_price_per_m2_iqd) || !(summary.sample_count>0)) return;
+      if(!summariesByKey[key] || summary.sample_count>summariesByKey[key].sample_count) summariesByKey[key]=summary;
+    });
+    Object.entries(complexKeysByDistrict).forEach(([districtKey,complexKeys])=>{
+      const d=districts[districtKey];
+      if(!d) return;
+      const included=complexKeys.map(key=>({key,summary:summariesByKey[key]})).filter(x=>x.summary);
+      if(!included.length){
+        d.iqd=null;d.sampleCount=0;d.sourceKind='pending';
+        d.source=`최근 90일 확인 매물 없음 · 지역 대표값 산출 대기`;
+        d.sources=[];return;
+      }
+      const complexPrices=included.map(x=>x.summary.median_price_per_m2_iqd).sort((a,b)=>a-b);
+      const middle=Math.floor(complexPrices.length/2);
+      const regionalMedian=complexPrices.length%2 ? complexPrices[middle] : Math.round((complexPrices[middle-1]+complexPrices[middle])/2);
+      const listingCount=included.reduce((sum,x)=>sum+(x.summary.sample_count||0),0);
+      d.iqd=regionalMedian;
+      d.sampleCount=listingCount;
+      d.sourceKind=included.length===1&&listingCount===1?'single':'sample';
+      d.complex=`확인 단지 ${included.length}곳 · 최근 매물 ${listingCount}건`;
+      d.propertyType='아파트';
+      d.checked=snapshot.updated_at;
+      d.priceMethod=`단지별 중앙값의 중앙값 · 최근 ${snapshot.current_window_days||90}일`;
+      d.source=`ibaity 공개 매물 · 단지 ${included.length}곳 · 최근 매물 ${listingCount}건 · 단지 중앙값의 중앙값`;
+      const sourceIds=new Set(included.flatMap(x=>x.summary.listing_ids||[]));
+      d.sources=(snapshot.listings||[]).filter(listing=>sourceIds.has(listing.id)&&listing.source_url).slice(0,12).map(listing=>({
+        label:`${listing.complex_key} · ${listing.area_m2}m² / ${Number(listing.price_iqd).toLocaleString('en-US')} IQD`,url:listing.source_url
+      }));
+      d.sourceNote=`지역 대표값은 ${included.length}개 단지의 최근 ${snapshot.current_window_days||90}일 단지별 중앙값을 동일 가중치로 다시 계산한 중앙값입니다. 전체 매물 통합 중앙값이 아니며, 실제 거래가가 아닌 공개 매도 호가입니다.`;
+    });
+    refreshOrderedRegions();
+    refreshDistrictTierVisuals();
   }
 
   function applyDataQualityGate(){
