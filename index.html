@@ -901,10 +901,12 @@
   const chartSubtitle = document.getElementById('chart-subtitle');
 
   function sourceLinksHtml(item){
-    const priceLinks = item.sources.map(s=>`<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join('');
-    const infoLinks = item.infoSources.map(s=>`<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join('');
+    const priceSources = Array.isArray(item.sources) ? item.sources : [];
+    const infoSources = Array.isArray(item.infoSources) ? item.infoSources : [];
+    const priceLinks = priceSources.map(s=>`<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join('');
+    const infoLinks = infoSources.map(s=>`<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join('');
     return `<details class="source-details">
-      <summary>${item.sources.length?`가격 원문 ${item.sources.length}개 · `:''}기본정보/위치 ${item.infoSources.length}개</summary>
+      <summary>${priceSources.length?`가격 원문 ${priceSources.length}개 · `:''}기본정보/위치 ${infoSources.length}개</summary>
       <div class="source-links">${priceLinks}${infoLinks}<div class="source-note">${item.sourceNote}</div></div>
     </details>`;
   }
@@ -916,6 +918,7 @@
   }
 
   function renderList(){
+    refreshComplexOrdering();
     listEl.innerHTML = '';
     if(activeMode==='region'){
       orderedRegionKeys.forEach((key,i)=>{
@@ -1427,6 +1430,7 @@
   document.getElementById('quality-filter').addEventListener('change',e=>{qualityFilter=e.target.value;renderList();});
   document.getElementById('print-report').addEventListener('click',()=>window.print());
 
+  refreshComplexOrdering();
   renderList();renderChart();renderTrend();updateLegend();scheduleCalloutLayout();
   fetch('./data/complex-history.json',{cache:'no-store'})
     .then(r=>r.ok?r.json():[]).then(rows=>{ trendHistory=Array.isArray(rows)?rows:[]; renderTrend(); })
