@@ -316,7 +316,7 @@
         </div>
       </div>
       <div class="unit-source">공식가: 알라피다인 은행 공문 인용 · <a href="https://964media.com/296624/" target="_blank" rel="noopener">964media 원문</a></div>
-      <details class="unit-sources"><summary>시장 매물 원문 5건 열기</summary><div class="unit-source-links">
+      <details id="bismayah-links-100" class="unit-sources"><summary>시장 매물 원문 5건 열기</summary><div class="unit-source-links">
         <a href="https://www.raqi.app/ar/posts/10660760-%D9%A1%D9%A0%D9%A0%D9%85-%D8%B4%D8%B1%D9%82%D9%8A-%D8%AA%D8%AD%D9%88%D9%8A%D9%84-%D9%81%D9%88%D8%B1%D9%8A" target="_blank" rel="noopener">113M</a>
         <a href="https://www.raqi.app/ar/posts/10609043-%D9%A1%D9%A0%D9%A0%D9%85-%D8%B7%D8%A7%D8%A8%D9%82%D9%A8-%D9%85%D8%A4%D8%AB%D8%AB%D8%A9" target="_blank" rel="noopener">112M</a>
         <a href="https://www.raqi.app/ar/posts/10596103-%D9%A1%D9%A0%D9%A0%D9%85-%D8%BA%D8%B1%D8%A8%D9%8A-%D9%83%D8%A7%D8%B4" target="_blank" rel="noopener">114.5M</a>
@@ -340,7 +340,7 @@
         </div>
       </div>
       <div class="unit-source">공식가: 알라피다인 은행 공문 인용 · <a href="https://964media.com/296624/" target="_blank" rel="noopener">964media 원문</a></div>
-      <details class="unit-sources"><summary>시장 매물 원문 5건 열기</summary><div class="unit-source-links">
+      <details id="bismayah-links-120" class="unit-sources"><summary>시장 매물 원문 5건 열기</summary><div class="unit-source-links">
         <a href="https://www.raqi.app/ar/posts/10662466-a6-%D8%B79-%D9%A1%D9%A2%D9%A0%D9%85-%D8%AF%D9%8A%D9%83%D9%88%D8%B1%D8%A7%D8%AA" target="_blank" rel="noopener">130M</a>
         <a href="https://www.raqi.app/ar/posts/10583019-%D8%A8%D8%B3%D9%85%D8%A7%D9%8A%D8%A9-%D9%A1%D9%A2%D9%A0%D9%85-%D9%83%D8%A7%D8%B4" target="_blank" rel="noopener">126M</a>
         <a href="https://www.raqi.app/ar/posts/10656189-%D8%A8%D8%B3%D9%85%D8%A7%D9%8A%D8%A9-%D8%A8%D9%84%D9%88%D9%83-b1-%D9%A1%D9%A2%D9%A0%D9%85-%D9%85%D8%A4%D8%AB%D8%AB%D8%A9" target="_blank" rel="noopener">140M</a>
@@ -364,7 +364,7 @@
         </div>
       </div>
       <div class="unit-source">공식가: 알라피다인 은행 공문 인용 · <a href="https://964media.com/296624/" target="_blank" rel="noopener">964media 원문</a></div>
-      <details class="unit-sources"><summary>시장 매물 원문 5건 열기</summary><div class="unit-source-links">
+      <details id="bismayah-links-140" class="unit-sources"><summary>시장 매물 원문 5건 열기</summary><div class="unit-source-links">
         <a href="https://www.raqi.app/ar/posts/10224270-%D9%A1%D9%A4%D9%A0%D9%85-%D8%B7%D8%A7%D8%A8%D9%82%D9%A2-%D9%81%D8%A7%D8%B6%D9%8A%D8%A9" target="_blank" rel="noopener">153M</a>
         <a href="https://www.raqi.app/ar/posts/10634319-%D9%A1%D9%A4%D9%A0%D9%85-%D9%85%D8%A4%D8%AB%D8%AB%D8%A9-%D9%86%D8%B8%D8%A7%D9%85-%D8%B4%D8%B1%D9%82%D9%8A" target="_blank" rel="noopener">153M</a>
         <a href="https://www.raqi.app/ar/posts/10630989-%D8%A8%D9%84%D9%88%D9%83-a6-%D9%A1%D9%A4%D9%A0%D9%85-%D8%AF%D9%88%D8%B1-%D8%B3%D8%A7%D8%A8%D8%B9" target="_blank" rel="noopener">155M</a>
@@ -1469,8 +1469,23 @@
       d.sourceNote=`ibaity 공개 client API에서 수집한 승인 매매 아파트의 등록 호가입니다. 실거래가가 아니며, 최근 ${summary.current_window_days||90}일 등록 매물 중 가격·면적이 확인된 ${d.sampleCount}건을 사용했습니다. 전체 활성 매물 ${summary.all_sample_count||d.sampleCount}건 중 오래된 매물은 현재 중앙값에서 제외했습니다.`;
     });
     applyIbaityRegionPrices(snapshot);
+    updateBismayahMarketLinks(snapshot);
     refreshComplexOrdering();
     renderList();renderChart();updateCalloutTexts();updateLegend();scheduleCalloutLayout();
+  }
+
+  function updateBismayahMarketLinks(snapshot){
+    const currentIds=new Set(Object.values(snapshot.by_complex||{}).filter(summary=>summary.complex_key==='bismayah_complex').flatMap(summary=>summary.listing_ids||[]));
+    const listings=(snapshot.listings||[]).filter(listing=>listing.complex_key==='bismayah_complex'&&currentIds.has(listing.id)&&listing.source_url);
+    [100,120,140].forEach(area=>{
+      const items=listings.filter(listing=>Number(listing.area_m2)===area).slice(0,12);
+      const details=document.getElementById(`bismayah-links-${area}`);
+      if(!details||!items.length) return;
+      const summary=details.querySelector('summary');
+      const links=details.querySelector('.unit-source-links');
+      if(summary) summary.textContent=`Ibaity 시장 매물 원문 ${items.length}건 열기`;
+      if(links) links.innerHTML=items.map(listing=>`<a href="${listing.source_url}" target="_blank" rel="noopener">${Number(listing.price_iqd).toLocaleString('en-US')} IQD · ${listing.created_at?.slice(0,10)||''}</a>`).join('');
+    });
   }
 
   function applyIbaityRegionPrices(snapshot){
