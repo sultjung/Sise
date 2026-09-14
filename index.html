@@ -1416,17 +1416,17 @@
       '매물 표본수':g.count,
       '평균 매매가 (IQD)':Math.round(g.asking/g.count),
       '평균 매매가 (USD)':Math.round(g.asking/g.count/RATE_IQD_PER_USD),
-      '평균 단가 (USD/m²)':Math.round(g.unitIqd/g.count/RATE_IQD_PER_USD*100)/100,
       '지역':g.region,
+      '평균 단가 (USD/m²)':Math.round(g.unitIqd/g.count/RATE_IQD_PER_USD*100)/100,
       '평균 단가 (IQD/m²)':Math.round(g.unitIqd/g.count)
     }));
     const summaryWs=XLSX.utils.json_to_sheet(summaryRows);
     applyExcelSheetStyle(summaryWs,summaryRows.length,8,[24,20,14,20,20,20,24,22]);
     for(let row=2;row<=summaryRows.length+1;row++){
-      ['C','D','E','F','H'].forEach(col=>{
+      ['C','D','E','G','H'].forEach(col=>{
         if(summaryWs[`${col}${row}`]) summaryWs[`${col}${row}`].z=col==='G' ? '#,##0.00' : '#,##0';
       });
-      if(summaryWs[`F${row}`]) summaryWs[`F${row}`].z='#,##0.00';
+      if(summaryWs[`G${row}`]) summaryWs[`G${row}`].z='#,##0.00';
       if(summaryWs[`H${row}`]) summaryWs[`H${row}`].z='#,##0';
     }
     const wb=XLSX.utils.book_new();
