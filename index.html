@@ -350,13 +350,13 @@
           <div class="unit-meta"><span>총액 <b>$105,000</b> · 138,600,000 IQD</span></div>
         </div>
         <div class="unit-price-block market">
-          <div class="price-caption"><span>민간 매물 호가</span><small>현재 원문 표본 없음</small></div>
-          <div class="price-row"><div class="price-primary"><span class="usd">—</span><span class="unit-label">USD/m²</span></div><div class="price-secondary"><span class="iqd">—</span> IQD/m²</div></div>
-          <div class="unit-meta"><span>삭제·만료 매물은 산정에서 제외 · 재수집 중</span></div>
+          <div class="price-caption"><span>민간 매물 호가</span><small>마지막 확인 2026.09.10 · 5건</small></div>
+          <div class="price-row"><div class="price-primary"><span class="usd">834</span><span class="unit-label">USD/m²</span></div><div class="price-secondary"><span class="iqd">1,092,857</span> IQD/m²</div></div>
+          <div class="unit-meta"><span>마지막 확인 총액 중앙값 <b>153,000,000 IQD</b> · 현재 원문 만료</span></div>
         </div>
       </div>
       <div class="unit-source">공식가: 알라피다인 은행 공문 인용 · <a href="https://964media.com/296624/" target="_blank" rel="noopener">964media 원문</a></div>
-      <details class="unit-sources"><summary>이전 원문 5건 (삭제·만료로 산정 제외)</summary><div class="unit-source-links">
+      <details class="unit-sources"><summary>마지막 확인 원문 5건 (현재 링크 만료)</summary><div class="unit-source-links">
         <a href="https://www.raqi.app/ar/posts/10224270-%D9%A1%D9%A4%D9%A0%D9%85-%D8%B7%D8%A7%D8%A8%D9%82%D9%A2-%D9%81%D8%A7%D8%B6%D9%8A%D8%A9" target="_blank" rel="noopener">153M</a>
         <a href="https://www.raqi.app/ar/posts/10634319-%D9%A1%D9%A4%D9%A0%D9%85-%D9%85%D8%A4%D8%AB%D8%AB%D8%A9-%D9%86%D8%B8%D8%A7%D9%85-%D8%B4%D8%B1%D9%82%D9%8A" target="_blank" rel="noopener">153M</a>
         <a href="https://www.raqi.app/ar/posts/10630989-%D8%A8%D9%84%D9%88%D9%83-a6-%D9%A1%D9%A4%D9%A0%D9%85-%D8%AF%D9%88%D8%B1-%D8%B3%D8%A7%D8%A8%D8%B9" target="_blank" rel="noopener">155M</a>
@@ -738,7 +738,7 @@
       {label:"Raqi · 120m² / 135M IQD · 완납",url:"https://www.raqi.app/ar/posts/11035429-%D8%B4%D9%82%D8%A9-%D9%A1%D9%A2%D9%A0%D9%85-%D8%B7%D8%A7%D8%A8%D9%82-%D9%A5"},
       {label:"Raqi · 120m² / 128M IQD · 직접 이전",url:"https://www.raqi.app/ar/posts/10925500-%D9%A1%D9%A2%D9%A0%D9%85-%D9%85%D8%AC%D9%85%D8%B9-a1-%D8%B7%D8%A7%D8%A8%D9%82-%D8%B3%D8%A7%D8%A8%D8%B9"}
     ],
-    sourceNote:"2026.09.14 현재 링크·총액·면적·매매 조건이 함께 확인되는 4건만 산정에 반영했습니다. 140㎡형은 현재 표본이 없어 전체 중앙값에는 포함하지 않았습니다."
+    sourceNote:"2026.09.14 현재 활성 원문 4건의 ㎡당 호가 중앙값은 1.120M IQD입니다. 140㎡형은 마지막 확인값 1.093M IQD/m²를 유지하되, 현재 활성 표본에는 포함하지 않았습니다."
   });
   Object.assign(complexes.baghdad_marina, {
     iqd:null, sampleCount:0, sourceKind:"pending", checked:"2026.09.11", priceMethod:"면적·매매 총액 동시 확인 매물 재검색 중",
@@ -837,7 +837,7 @@
     if(item.sourceKind==='official' || item.verified) return `<span class="badge verified">✓ ${compact?'공식':'공식가'}</span>`;
     if(item.sourceKind==='sample') return `<span class="badge sample">${compact?'중앙값':`매물 ${item.sampleCount}건`}</span>`;
     if(item.sourceKind==='single') return `<span class="badge single">${compact?'1건':'단일 매물'}</span>`;
-    if(item.sourceKind==='pending') return `<span class="badge pending">${compact?'수집 중':'표본 수집 중'}</span>`;
+    if(item.sourceKind==='pending') return `<span class="badge pending">${hasPrice(item) ? (compact?'마지막값':'마지막 확인값') : (compact?'수집 중':'표본 수집 중')}</span>`;
     if(item.sourceKind==='known') return `<span class="badge pending">${compact?'시세 미확인':'단지 정보 확인'}</span>`;
     return '<span class="badge estimate">예시</span>';
   }
@@ -1407,8 +1407,8 @@
   }
 
   function applyDataQualityGate(){
-    Object.values(complexes).forEach(c=>{if(c.iqd!==null){if(c.sourceKind!=='dual')c.sourceKind='pending';c.priceMethod=`${c.checked||'기준일'} 공개 매물 호가 · 원문 재검증 중`;c.sourceNote='표시값은 이전 기준일의 공개 매물 호가 중앙값입니다. 현재 링크 상태와 가격·면적 동시 표기를 재확인 중이며, 검증 완료 전에는 잠정 참고값으로 해석해야 합니다.';}});
-    Object.values(districts).forEach(d=>{if(d.iqd!==null&&d.sourceKind!=='official'&&d.sourceKind!=='dual'){d.sourceKind='pending';d.source=`${d.source||'대표 단지 공개 매물 호가'} · 원문 재검증 중`;}});
+    Object.values(complexes).forEach(c=>{if(c.iqd!==null){if(c.sourceKind!=='dual')c.sourceKind='pending';c.priceMethod=`${c.checked||'기준일'} 마지막 확인 공개 매물 호가`;c.sourceNote='매물이 만료되거나 링크가 삭제되어도 마지막 확인값은 유지합니다. 다만 현재 활성 매물 기준의 실시간 값이 아니므로, 확인일·표본수와 함께 해석해야 합니다.';}});
+    Object.values(districts).forEach(d=>{if(d.iqd!==null&&d.sourceKind!=='official'&&d.sourceKind!=='dual'){d.sourceKind='pending';d.source=`${d.source||'대표 단지 공개 매물 호가'} · 마지막 확인값(원문 재검증 예정)`;}});
     refreshOrderedRegions();
     document.querySelectorAll('.unit-price-block.market .price-caption small').forEach(el=>{el.textContent='잠정 참고값 · 재검증 중';});
     document.querySelectorAll('.unit-sources').forEach(el=>{el.open=false;});
