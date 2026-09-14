@@ -273,7 +273,7 @@
     </div>
   </div>
   <div class="top-controls">
-    <div class="updated" id="last-updated">LAST UPDATED · 2026.09.14</div>
+    <div class="updated">LAST UPDATED · 2026.09.10</div>
     <div class="toggle">
       <button id="btn-iqd" aria-pressed="false">IQD</button>
       <button id="btn-usd" class="active" aria-pressed="true">USD</button>
@@ -1397,8 +1397,6 @@
   function applyLatestPrices(snapshot){
     if(!snapshot || !snapshot.by_district) return;
     if(snapshot.updated_at){
-      const headerUpdate=document.getElementById('last-updated');
-      if(headerUpdate) headerUpdate.textContent=`LAST UPDATED · ${snapshot.updated_at.replaceAll('-','.')}`;
       const updateEl=document.getElementById('bismayah-update-date');
       if(updateEl) updateEl.textContent=`LAST UPDATE · ${snapshot.updated_at.replaceAll('-','.')}`;
     }
@@ -1432,18 +1430,30 @@
       const key=summary.complex_key;
       const d=key ? complexes[key] : null;
       const value=summary.median_price_per_m2_iqd;
-      if(!d || !Number.isFinite(value)) return;
+      if(!d) return;
+      const sampleCount=summary.sample_count||0;
+      const isDual=d.sourceKind==='dual';
+      if(!Number.isFinite(value) || sampleCount<1){
+        if(!isDual){
+          d.iqd=null;
+          d.sampleCount=0;
+          d.sourceKind='pending';
+          d.priceMethod=`최근 ${summary.current_window_days||90}일 공개 매물 없음`;
+          d.sources=[];
+        }
+        return;
+      }
       d.iqd=value;
-      d.sampleCount=summary.sample_count||0;
+      d.sampleCount=sampleCount;
       d.checked=snapshot.updated_at;
-      d.sourceKind=d.sampleCount===1?'single':'sample';
-      d.priceMethod=`ibaity 공개 매물 호가 ${d.sampleCount}건 중앙값`;
+      if(!isDual) d.sourceKind=d.sampleCount===1?'single':'sample';
+      d.priceMethod=`최근 ${summary.current_window_days||90}일 ibaity 공개 매물 호가 ${d.sampleCount}건 ${d.sampleCount===1?'':'중앙값'}`;
       const listingSources=(snapshot.listings||[])
-        .filter(listing=>listing.complex_key===key && listing.source_url)
+        .filter(listing=>listing.complex_key===key && (summary.listing_ids||[]).includes(listing.id) && listing.source_url)
         .slice(0,12)
         .map((listing,index)=>({label:`ibaity · ${listing.area_m2}m² / ${Number(listing.price_iqd).toLocaleString('en-US')} IQD`,url:listing.source_url}));
       d.sources=listingSources.length ? listingSources : [{label:`ibaity API · ${d.sampleCount}건`,url:sourceUrl}];
-      d.sourceNote='ibaity 공개 client API에서 수집한 승인 매매 아파트의 등록 호가입니다. 실거래가가 아니며, 가격·면적이 확인된 매물만 중앙값에 포함했습니다.';
+      d.sourceNote=`ibaity 공개 client API에서 수집한 승인 매매 아파트의 등록 호가입니다. 실거래가가 아니며, 최근 ${summary.current_window_days||90}일 등록 매물 중 가격·면적이 확인된 ${d.sampleCount}건을 사용했습니다. 전체 활성 매물 ${summary.all_sample_count||d.sampleCount}건 중 오래된 매물은 현재 중앙값에서 제외했습니다.`;
     });
     refreshComplexOrdering();
     renderList();renderChart();updateCalloutTexts();updateLegend();scheduleCalloutLayout();
