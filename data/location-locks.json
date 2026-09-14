@@ -14,7 +14,8 @@
     "dar_alsalam": { "name": "다르 알살람", "latitude": 33.336312, "longitude": 44.357106, "locked": true },
     "millennium": { "name": "밀레니엄 주거단지", "latitude": 33.315031, "longitude": 44.255361, "locked": true },
     "baghdad_marina": { "name": "바그다드 마리나", "latitude": 33.259301, "longitude": 44.366331, "locked": true },
-    "yarmouk_compound": { "name": "알야르무크 컴파운드", "latitude": 33.299778, "longitude": 44.346665, "locked": true }
+    "yarmouk_compound": { "name": "알야르무크 컴파운드", "latitude": 33.299778, "longitude": 44.346665, "locked": true },
+    "al_zahraa": { "name": "알 자흐라 주거단지", "latitude": 33.272274, "longitude": 44.474394, "locked": true }
   },
   "removed_without_user_coordinates": ["sama_baghdad", "al_salam_district", "al_khulood"]
 }
