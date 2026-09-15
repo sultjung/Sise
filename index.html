@@ -1577,6 +1577,10 @@
     const middle=Math.floor(sorted.length/2);
     return sorted.length%2 ? sorted[middle] : Math.round((sorted[middle-1]+sorted[middle])/2);
   }
+  function average(values){
+    const numbers=values.filter(value=>Number.isFinite(Number(value))).map(Number);
+    return numbers.length ? Math.round(numbers.reduce((sum,value)=>sum+value,0)/numbers.length) : null;
+  }
   function excelComplexRows(){
     const listings=ibaitySnapshot?.listings||[];
     return listings
@@ -1595,13 +1599,13 @@
           values:[
             excelValue(complex.nameKr),excelValue(district),excelValue(complex.units),excelValue(complex.completionYear),
             excelValue(Number(listing.price_iqd)),excelValue(Number(listing.area_m2)),excelValue(unit),
-            excelValue(Number.isFinite(unit)?Math.round(unit/RATE):null),excelValue(listing.source_url),excelValue(note)
+            excelValue(Number.isFinite(unit)?Math.round(unit/RATE):null),excelValue(listing.source_url),excelValue(listing.created_at?.slice(0,10))
           ],
           district,unit,listingCount:1
         };
       });
   }
-  function applyExcelSheetStyle(sheet, headerRow, widths){
+  function applyExcelSheetStyle(sheet, headerRow, widths, numberFormats={}){
     const range=XLSX.utils.decode_range(sheet['!ref']);
     sheet['!cols']=widths.map(width=>({wch:width}));
     sheet['!freeze']={xSplit:0,ySplit:headerRow};
@@ -1616,6 +1620,12 @@
         if(cell) cell.s={alignment:{vertical:'center',wrapText:true}};
       }
     }
+    Object.entries(numberFormats).forEach(([column,format])=>{
+      for(let row=headerRow+1;row<=range.e.r;row++){
+        const cell=sheet[XLSX.utils.encode_cell({r:row,c:Number(column)})];
+        if(cell && typeof cell.v==='number') cell.z=format;
+      }
+    });
     sheet['!rows']=[{hpt:24}];
     sheet['!sheetView']={showGridLines:false};
   }
@@ -1629,9 +1639,9 @@
       alert('확인 가능한 매물 데이터를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
       return;
     }
-    const complexHeaders=['단지명','해당 지역','세대수','준공연도','가격(IQD)','면적(m²)','단가(IQD/m²)','단가(USD/m²)','출처 링크','비고'];
+    const complexHeaders=['단지명','해당 지역','세대수','준공연도','가격(IQD)','면적(m²)','단가(IQD/m²)','단가(USD/m²)','출처 링크','등록일'];
     const complexSheet=XLSX.utils.aoa_to_sheet([complexHeaders,...complexRows.map(row=>row.values)]);
-    applyExcelSheetStyle(complexSheet,0,[24,22,14,12,18,12,18,18,58,64]);
+    applyExcelSheetStyle(complexSheet,0,[24,22,14,12,18,14,18,18,58,16],{4:'#,##0',5:'#,##0.##',6:'#,##0',7:'#,##0'});
     const sourceLinkColumn=8;
     complexRows.forEach((row,index)=>{
       const cell=complexSheet[XLSX.utils.encode_cell({r:index+1,c:sourceLinkColumn})];
@@ -1655,10 +1665,27 @@
         return [excelValue(group.name),excelValue(group.district),excelValue(group.sampleCount||null),excelValue(iqd),excelValue(Number.isFinite(iqd)?Math.round(iqd/RATE):null),'공개 매물 m² 단가 중앙값'];
       });
     const regionSheet=XLSX.utils.aoa_to_sheet([regionHeaders,...regionRows]);
-    applyExcelSheetStyle(regionSheet,0,[24,22,16,20,20,28]);
+    applyExcelSheetStyle(regionSheet,0,[24,22,16,20,20,28],{3:'#,##0',4:'#,##0'});
+    const districtGroups={};
+    complexRows.forEach(row=>{
+      const district=row.district||EXCEL_UNKNOWN;
+      if(!districtGroups[district]) districtGroups[district]={units:[],sampleCount:0};
+      if(Number.isFinite(row.unit)) districtGroups[district].units.push(row.unit);
+      districtGroups[district].sampleCount+=row.listingCount;
+    });
+    const districtHeaders=['해당 지역','표본 수(건)','지역 평균 단가(IQD/m²)','지역 평균 단가(USD/m²)','산출 기준'];
+    const districtRows=Object.entries(districtGroups)
+      .sort(([a],[b])=>a.localeCompare(b,'ko'))
+      .map(([district,group])=>{
+        const iqd=average(group.units);
+        return [excelValue(district),excelValue(group.sampleCount||null),excelValue(iqd),excelValue(Number.isFinite(iqd)?Math.round(iqd/RATE):null),'개별 매물 단가 산술평균'];
+      });
+    const districtSheet=XLSX.utils.aoa_to_sheet([districtHeaders,...districtRows]);
+    applyExcelSheetStyle(districtSheet,0,[24,16,24,24,28],{2:'#,##0',3:'#,##0'});
     const workbook=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook,complexSheet,'단지별 리스트');
     XLSX.utils.book_append_sheet(workbook,regionSheet,'단지별 평단가');
+    XLSX.utils.book_append_sheet(workbook,districtSheet,'지역별 평균');
     const updatedAt=ibaitySnapshot?.updated_at||new Date().toISOString().slice(0,10);
     XLSX.writeFile(workbook,`sise-단지별-지역별-${updatedAt}.xlsx`);
   }
