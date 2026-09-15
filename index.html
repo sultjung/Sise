@@ -1700,19 +1700,19 @@
     const regionGroups={};
     complexRows.forEach(row=>{
       const key=row.key;
-      if(!regionGroups[key]) regionGroups[key]={name:complexes[key].nameKr,district:row.district,units:[],sampleCount:0};
+      if(!regionGroups[key]) regionGroups[key]={name:complexes[key].nameKr,district:row.district,households:complexes[key].units,units:[],sampleCount:0};
       if(Number.isFinite(row.unit)) regionGroups[key].units.push(row.unit);
       regionGroups[key].sampleCount+=row.listingCount;
     });
-    const regionHeaders=['단지명','해당 지역','표본 수(건)','평단가(IQD/m²)','평단가(USD/m²)','산출 기준'];
+    const regionHeaders=['단지명','세대수','해당 지역','표본 수(건)','중위값(IQD/m²)','중위값(USD/m²)','산출 기준'];
     const regionRows=Object.values(regionGroups)
       .sort((a,b)=>a.name.localeCompare(b.name,'ko'))
       .map(group=>{
         const iqd=median(group.units);
-        return [excelValue(group.name),excelValue(group.district),excelValue(group.sampleCount||null),excelValue(iqd),excelValue(Number.isFinite(iqd)?Math.round(iqd/RATE):null),'공개 매물 m² 단가 중앙값'];
+        return [excelValue(group.name),excelValue(group.households),excelValue(group.district),excelValue(group.sampleCount||null),excelValue(iqd),excelValue(Number.isFinite(iqd)?Math.round(iqd/RATE):null),'공개 매물 m² 단가 중위값'];
       });
     const regionSheet=XLSX.utils.aoa_to_sheet([regionHeaders,...regionRows]);
-    applyExcelSheetStyle(regionSheet,0,[24,22,16,20,20,28],{3:'#,##0',4:'#,##0'});
+    applyExcelSheetStyle(regionSheet,0,[24,14,22,16,20,20,28],{4:'#,##0',5:'#,##0'});
     const districtGroups={};
     complexRows.forEach(row=>{
       const district=row.district||EXCEL_UNKNOWN;
@@ -1720,12 +1720,12 @@
       if(Number.isFinite(row.unit)) districtGroups[district].units.push(row.unit);
       districtGroups[district].sampleCount+=row.listingCount;
     });
-    const districtHeaders=['해당 지역','표본 수(건)','지역 평균 단가(IQD/m²)','지역 평균 단가(USD/m²)','산출 기준'];
+    const districtHeaders=['해당 지역','표본 수(건)','지역 중위값(IQD/m²)','지역 중위값(USD/m²)','산출 기준'];
     const districtRows=Object.entries(districtGroups)
       .sort(([a],[b])=>a.localeCompare(b,'ko'))
       .map(([district,group])=>{
-        const iqd=average(group.units);
-        return [excelValue(district),excelValue(group.sampleCount||null),excelValue(iqd),excelValue(Number.isFinite(iqd)?Math.round(iqd/RATE):null),'개별 매물 단가 산술평균'];
+        const iqd=median(group.units);
+        return [excelValue(district),excelValue(group.sampleCount||null),excelValue(iqd),excelValue(Number.isFinite(iqd)?Math.round(iqd/RATE):null),'개별 매물 단가 중위값'];
       });
     const districtSheet=XLSX.utils.aoa_to_sheet([districtHeaders,...districtRows]);
     applyExcelSheetStyle(districtSheet,0,[24,16,24,24,28],{2:'#,##0',3:'#,##0'});
