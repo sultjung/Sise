@@ -1196,30 +1196,22 @@
       "subdistricts_ar": [
         "Pasmaya"
       ],
-      "median_price_per_m2_iqd": 1116667,
-      "min_price_per_m2_iqd": 260000,
+      "median_price_per_m2_iqd": 1155000,
+      "min_price_per_m2_iqd": 958333,
       "max_price_per_m2_iqd": 1250000,
-      "sample_count": 20,
-      "all_sample_count": 24,
-      "all_median_price_per_m2_iqd": 1116667,
+      "sample_count": 12,
+      "all_sample_count": 16,
+      "all_median_price_per_m2_iqd": 1146428,
       "current_window_days": 90,
       "latest_created_at": "2026-08-22T08:28:26.728024Z",
       "listing_ids": [
         "GD4956",
-        "241BGF",
-        "IF3H3C",
         "49A7E2",
         "6G25J8",
-        "07C9JB",
-        "IF3H8C",
         "2410DF",
         "B0D9BH",
-        "DC9ECG",
         "IF3B5C",
         "49A8H2",
-        "78I310",
-        "IF3B6C",
-        "86F1D7",
         "86F1I7",
         "6G2HA8",
         "6G2HE8",
@@ -5275,8 +5267,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/ac07210a-3287-4d57-be5f-bd7ecbb4b351",
       "source_url": "https://ibaity.com/realestate/241BGF?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=29",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "선수금·분할납부·보증인 교체·대출 승계 조건 확인"
     },
     {
       "id": "IF3H3C",
@@ -5300,8 +5292,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/32149a82-3e99-4b36-99ed-2a17cf3a7059",
       "source_url": "https://ibaity.com/realestate/IF3H3C?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=29",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "49A7E2",
@@ -5375,8 +5367,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/6dfb843d-df2b-4b74-98cd-ba418f76a6d5",
       "source_url": "https://ibaity.com/realestate/07C9JB?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=29",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "선수금·분할납부·보증인 교체·대출 승계 조건 확인"
     },
     {
       "id": "IF3H8C",
@@ -5400,8 +5392,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/05bcc718-bcc0-4c1a-b2bb-e30712504abf",
       "source_url": "https://ibaity.com/realestate/IF3H8C?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=29",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "선수금·분할납부·보증인 교체·대출 승계 조건 확인"
     },
     {
       "id": "2410DF",
@@ -5475,8 +5467,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/f5565893-7b9e-4a24-bf29-339954bdd8a0",
       "source_url": "https://ibaity.com/realestate/DC9ECG?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=29",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "선수금·분할납부·보증인 교체·대출 승계 조건 확인"
     },
     {
       "id": "IF3B5C",
@@ -5550,8 +5542,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/26d0d9ba-6240-4bab-8e23-65e181682646",
       "source_url": "https://ibaity.com/realestate/78I310?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=30",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "선수금·분할납부·보증인 교체·대출 승계 조건 확인"
     },
     {
       "id": "IF3B6C",
@@ -5575,8 +5567,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/7ca67d63-cead-46ea-9d6f-11674cf58ce1",
       "source_url": "https://ibaity.com/realestate/IF3B6C?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=30",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "선수금·분할납부·보증인 교체·대출 승계 조건 확인"
     },
     {
       "id": "86F1D7",
@@ -5600,8 +5592,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/954982b3-f0e6-4a38-8b5d-f0e1a91a6ec1",
       "source_url": "https://ibaity.com/realestate/86F1D7?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=31",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "선수금·분할납부·보증인 교체·대출 승계 조건 확인"
     },
     {
       "id": "86F1I7",
@@ -6101,7 +6093,7 @@
       "source_url": "https://ibaity.com/realestate/H7H15E?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=33",
       "price_eligible": false,
-      "price_exclusion_reason": "선수금·분할납부 조건 확인"
+      "price_exclusion_reason": "선수금·분할납부·보증인 교체·대출 승계 조건 확인"
     },
     {
       "id": "C2J1ED",
