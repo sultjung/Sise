@@ -29,6 +29,13 @@ TIMEOUT_SEC = 30
 CURRENT_WINDOW_DAYS = 90
 OUT_PATH = Path(__file__).resolve().parent.parent / "data" / "ibaity-latest.json"
 
+# Confirmed financing/upfront-payment listing.  Its visible API price is only
+# the deposit, so it must stay in the raw source list but never enter price
+# statistics until the full obligation is verified.
+FINANCING_EXCLUDED_IDS = {
+    "H7H15E",
+}
+
 COMPLEX_KEY_BY_AR = {
     "المنصور ستي": "mansour_city",
     "بغداد مارينا": "baghdad_marina",
@@ -134,6 +141,8 @@ def clean_listing(item: dict[str, Any], observed_at: str) -> dict[str, Any] | No
         "image": images[0] if images else item.get("image"),
         "source_url": detail_url(str(item.get("id") or "")),
         "source_api_url": api_url(1),
+        "price_eligible": str(item.get("id") or "") not in FINANCING_EXCLUDED_IDS,
+        "price_exclusion_reason": "선수금·분할납부 조건 확인" if str(item.get("id") or "") in FINANCING_EXCLUDED_IDS else None,
     }
 
 
@@ -178,9 +187,10 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
 
     result: dict[str, Any] = {}
     for key, items in sorted(groups.items()):
-        current_items = [x for x in items if is_current(x)]
+        eligible_items = [x for x in items if x.get("price_eligible", True)]
+        current_items = [x for x in eligible_items if is_current(x)]
         prices = [x["price_per_m2_iqd"] for x in current_items]
-        all_prices = [x["price_per_m2_iqd"] for x in items]
+        all_prices = [x["price_per_m2_iqd"] for x in eligible_items]
         latest_created_at = max((x.get("created_at") for x in items if x.get("created_at")), default=None)
         result[key] = {
             "complex_key": next((x.get("complex_key") for x in items if x.get("complex_key")), None),
@@ -192,8 +202,8 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
             "min_price_per_m2_iqd": min(prices) if prices else None,
             "max_price_per_m2_iqd": max(prices) if prices else None,
             "sample_count": len(current_items),
-            "all_sample_count": len(items),
-            "all_median_price_per_m2_iqd": round(statistics.median(all_prices)),
+            "all_sample_count": len(eligible_items),
+            "all_median_price_per_m2_iqd": round(statistics.median(all_prices)) if all_prices else None,
             "current_window_days": CURRENT_WINDOW_DAYS,
             "latest_created_at": latest_created_at,
             "listing_ids": [x["id"] for x in current_items],
