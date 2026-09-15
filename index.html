@@ -1040,6 +1040,11 @@
   }
 
   function trendValueLabel(v){ return `${fmt(v)} IQD/m²`; }
+  function trendOrderedComplexKeys(){
+    return Object.keys(complexes)
+      .filter(key=>Number.isFinite(Number(complexes[key].iqd)))
+      .sort((a,b)=>complexes[b].iqd-complexes[a].iqd || complexes[a].nameKr.localeCompare(complexes[b].nameKr,'ko'));
+  }
   function renderComparisonTable(){
     const el=document.getElementById('comparison-table');
     if(!el) return;
@@ -1058,7 +1063,7 @@
     if(!sepSnapshot){el.innerHTML='<div class="trend-empty">비교 기준 데이터를 불러오는 중입니다.</div>';return;}
     const aug=trendHistory.find(s=>s.date==='2026-08-30')?.by_complex||{};
     const sep=trendHistory.find(s=>s.date==='2026-09-10')?.by_complex||{};
-    const keys=Object.keys(complexes).filter(k=>Number.isFinite(sep[k]?.price_per_m2_iqd));
+    const keys=trendOrderedComplexKeys().filter(k=>Number.isFinite(sep[k]?.price_per_m2_iqd));
     if(!keys.length){ el.innerHTML='<div class="trend-empty">8월·9월 비교 데이터를 불러오는 중입니다.</div>'; return; }
     const rows=keys.map(k=>{
       const a=aug[k]?.price_per_m2_iqd, b=sep[k]?.price_per_m2_iqd;
@@ -1089,7 +1094,7 @@
     const holder=document.getElementById('trend-chart');
     const meta=document.getElementById('trend-meta');
     renderComparisonTable();
-    const seriesKeys=Object.keys(complexes).filter(k=>complexes[k].iqd);
+    const seriesKeys=trendOrderedComplexKeys();
     if(selectedTrendKey!=='all'&&!seriesKeys.includes(selectedTrendKey)) selectedTrendKey=seriesKeys[0];
     controls.innerHTML=`<div class="trend-toolbar"><div><button class="${selectedTrendKey==='all'?'active':''}" data-trend-key="all">전체 단지 비교</button>${seriesKeys.map(k=>`<button class="${k===selectedTrendKey?'active':''}" data-trend-key="${k}">${complexes[k].nameKr}</button>`).join('')}</div><div class="trend-type"><button class="${selectedTrendType==='bar'?'active':''}" data-trend-type="bar">막대</button><button class="${selectedTrendType==='line'?'active':''}" data-trend-type="line">선</button><button class="${selectedTrendCurrency==='usd'?'active':''}" data-trend-currency="usd">USD</button><button class="${selectedTrendCurrency==='iqd'?'active':''}" data-trend-currency="iqd">IQD</button></div></div>`;
     controls.querySelectorAll('[data-trend-key]').forEach(b=>b.addEventListener('click',()=>{selectedTrendKey=b.dataset.trendKey;renderTrend();}));
