@@ -52,6 +52,11 @@ FINANCING_EXCLUDED_IDS = {
 # the raw snapshot but conservatively excluded from statistics.
 BISMAYAH_CASH_MIN_UNIT_IQD = 925000
 
+# Dar Al Salam's low advertised amounts commonly represent an upfront amount
+# or a remaining installment/loan obligation. Keep only the high-price band
+# consistent with a full cash settlement until detail-page terms are exposed.
+DAR_ALSALAM_CASH_MIN_UNIT_IQD = 1800000
+
 COMPLEX_KEY_BY_AR = {
     "المنصور ستي": "mansour_city",
     "بغداد مارينا": "baghdad_marina",
@@ -138,7 +143,8 @@ def clean_listing(item: dict[str, Any], observed_at: str) -> dict[str, Any] | No
     listing_id = str(item.get("id") or "")
     complex_key = COMPLEX_KEY_BY_AR.get(complex_info.get("name")) or COMPLEX_KEY_BY_PROVIDER_NAME.get(str(complex_info.get("name") or "").strip().lower())
     is_bismayah_conditional = complex_key == "bismayah_complex" and calculated < BISMAYAH_CASH_MIN_UNIT_IQD
-    is_excluded = listing_id in FINANCING_EXCLUDED_IDS or is_bismayah_conditional
+    is_dar_alsalam_conditional = complex_key == "dar_alsalam" and calculated < DAR_ALSALAM_CASH_MIN_UNIT_IQD
+    is_excluded = listing_id in FINANCING_EXCLUDED_IDS or is_bismayah_conditional or is_dar_alsalam_conditional
     return {
         "id": listing_id,
         "observed_at": observed_at,
