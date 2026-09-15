@@ -34,7 +34,23 @@ OUT_PATH = Path(__file__).resolve().parent.parent / "data" / "ibaity-latest.json
 # statistics until the full obligation is verified.
 FINANCING_EXCLUDED_IDS = {
     "H7H15E",
+    # Bismayah listings whose advertised amount is a guarantor-transfer,
+    # assignment-fee, remaining-loan, or installment amount rather than a
+    # fully settled cash sale price.
+    "241BGF",  # 58M IQD
+    "IF3H8C",  # 51M IQD
+    "IF3B6C",  # 26M IQD / east-contract condition
+    "DC9ECG",  # 45M IQD
+    "78I310",  # 48M IQD
+    "07C9JB",  # 75M IQD
+    "86F1D7",  # 65M IQD
 }
+
+# A Bismayah listing is included only when its amount is consistent with a
+# settled cash-sale price.  The public list API does not expose the detail
+# page's financing text, so the low-price conditional listings are kept in
+# the raw snapshot but conservatively excluded from statistics.
+BISMAYAH_CASH_MIN_UNIT_IQD = 925000
 
 COMPLEX_KEY_BY_AR = {
     "المنصور ستي": "mansour_city",
@@ -119,8 +135,12 @@ def clean_listing(item: dict[str, Any], observed_at: str) -> dict[str, Any] | No
     district = item.get("district") or {}
     subdistrict = item.get("subDistrict") or {}
     images = item.get("images") or []
+    listing_id = str(item.get("id") or "")
+    complex_key = COMPLEX_KEY_BY_AR.get(complex_info.get("name")) or COMPLEX_KEY_BY_PROVIDER_NAME.get(str(complex_info.get("name") or "").strip().lower())
+    is_bismayah_conditional = complex_key == "bismayah_complex" and calculated < BISMAYAH_CASH_MIN_UNIT_IQD
+    is_excluded = listing_id in FINANCING_EXCLUDED_IDS or is_bismayah_conditional
     return {
-        "id": str(item.get("id") or ""),
+        "id": listing_id,
         "observed_at": observed_at,
         "created_at": item.get("createdAt"),
         "expires_at": item.get("expiresAt"),
@@ -135,14 +155,14 @@ def clean_listing(item: dict[str, Any], observed_at: str) -> dict[str, Any] | No
         "lng": item.get("lng"),
         "complex_id": complex_info.get("id"),
         "complex_name_ar": complex_info.get("name"),
-        "complex_key": COMPLEX_KEY_BY_AR.get(complex_info.get("name")) or COMPLEX_KEY_BY_PROVIDER_NAME.get(str(complex_info.get("name") or "").strip().lower()),
+        "complex_key": complex_key,
         "district_ar": district.get("name"),
         "subdistrict_ar": subdistrict.get("name"),
         "image": images[0] if images else item.get("image"),
         "source_url": detail_url(str(item.get("id") or "")),
         "source_api_url": api_url(1),
-        "price_eligible": str(item.get("id") or "") not in FINANCING_EXCLUDED_IDS,
-        "price_exclusion_reason": "선수금·분할납부 조건 확인" if str(item.get("id") or "") in FINANCING_EXCLUDED_IDS else None,
+        "price_eligible": not is_excluded,
+        "price_exclusion_reason": ("선수금·분할납부·보증인 교체·대출 승계 조건 확인" if listing_id in FINANCING_EXCLUDED_IDS else "현금·완납 조건 확인 전 보수적 제외") if is_excluded else None,
     }
 
 
