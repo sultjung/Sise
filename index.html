@@ -214,9 +214,10 @@
   .trend-chart{ width:100%; min-height:205px; }
   .trend-meta{ margin-top:9px; font-size:10.5px; color:var(--hw-ink-soft); }
   .comparison-table-wrap{ margin-top:16px; overflow-x:auto; border:1px solid var(--hw-border); border-radius:8px; }
-  .comparison-table{ width:100%; border-collapse:collapse; min-width:620px; font-size:11px; }
-  .comparison-table th,.comparison-table td{ padding:9px 10px; border-bottom:1px solid var(--hw-border); text-align:right; white-space:nowrap; }
-  .comparison-table th{ background:#F7F7F8; color:var(--hw-ink-soft); font-size:10px; font-weight:700; }
+  .comparison-table{ width:100%; border-collapse:collapse; min-width:760px; font-size:14px; }
+  .comparison-table th,.comparison-table td{ padding:12px 14px; border-bottom:1px solid var(--hw-border); text-align:right; white-space:nowrap; }
+  .comparison-table th{ background:#F7F7F8; color:var(--hw-ink-soft); font-size:12px; font-weight:700; }
+  .comparison-table td small{ display:block; margin-top:4px; color:var(--hw-ink-soft); font-size:11px; }
   .comparison-table th:first-child,.comparison-table td:first-child{ text-align:left; }
   .comparison-table tr:last-child td{ border-bottom:0; }
   .comparison-table .up{ color:var(--hw-up); font-weight:700; }
@@ -1059,21 +1060,15 @@
       el.innerHTML=`<table class="comparison-table"><thead><tr><th>기간</th><th>표본</th><th>IQD/m²</th><th>USD/m²</th><th>직전 확인기간 대비</th></tr></thead><tbody>${rows}</tbody></table><div class="trend-meta">※ ${complexes[selectedTrendKey].nameKr}의 기간별 공개 매물 ㎡당 호가 중앙값입니다. 표본이 없는 기간은 미확인으로 표시합니다.</div>`;
       return;
     }
-    const sepSnapshot=trendHistory.find(s=>s.date==='2026-09-10');
-    if(!sepSnapshot){el.innerHTML='<div class="trend-empty">비교 기준 데이터를 불러오는 중입니다.</div>';return;}
-    const aug=trendHistory.find(s=>s.date==='2026-08-30')?.by_complex||{};
-    const sep=trendHistory.find(s=>s.date==='2026-09-10')?.by_complex||{};
-    const keys=trendOrderedComplexKeys().filter(k=>Number.isFinite(sep[k]?.price_per_m2_iqd));
-    if(!keys.length){ el.innerHTML='<div class="trend-empty">8월·9월 비교 데이터를 불러오는 중입니다.</div>'; return; }
+    const keys=trendOrderedComplexKeys();
+    if(!keys.length){ el.innerHTML='<div class="trend-empty">분기별 비교 데이터를 불러오는 중입니다.</div>'; return; }
+    const periodLabels=['2025년','2026년 1분기','2026년 2분기','2026년 3분기'];
     const rows=keys.map(k=>{
-      const a=aug[k]?.price_per_m2_iqd, b=sep[k]?.price_per_m2_iqd;
-      const diff=Number.isFinite(a)&&Number.isFinite(b)?b-a:null;
-      const pct=Number.isFinite(diff)&&a?diff/a*100:null;
-      const cls=diff>0?'up':diff<0?'down':'flat';
-      const change=diff===null?'—':`${diff>0?'+':''}${fmt(diff)} (${pct>0?'+':''}${pct.toFixed(1)}%)`;
-      return `<tr class="trend-complex-row" data-trend-key="${k}"><td>${complexes[k].nameKr}<small>표본 ${sep[k]?.sample_count||'-'}건 · 클릭하여 상세보기</small></td><td>${Number.isFinite(a)?fmt(a):'—'}</td><td>${fmt(b)}</td><td class="${cls}">${change}</td></tr>`;
+      const points=quarterlyTrendPoints(k);
+      const cells=points.map(point=>Number.isFinite(point.value)?`${fmt(point.value)}<small>표본 ${point.sample}건</small>`:'미확인').join('</td><td>');
+      return `<tr class="trend-complex-row" data-trend-key="${k}"><td>${complexes[k].nameKr}<small>클릭하여 상세보기</small></td><td>${cells}</td></tr>`;
     }).join('');
-    el.innerHTML=`<table class="comparison-table"><thead><tr><th>단지</th><th>8월 기준<br>IQD/m²</th><th>9월 중간 기준<br>IQD/m²</th><th>변동</th></tr></thead><tbody>${rows}</tbody></table><div class="trend-meta">※ 9월 값은 월말 확정 전 중간 집계입니다. 링크 재검증 결과에 따라 표본과 중앙값이 변경될 수 있습니다.</div>`;
+    el.innerHTML=`<table class="comparison-table"><thead><tr><th>단지</th>${periodLabels.map(label=>`<th>${label}<br>IQD/m²</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table><div class="trend-meta">※ 2025년 연간 및 2026년 분기별 공개 매물 ㎡당 호가 중위값입니다. 표본이 없는 기간은 미확인으로 표시하며, 단지는 최신 확인 단가가 높은 순으로 정렬합니다.</div>`;
     el.querySelectorAll('[data-trend-key]').forEach(row=>row.addEventListener('click',()=>{selectedTrendKey=row.dataset.trendKey;renderTrend();}));
   }
   function quarterlyTrendPoints(complexKey){
