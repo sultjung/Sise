@@ -439,6 +439,12 @@
   let selectedTrendKey = 'all';
   let selectedTrendType = 'bar';
   let selectedTrendCurrency = 'usd';
+  // Dar Al Salam financing listing: the visible price is an upfront payment,
+  // not the full property obligation, so it must not enter price statistics.
+  const excludedFinancingListingIds = {dar_alsalam:new Set(['H7H15E'])};
+  function isPriceEligibleListing(listing){
+    return !excludedFinancingListingIds[listing?.complex_key]?.has(String(listing?.id));
+  }
   const tierColor = { high:"#D94800", mid:"#FF8A3D", low:"#FFC896", pending:"#C9CDD3" };
 
   // districts: iqd = per-m² asking price in IQD. verified:true means real sourced data.
@@ -1059,7 +1065,7 @@
       {key:'2026-q2',label:'2026년 2분기',test:date=>/^2026-(04|05|06)-/.test(date)},
       {key:'2026-q3',label:'2026년 3분기',test:date=>/^2026-(07|08|09)-/.test(date)}
     ];
-    const listings=(ibaitySnapshot?.listings||[]).filter(listing=>listing.complex_key===complexKey && Number.isFinite(Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd)));
+      const listings=(ibaitySnapshot?.listings||[]).filter(listing=>listing.complex_key===complexKey && isPriceEligibleListing(listing) && Number.isFinite(Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd)));
     return periods.map(period=>{
       const values=listings.filter(listing=>period.test(String(listing.created_at||'').slice(0,10))).map(listing=>Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd));
       return {period:period.key,label:period.label,value:median(values),sample:values.length};
@@ -1480,9 +1486,12 @@
     Object.values(snapshot.by_complex).forEach(summary=>{
       const key=summary.complex_key;
       const d=key ? complexes[key] : null;
-      const value=summary.median_price_per_m2_iqd;
       if(!d) return;
-      const sampleCount=summary.sample_count||0;
+      const eligibleIds=new Set((summary.listing_ids||[]).filter(id=>!excludedFinancingListingIds[key]?.has(String(id))));
+      const eligibleListings=(snapshot.listings||[]).filter(listing=>listing.complex_key===key && eligibleIds.has(String(listing.id)) && Number.isFinite(Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd)));
+      const eligibleValues=eligibleListings.map(listing=>Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd));
+      const value=key==='dar_alsalam' ? median(eligibleValues) : summary.median_price_per_m2_iqd;
+      const sampleCount=key==='dar_alsalam' ? eligibleValues.length : (summary.sample_count||0);
       const isDual=d.sourceKind==='dual';
       if(!Number.isFinite(value) || sampleCount<1){
         if(!isDual){
@@ -1500,11 +1509,11 @@
       if(!isDual) d.sourceKind=d.sampleCount===1?'single':'sample';
       d.priceMethod=`최근 ${summary.current_window_days||90}일 ibaity 공개 매물 호가 ${d.sampleCount}건 ${d.sampleCount===1?'':'중앙값'}`;
       const listingSources=(snapshot.listings||[])
-        .filter(listing=>listing.complex_key===key && (summary.listing_ids||[]).includes(listing.id) && listing.source_url)
+        .filter(listing=>listing.complex_key===key && eligibleIds.has(String(listing.id)) && isPriceEligibleListing(listing) && listing.source_url)
         .slice(0,12)
         .map((listing,index)=>({label:`ibaity · ${listing.area_m2}m² / ${Number(listing.price_iqd).toLocaleString('en-US')} IQD`,url:listing.source_url}));
       d.sources=listingSources.length ? listingSources : [{label:`ibaity API · ${d.sampleCount}건`,url:sourceUrl}];
-      d.sourceNote=`ibaity 공개 client API에서 수집한 승인 매매 아파트의 등록 호가입니다. 실거래가가 아니며, 최근 ${summary.current_window_days||90}일 등록 매물 중 가격·면적이 확인된 ${d.sampleCount}건을 사용했습니다. 전체 활성 매물 ${summary.all_sample_count||d.sampleCount}건 중 오래된 매물은 현재 중앙값에서 제외했습니다.`;
+      d.sourceNote=`ibaity 공개 client API에서 수집한 승인 매매 아파트의 등록 호가입니다. 실거래가가 아니며, 최근 ${summary.current_window_days||90}일 등록 매물 중 가격·면적이 확인된 ${d.sampleCount}건을 사용했습니다. 선수금·분할납부 조건 매물은 가격 산정에서 제외했습니다.`;
     });
     applyIbaityRegionPrices(snapshot);
     updateBismayahMarketLinks(snapshot);
@@ -1609,7 +1618,7 @@
   function excelComplexRows(){
     const listings=ibaitySnapshot?.listings||[];
     return listings
-      .filter(listing=>complexes[listing.complex_key] && listing.source_url && Number.isFinite(Number(listing.price_iqd)) && Number.isFinite(Number(listing.area_m2)))
+      .filter(listing=>complexes[listing.complex_key] && isPriceEligibleListing(listing) && listing.source_url && Number.isFinite(Number(listing.price_iqd)) && Number.isFinite(Number(listing.area_m2)))
       .map(listing=>{
         const complex=complexes[listing.complex_key];
         const unit=Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd);
