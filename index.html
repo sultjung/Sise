@@ -1577,46 +1577,29 @@
     const middle=Math.floor(sorted.length/2);
     return sorted.length%2 ? sorted[middle] : Math.round((sorted[middle-1]+sorted[middle])/2);
   }
-  function excelSourceLinks(sources){
-    const links=(sources||[]).filter(source=>source?.url).map(source=>source.url);
-    return links.length ? links.join('\n') : EXCEL_UNKNOWN;
-  }
   function excelComplexRows(){
     const listings=ibaitySnapshot?.listings||[];
-    return Object.entries(complexes).map(([key,complex])=>{
-      const currentListings=listings.filter(listing=>listing.complex_key===key && listing.source_url && Number.isFinite(Number(listing.price_iqd)) && Number.isFinite(Number(listing.area_m2)));
-      const areas=currentListings.map(listing=>Number(listing.area_m2));
-      const prices=currentListings.map(listing=>Number(listing.price_iqd));
-      const unitsPerM2=currentListings.map(listing=>Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd));
-      const representativePrice=median(prices);
-      const representativeArea=median(areas);
-      const displayedUnit=Number.isFinite(Number(complex.iqd)) ? Number(complex.iqd) : median(unitsPerM2);
-      const district=complex.district ? complex.district.split(' · ')[0] : null;
-      const note=[
-        complex.priceMethod,
-        complex.sourceNote,
-        complex.sourceKind==='official'?'개발사 공개 시작가':null,
-        complex.sourceKind==='dual'?'공식 분양가와 민간시장가 병기':null
-      ].filter(Boolean).join(' · ');
-      return {
-        key,
-        values:[
-          excelValue(complex.nameKr),
-          excelValue(district),
-          excelValue(complex.units),
-          excelValue(complex.completionYear),
-          excelValue(representativePrice),
-          excelValue(representativeArea),
-          excelValue(displayedUnit),
-          excelValue(Number.isFinite(displayedUnit) ? Math.round(displayedUnit/RATE) : null),
-          excelSourceLinks(complex.sources?.length ? complex.sources : complex.infoSources),
-          excelValue(note)
-        ],
-        district,
-        unit:displayedUnit,
-        listingCount:currentListings.length || (Number(complex.sampleCount)>0 ? Number(complex.sampleCount) : 0)
-      };
-    });
+    return listings
+      .filter(listing=>complexes[listing.complex_key] && listing.source_url && Number.isFinite(Number(listing.price_iqd)) && Number.isFinite(Number(listing.area_m2)))
+      .map(listing=>{
+        const complex=complexes[listing.complex_key];
+        const unit=Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd);
+        const district=complex.district ? complex.district.split(' · ')[0] : null;
+        const note=[
+          listing.created_at ? `등록일 ${listing.created_at.slice(0,10)}` : null,
+          listing.sale_type || null,
+          complex.sourceKind==='dual'?'공식 분양가와 민간시장가 병기':null
+        ].filter(Boolean).join(' · ');
+        return {
+          key:listing.complex_key,
+          values:[
+            excelValue(complex.nameKr),excelValue(district),excelValue(complex.units),excelValue(complex.completionYear),
+            excelValue(Number(listing.price_iqd)),excelValue(Number(listing.area_m2)),excelValue(unit),
+            excelValue(Number.isFinite(unit)?Math.round(unit/RATE):null),excelValue(listing.source_url),excelValue(note)
+          ],
+          district,unit,listingCount:1
+        };
+      });
   }
   function applyExcelSheetStyle(sheet, headerRow, widths){
     const range=XLSX.utils.decode_range(sheet['!ref']);
@@ -1643,7 +1626,7 @@
     }
     const complexRows=excelComplexRows();
     if(!complexRows.length){
-      alert('단지 데이터를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
+      alert('확인 가능한 매물 데이터를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
       return;
     }
     const complexHeaders=['단지명','해당 지역','세대수','준공연도','가격(IQD)','면적(m²)','단가(IQD/m²)','단가(USD/m²)','출처 링크','비고'];
@@ -1653,30 +1636,29 @@
     complexRows.forEach((row,index)=>{
       const cell=complexSheet[XLSX.utils.encode_cell({r:index+1,c:sourceLinkColumn})];
       if(cell && cell.v!==EXCEL_UNKNOWN){
-        const firstUrl=String(cell.v).split('\n')[0];
-        cell.l={Target:firstUrl,Tooltip:'출처 링크 열기'};
+        cell.l={Target:String(cell.v),Tooltip:'출처 링크 열기'};
       }
     });
 
     const regionGroups={};
     complexRows.forEach(row=>{
-      const region=row.district||EXCEL_UNKNOWN;
-      if(!regionGroups[region]) regionGroups[region]={units:[],sampleCount:0};
-      if(Number.isFinite(row.unit)) regionGroups[region].units.push(row.unit);
-      regionGroups[region].sampleCount+=row.listingCount;
+      const key=row.key;
+      if(!regionGroups[key]) regionGroups[key]={name:complexes[key].nameKr,district:row.district,units:[],sampleCount:0};
+      if(Number.isFinite(row.unit)) regionGroups[key].units.push(row.unit);
+      regionGroups[key].sampleCount+=row.listingCount;
     });
-    const regionHeaders=['해당 지역','표본 수(건)','단가(IQD/m²)','단가(USD/m²)'];
-    const regionRows=Object.entries(regionGroups)
-      .sort(([a],[b])=>a.localeCompare(b,'ko'))
-      .map(([region,group])=>{
+    const regionHeaders=['단지명','해당 지역','표본 수(건)','평단가(IQD/m²)','평단가(USD/m²)','산출 기준'];
+    const regionRows=Object.values(regionGroups)
+      .sort((a,b)=>a.name.localeCompare(b.name,'ko'))
+      .map(group=>{
         const iqd=median(group.units);
-        return [excelValue(region),excelValue(group.sampleCount||null),excelValue(iqd),excelValue(Number.isFinite(iqd)?Math.round(iqd/RATE):null)];
+        return [excelValue(group.name),excelValue(group.district),excelValue(group.sampleCount||null),excelValue(iqd),excelValue(Number.isFinite(iqd)?Math.round(iqd/RATE):null),'공개 매물 m² 단가 중앙값'];
       });
     const regionSheet=XLSX.utils.aoa_to_sheet([regionHeaders,...regionRows]);
-    applyExcelSheetStyle(regionSheet,0,[24,16,20,20]);
+    applyExcelSheetStyle(regionSheet,0,[24,22,16,20,20,28]);
     const workbook=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook,complexSheet,'단지별 리스트');
-    XLSX.utils.book_append_sheet(workbook,regionSheet,'지역별 비교');
+    XLSX.utils.book_append_sheet(workbook,regionSheet,'단지별 평단가');
     const updatedAt=ibaitySnapshot?.updated_at||new Date().toISOString().slice(0,10);
     XLSX.writeFile(workbook,`sise-단지별-지역별-${updatedAt}.xlsx`);
   }
