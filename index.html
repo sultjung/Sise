@@ -1041,6 +1041,19 @@
     }).join('');
     el.innerHTML=`<table class="comparison-table"><thead><tr><th>단지</th><th>8월 기준<br>IQD/m²</th><th>9월 중간 기준<br>IQD/m²</th><th>변동</th></tr></thead><tbody>${rows}</tbody></table><div class="trend-meta">※ 9월 값은 월말 확정 전 중간 집계입니다. 링크 재검증 결과에 따라 표본과 중앙값이 변경될 수 있습니다.</div>`;
   }
+  function quarterlyTrendPoints(complexKey){
+    const periods=[
+      {key:'2025',label:'2025년',test:date=>date.startsWith('2025-')},
+      {key:'2026-q1',label:'2026년 1분기',test:date=>/^2026-(01|02|03)-/.test(date)},
+      {key:'2026-q2',label:'2026년 2분기',test:date=>/^2026-(04|05|06)-/.test(date)},
+      {key:'2026-q3',label:'2026년 3분기',test:date=>/^2026-(07|08|09)-/.test(date)}
+    ];
+    const listings=(ibaitySnapshot?.listings||[]).filter(listing=>listing.complex_key===complexKey && Number.isFinite(Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd)));
+    return periods.map(period=>{
+      const values=listings.filter(listing=>period.test(String(listing.created_at||'').slice(0,10))).map(listing=>Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd));
+      return {period:period.key,label:period.label,value:median(values),sample:values.length};
+    });
+  }
   function renderTrend(){
     const controls=document.getElementById('trend-controls');
     const holder=document.getElementById('trend-chart');
@@ -1059,16 +1072,16 @@
       meta.textContent=`전체 단지 비교 · ${latest.date} 기준 · 비스마야는 주황색(시장가), 나머지는 회색 · IQD/m² 및 USD/m² 병기 · 표본 1건 단지는 단일 매물으로 해석`;
       return;
     }
-    const points=trendHistory.map(s=>({date:s.date,value:s.by_complex?.[selectedTrendKey]?.price_per_m2_iqd,sample:s.by_complex?.[selectedTrendKey]?.sample_count})).filter(p=>Number.isFinite(p.value));
-    if(!points.length){holder.innerHTML='<div class="trend-empty">누적된 월말 시세가 아직 없습니다. 이번 8월 말 값을 첫 기준점으로 저장한 뒤, 다음 월말부터 변동 폭과 표본 수를 함께 표시합니다.</div>';return;}
-    const vals=points.map(p=>p.value), min=Math.min(...vals), max=Math.max(...vals), range=Math.max(max-min, Math.max(1,max*.03));
+    const points=quarterlyTrendPoints(selectedTrendKey);
+    if(!points.some(p=>Number.isFinite(p.value))){holder.innerHTML='<div class="trend-empty">해당 단지의 2025년 또는 2026년 분기별 매물 시세가 없습니다.</div>';return;}
+    const vals=points.filter(p=>Number.isFinite(p.value)).map(p=>p.value), min=Math.min(...vals), max=Math.max(...vals), range=Math.max(max-min, Math.max(1,max*.03));
     const W=900,H=205,P=36; const xy=points.map((p,i)=>({x:P+(W-P*2)*(points.length===1?.5:i/(points.length-1)),y:H-P-(p.value-(min-range*.25))/(range*1.5)*(H-P*2),...p}));
-    const path=xy.map((p,i)=>`${i?'L':'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+    const path=xy.filter(p=>Number.isFinite(p.value)).map((p,i)=>`${i?'L':'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
     const series=selectedTrendType==='bar'
-      ? xy.map((p,i)=>{const bw=Math.min(90,(W-P*2)/Math.max(points.length,1)*.55);const h=H-P-p.y;return `<rect x="${p.x-bw/2}" y="${p.y}" width="${bw}" height="${h}" rx="5" fill="#FF6100"><title>${p.date}: ${trendValueLabel(p.value)} · 표본 ${p.sample||'-'}건</title></rect><text x="${p.x}" y="${p.y-10}" text-anchor="middle" font-size="12" font-weight="700" fill="#9E3500">${fmt(p.value)}</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="11" fill="#6B6D72">${p.date.slice(5).replace('-','.')}</text>`}).join('')
-      : `<path d="${path}" fill="none" stroke="#FF6100" stroke-width="3"/>${xy.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="5" fill="#FF6100"><title>${p.date}: ${trendValueLabel(p.value)} · 표본 ${p.sample||'-'}건</title></circle><text x="${p.x}" y="${p.y-12}" text-anchor="middle" font-size="12" font-weight="700" fill="#9E3500">${fmt(p.value)}</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="11" fill="#6B6D72">${p.date.slice(5).replace('-','.')}</text>`).join('')}`;
+      ? xy.map((p,i)=>{const bw=Math.min(90,(W-P*2)/Math.max(points.length,1)*.55);if(!Number.isFinite(p.value))return `<text x="${p.x}" y="${H-P-10}" text-anchor="middle" font-size="11" fill="#9B9DA2">미확인</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label.replace('2026년 ','').replace('2025년','2025')}</text>`;const h=H-P-p.y;return `<rect x="${p.x-bw/2}" y="${p.y}" width="${bw}" height="${h}" rx="5" fill="#FF6100"><title>${p.label}: ${trendValueLabel(p.value)} · 표본 ${p.sample||'-'}건</title></rect><text x="${p.x}" y="${p.y-10}" text-anchor="middle" font-size="12" font-weight="700" fill="#9E3500">${fmt(p.value)}</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label.replace('2026년 ','').replace('2025년','2025')}</text>`}).join('')
+      : `<path d="${path}" fill="none" stroke="#FF6100" stroke-width="3"/>${xy.map(p=>Number.isFinite(p.value)?`<circle cx="${p.x}" cy="${p.y}" r="5" fill="#FF6100"><title>${p.label}: ${trendValueLabel(p.value)} · 표본 ${p.sample||'-'}건</title></circle><text x="${p.x}" y="${p.y-12}" text-anchor="middle" font-size="12" font-weight="700" fill="#9E3500">${fmt(p.value)}</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label.replace('2026년 ','').replace('2025년','2025')}</text>`:`<text x="${p.x}" y="${H-P-10}" text-anchor="middle" font-size="11" fill="#9B9DA2">미확인</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label.replace('2026년 ','').replace('2025년','2025')}</text>`).join('')}`;
     holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${complexes[selectedTrendKey].nameKr} 월별 시세 추이"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${series}</svg>`;
-    const latest=points.at(-1); meta.textContent=`${complexes[selectedTrendKey].nameKr} · 최근 ${latest.date} ${trendValueLabel(latest.value)} · 공개 매물 ${latest.sample||'-'}건 · 매월 말일 누적`;
+    const latest=points.at(-1); meta.textContent=`${complexes[selectedTrendKey].nameKr} · 2025년 연간 및 2026년 분기별 비교 · 기간별 공개 매물 호가 중앙값 · 표본 수 표시 · 환율 1 USD=${RATE.toLocaleString()} IQD`;
   }
 
   /* ---------- MAP ---------- */
