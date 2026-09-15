@@ -624,8 +624,8 @@
       "min_price_per_m2_iqd": 2029851,
       "max_price_per_m2_iqd": 2089552,
       "sample_count": 3,
-      "all_sample_count": 26,
-      "all_median_price_per_m2_iqd": 914182,
+      "all_sample_count": 6,
+      "all_median_price_per_m2_iqd": 2074626,
       "current_window_days": 90,
       "latest_created_at": "2026-09-06T13:06:00.659675Z",
       "listing_ids": [
@@ -6742,8 +6742,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/19c1bf43-0cb0-41be-8a52-c8fc9e0fe9f4",
       "source_url": "https://ibaity.com/realestate/F3CJ4I?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=39",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "H6A8DE",
@@ -7267,8 +7267,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/d25e5325-efea-4c54-9493-826e7310f4b4",
       "source_url": "https://ibaity.com/realestate/CJ79ID?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=41",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "21G51F",
@@ -7292,8 +7292,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/35577fb6-1143-47b8-b831-ff1b13bbd032",
       "source_url": "https://ibaity.com/realestate/21G51F?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=41",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "7IAC20",
@@ -7342,8 +7342,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/b86fee3f-b6c5-482e-93e8-405cd8587e4e",
       "source_url": "https://ibaity.com/realestate/62H268?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=42",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "62H2G8",
@@ -7392,8 +7392,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/17d4b037-20c9-4dd7-bbfd-d5fdf26289b8",
       "source_url": "https://ibaity.com/realestate/BD5D2H?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=42",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "21D66F",
@@ -8017,8 +8017,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/0047a058-984a-46fb-abae-7b762074e241",
       "source_url": "https://ibaity.com/realestate/6426F8?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=45",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "0IC0IB",
@@ -8042,8 +8042,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/e84a08ae-a6a7-4def-a74a-a369cc5ea7fe",
       "source_url": "https://ibaity.com/realestate/0IC0IB?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=45",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "7FI720",
@@ -8067,8 +8067,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/95b32858-a10e-4ef6-a7ee-7490f18ad48f",
       "source_url": "https://ibaity.com/realestate/7FI720?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=45",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "G94G36",
@@ -8092,8 +8092,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/f140d720-f908-48df-b895-9f088d62b872",
       "source_url": "https://ibaity.com/realestate/G94G36?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=45",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "I53IEC",
@@ -8117,8 +8117,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/383b7207-3228-4816-bca2-9e388640ebed",
       "source_url": "https://ibaity.com/realestate/I53IEC?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=45",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "BCDB3H",
@@ -8142,8 +8142,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/16b3ee45-b24c-4e59-bace-2d22cfb800c7",
       "source_url": "https://ibaity.com/realestate/BCDB3H?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=45",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "DJ9D0G",
@@ -8167,8 +8167,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/953806f3-1ec0-4b46-a1fa-03567a2518b9",
       "source_url": "https://ibaity.com/realestate/DJ9D0G?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=45",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "82F8H7",
@@ -8192,8 +8192,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/545b3867-f8c1-4468-a2ec-398abbd59d25",
       "source_url": "https://ibaity.com/realestate/82F8H7?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=45",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "HDGH1E",
@@ -8217,8 +8217,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/46873d8e-23df-48c6-84cc-fb5231b3c680",
       "source_url": "https://ibaity.com/realestate/HDGH1E?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=45",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "82F807",
@@ -8242,8 +8242,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/635337c3-cd88-4b37-8cce-ef5015cdaa7d",
       "source_url": "https://ibaity.com/realestate/82F807?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=46",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "C3JICD",
@@ -8267,8 +8267,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/9b2ebd97-44bc-4bd0-9133-42760f8a580d",
       "source_url": "https://ibaity.com/realestate/C3JICD?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=46",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "7F2980",
@@ -8542,8 +8542,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/9493a998-48e6-4b4c-94fb-cfdbb25492cc",
       "source_url": "https://ibaity.com/realestate/I5HD4C?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=48",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "2A0I3F",
@@ -8567,8 +8567,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/bea901d3-b5e1-4e58-b35f-94339d534e54",
       "source_url": "https://ibaity.com/realestate/2A0I3F?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=48",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "7FJBI0",
@@ -8592,8 +8592,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/8d97efcf-c310-4fc9-8753-29811b0306b1",
       "source_url": "https://ibaity.com/realestate/7FJBI0?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=48",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "DJE74G",
@@ -8717,8 +8717,8 @@
       "image": "https://d2mvhtn02x76us.cloudfront.net/uploads/b0fa01ec-47f7-4f5d-810d-a804d97d1afe",
       "source_url": "https://ibaity.com/realestate/2A7IJF?searchCountry=IQ&currency=IQD",
       "source_api_url": "https://v3.ibaity.com/api/client/Realestate?PageSize=10&offerType=SELL&CityId=G76HDC&CategoryId=C8D46D&SubCategoryId=DEG8GH&PageNumber=48",
-      "price_eligible": true,
-      "price_exclusion_reason": null
+      "price_eligible": false,
+      "price_exclusion_reason": "현금·완납 조건 확인 전 보수적 제외"
     },
     {
       "id": "HD4AIE",
