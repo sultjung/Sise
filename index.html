@@ -439,11 +439,19 @@
   let selectedTrendKey = 'all';
   let selectedTrendType = 'bar';
   let selectedTrendCurrency = 'usd';
-  // Dar Al Salam financing listing: the visible price is an upfront payment,
-  // not the full property obligation, so it must not enter price statistics.
-  const excludedFinancingListingIds = {dar_alsalam:new Set(['H7H15E'])};
+  // Conditional-price listings remain visible in raw links, but never enter
+  // price statistics. Bismayah low-price advertisements are conservatively
+  // excluded until cash/loan-settled terms are confirmed on the detail page.
+  const excludedFinancingListingIds = {dar_alsalam:new Set(['H7H15E']),bismayah_complex:new Set(['241BGF','IF3H8C','IF3B6C','DC9ECG','78I310','07C9JB','86F1D7'])};
+  const BISMAYAH_CASH_MIN_UNIT_IQD = 925000;
   function isPriceEligibleListing(listing){
-    return !excludedFinancingListingIds[listing?.complex_key]?.has(String(listing?.id));
+    if(listing?.price_eligible===false) return false;
+    if(excludedFinancingListingIds[listing?.complex_key]?.has(String(listing?.id))) return false;
+    if(listing?.complex_key==='bismayah_complex'){
+      const unit=Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd);
+      if(Number.isFinite(unit) && unit<BISMAYAH_CASH_MIN_UNIT_IQD) return false;
+    }
+    return true;
   }
   const tierColor = { high:"#D94800", mid:"#FF8A3D", low:"#FFC896", pending:"#C9CDD3" };
 
@@ -1490,8 +1498,8 @@
       const eligibleIds=new Set((summary.listing_ids||[]).filter(id=>!excludedFinancingListingIds[key]?.has(String(id))));
       const eligibleListings=(snapshot.listings||[]).filter(listing=>listing.complex_key===key && eligibleIds.has(String(listing.id)) && Number.isFinite(Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd)));
       const eligibleValues=eligibleListings.map(listing=>Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd));
-      const value=key==='dar_alsalam' ? median(eligibleValues) : summary.median_price_per_m2_iqd;
-      const sampleCount=key==='dar_alsalam' ? eligibleValues.length : (summary.sample_count||0);
+      const value=(key==='dar_alsalam'||key==='bismayah_complex') ? median(eligibleValues) : summary.median_price_per_m2_iqd;
+      const sampleCount=(key==='dar_alsalam'||key==='bismayah_complex') ? eligibleValues.length : (summary.sample_count||0);
       const isDual=d.sourceKind==='dual';
       if(!Number.isFinite(value) || sampleCount<1){
         if(!isDual){
@@ -1513,7 +1521,7 @@
         .slice(0,12)
         .map((listing,index)=>({label:`ibaity · ${listing.area_m2}m² / ${Number(listing.price_iqd).toLocaleString('en-US')} IQD`,url:listing.source_url}));
       d.sources=listingSources.length ? listingSources : [{label:`ibaity API · ${d.sampleCount}건`,url:sourceUrl}];
-      d.sourceNote=`ibaity 공개 client API에서 수집한 승인 매매 아파트의 등록 호가입니다. 실거래가가 아니며, 최근 ${summary.current_window_days||90}일 등록 매물 중 가격·면적이 확인된 ${d.sampleCount}건을 사용했습니다. 선수금·분할납부 조건 매물은 가격 산정에서 제외했습니다.`;
+      d.sourceNote=`ibaity 공개 client API에서 수집한 승인 매매 아파트의 등록 호가입니다. 실거래가가 아니며, 최근 ${summary.current_window_days||90}일 등록 매물 중 가격·면적이 확인된 ${d.sampleCount}건을 사용했습니다. 선수금·분할납부·보증인 교체·대출 승계 조건 매물은 가격 산정에서 제외했습니다. 비스마야는 현금·완납 확인 전 저가 조건부 매물을 보수적으로 제외합니다.`;
     });
     applyIbaityRegionPrices(snapshot);
     updateBismayahMarketLinks(snapshot);
@@ -1523,7 +1531,7 @@
 
   function updateBismayahMarketLinks(snapshot){
     const currentIds=new Set(Object.values(snapshot.by_complex||{}).filter(summary=>summary.complex_key==='bismayah_complex').flatMap(summary=>summary.listing_ids||[]));
-    const listings=(snapshot.listings||[]).filter(listing=>listing.complex_key==='bismayah_complex'&&currentIds.has(listing.id)&&listing.source_url);
+    const listings=(snapshot.listings||[]).filter(listing=>listing.complex_key==='bismayah_complex'&&currentIds.has(listing.id)&&isPriceEligibleListing(listing)&&listing.source_url);
     [100,120,140].forEach(area=>{
       const items=listings.filter(listing=>Number(listing.area_m2)===area).slice(0,12);
       const details=document.getElementById(`bismayah-links-${area}`);
@@ -1539,6 +1547,11 @@
     const summariesByKey={};
     const summariesById={};
     Object.values(snapshot.by_complex||{}).forEach(summary=>{
+      if(summary.complex_key==='dar_alsalam'||summary.complex_key==='bismayah_complex'){
+        const eligible=(snapshot.listings||[]).filter(listing=>listing.complex_key===summary.complex_key&&isPriceEligibleListing(listing)&&Number.isFinite(Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd)));
+        const values=eligible.map(listing=>Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd));
+        summary={...summary,median_price_per_m2_iqd:median(values),sample_count:values.length,listing_ids:eligible.map(listing=>listing.id)};
+      }
       if(summary.complex_id) summariesById[summary.complex_id]=summary;
       const key=summary.complex_key;
       if(!key || !Number.isFinite(summary.median_price_per_m2_iqd) || !(summary.sample_count>0)) return;
