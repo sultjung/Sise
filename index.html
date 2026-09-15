@@ -1078,9 +1078,12 @@
       {key:'2026-q2',label:'2026년 2분기',test:date=>/^2026-(04|05|06)-/.test(date)},
       {key:'2026-q3',label:'2026년 3분기',test:date=>/^2026-(07|08|09)-/.test(date)}
     ];
-      const listings=(ibaitySnapshot?.listings||[]).filter(listing=>listing.complex_key===complexKey && isPriceEligibleListing(listing) && Number.isFinite(Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd)));
+    const allListings=(ibaitySnapshot?.listings||[]).filter(listing=>listing.complex_key===complexKey && isPriceEligibleListing(listing) && Number.isFinite(Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd)));
+    const currentSummary=Object.values(ibaitySnapshot?.by_complex||{}).find(summary=>summary.complex_key===complexKey);
+    const currentIds=new Set(currentSummary?.listing_ids||[]);
     return periods.map(period=>{
-      const values=listings.filter(listing=>period.test(String(listing.created_at||'').slice(0,10))).map(listing=>Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd));
+      const listings=period.key==='2026-q3' && currentIds.size ? allListings.filter(listing=>currentIds.has(String(listing.id))) : allListings.filter(listing=>period.test(String(listing.created_at||'').slice(0,10)));
+      const values=listings.map(listing=>Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd));
       return {period:period.key,label:period.label,value:median(values),sample:values.length};
     });
   }
@@ -1096,11 +1099,11 @@
     controls.querySelectorAll('[data-trend-type]').forEach(b=>b.addEventListener('click',()=>{selectedTrendType=b.dataset.trendType;renderTrend();}));
     controls.querySelectorAll('[data-trend-currency]').forEach(b=>b.addEventListener('click',()=>{selectedTrendCurrency=b.dataset.trendCurrency;renderTrend();}));
     if(selectedTrendKey==='all'){
-      const latest=trendHistory.at(-1)||{date:'2026-09-10'}; const rows=seriesKeys.map(k=>({key:k,name:complexes[k].nameKr,price_per_m2_iqd:complexes[k].iqd,sample_count:complexes[k].sampleCount})).filter(r=>Number.isFinite(r.price_per_m2_iqd));
+      const latestDate=ibaitySnapshot?.updated_at||trendHistory.at(-1)?.date||'미확인'; const rows=seriesKeys.map(k=>({key:k,name:complexes[k].nameKr,price_per_m2_iqd:complexes[k].iqd,sample_count:complexes[k].sampleCount})).filter(r=>Number.isFinite(r.price_per_m2_iqd));
       if(!rows.length){holder.innerHTML='<div class="trend-empty">표시할 월말 단지 시세가 없습니다.</div>';return;}
       const W=900,H=285,P=42,max=Math.max(...rows.map(r=>selectedTrendCurrency==='usd'?r.price_per_m2_iqd/RATE:r.price_per_m2_iqd)); const bw=Math.min(70,(W-P*2)/rows.length*.62);
       holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="전체 단지 시세 비교"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${rows.map((r,i)=>{const display=selectedTrendCurrency==='usd'?r.price_per_m2_iqd/RATE:r.price_per_m2_iqd;const x=P+(W-P*2)*(i+.5)/rows.length,h=(H-P-48)*display/max,y=H-P-h,isBismayah=r.key==='bismayah_complex',fill=isBismayah?'#FF6100':'#AEB3BB',stroke=isBismayah?'#FF6100':'#9BA1AA',label=isBismayah?'#9E3500':'#4B515A';return `<rect x="${x-bw/2}" y="${y}" width="${bw}" height="${h}" rx="5" fill="${fill}" stroke="${stroke}"><title>${r.name}: ${fmt(r.price_per_m2_iqd)} IQD/m² / $${fmt(Math.round(r.price_per_m2_iqd/RATE))} · 표본 ${r.sample_count||'-'}건</title></rect><text x="${x}" y="${y-10}" text-anchor="middle" font-size="10" font-weight="700" fill="${label}">${selectedTrendCurrency==='usd'?'$'+fmt(Math.round(display)) : fmt(display)+' IQD'}</text><text x="${x}" y="${H-18}" text-anchor="middle" font-size="10" font-weight="${isBismayah?'700':'400'}" fill="${label}">${r.name}</text>`}).join('')}</svg>`;
-      meta.textContent=`전체 단지 비교 · ${latest.date} 기준 · ${selectedTrendCurrency.toUpperCase()}/m² · 비스마야는 주황색(시장가), 나머지는 회색 · 표본 1건 단지는 단일 매물로 해석`;
+      meta.textContent=`전체 단지 비교 · ${latestDate} 기준 · ${selectedTrendCurrency.toUpperCase()}/m² · 지도와 동일한 최신 확인값 · 비스마야는 주황색(시장가), 나머지는 회색`;
       return;
     }
     const points=quarterlyTrendPoints(selectedTrendKey);
@@ -1745,14 +1748,14 @@
 
   refreshComplexOrdering();
   renderList();renderChart();renderTrend();updateLegend();scheduleCalloutLayout();
-  fetch('./data/complex-history.json',{cache:'no-store'})
+  fetch(`./data/complex-history.json?v=${Date.now()}`,{cache:'no-store'})
     .then(r=>r.ok?r.json():[]).then(rows=>{ trendHistory=Array.isArray(rows)?rows:[]; renderTrend(); })
     .catch(()=>renderTrend());
-  fetch('./data/latest.json',{cache:'no-store'})
+  fetch(`./data/latest.json?v=${Date.now()}`,{cache:'no-store'})
     .then(response=>response.ok ? response.json() : null)
     .then(applyLatestPrices)
     .catch(()=>{ /* latest snapshot unavailable: retain embedded verified values */ });
-  fetch('./data/ibaity-latest.json',{cache:'no-store'})
+  fetch(`./data/ibaity-latest.json?v=${Date.now()}`,{cache:'no-store'})
     .then(response=>response.ok ? response.json() : null)
     .then(snapshot=>{ibaitySnapshot=snapshot;applyIbaitySnapshot(snapshot);})
     .catch(()=>{ /* ibaity snapshot unavailable: retain embedded values */ });
