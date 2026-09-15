@@ -190,6 +190,8 @@
   .map-legend{ background:rgba(255,255,255,.97); border:1px solid var(--hw-border); border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.85; box-shadow:0 2px 10px rgba(0,0,0,.08); }
   .map-legend .sw{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px;}
   .map-legend .dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin:0 8px 0 2px; vertical-align:0; }
+  .national-marker{ background:#fff; border:2px solid #315EBA; border-radius:50%; box-shadow:0 1px 5px rgba(0,0,0,.3); color:#183E8F; font:700 11px 'IBM Plex Mono',monospace; padding:5px 7px; white-space:nowrap; text-align:center; }
+  .national-marker.selected{ background:#315EBA; color:#fff; border-color:#183E8F; }
 
   .leaflet-popup-content{ margin:14px 16px; min-width:220px; }
   .map-popup .popup-place{ color:var(--hw-orange); font-size:10.5px; font-weight:700; }
@@ -383,6 +385,7 @@
       <span class="sub-en" id="view-section-sub">RESIDENTIAL COMPLEXES</span>
     </div>
     <div class="view-switch" role="group" aria-label="시세 보기 기준">
+      <button id="btn-national-view" aria-pressed="false">이라크 전체 <span class="view-count">18</span></button>
       <button id="btn-region-view" aria-pressed="false">지역별 <span class="view-count">13</span></button>
       <button id="btn-complex-view" class="active" aria-pressed="true">아파트 단지별 <span class="view-count">15</span></button>
     </div>
@@ -936,6 +939,29 @@
     zayouna:['2E44F6']
   };
 
+  // Ibaity statistics page, 2026-09-15. Values are the midpoint of the
+  // published high/low USD per-m² range, matching the site's displayed rate.
+  const nationalGovernorates = [
+    {key:'muthanna',nameKr:'무탄나',nameAr:'المثنى',city:'사마와',usd:507,count:170,change:-4.52,coords:[31.3182,45.2805]},
+    {key:'duhok',nameKr:'두호크',nameAr:'دهوك',city:'두호크',usd:667,count:2,change:0,coords:[36.8663,42.9978]},
+    {key:'basra',nameKr:'바스라',nameAr:'بصرة',city:'바스라',usd:1201,count:280,change:-20.53,coords:[30.5085,47.7804]},
+    {key:'karbala',nameKr:'카르발라',nameAr:'كربلاء',city:'카르발라',usd:1131,count:122,change:-20.38,coords:[32.6160,44.0249]},
+    {key:'diwaniyah',nameKr:'디와니야',nameAr:'الديوانية',city:'디와니야',usd:500,count:145,change:-13.84,coords:[31.9929,44.9255]},
+    {key:'erbil',nameKr:'에르빌',nameAr:'اربيل',city:'에르빌',usd:795,count:1308,change:-1.18,coords:[36.1911,44.0092]},
+    {key:'babel',nameKr:'바빌',nameAr:'بابل',city:'힐라',usd:638,count:70,change:-15.67,coords:[32.4637,44.4200]},
+    {key:'wasit',nameKr:'와시트',nameAr:'واسط',city:'쿠트',usd:550,count:81,change:3.01,coords:[32.5128,45.8182]},
+    {key:'nineveh',nameKr:'니나와',nameAr:'نينوى',city:'모술',usd:931,count:411,change:5.22,coords:[36.3350,43.1189]},
+    {key:'diyala',nameKr:'디얄라',nameAr:'ديالى',city:'바쿠바',usd:380,count:57,change:-7.64,coords:[33.7481,44.6330]},
+    {key:'salahaddin',nameKr:'살라흐 앗 딘',nameAr:'صلاح الدين',city:'티크리트',usd:513,count:242,change:-4.68,coords:[34.5970,43.6760]},
+    {key:'sulaymaniyah',nameKr:'술라이마니야',nameAr:'السليمانية',city:'술라이마니야',usd:742,count:33,change:-12.37,coords:[35.5613,45.4306]},
+    {key:'anbar',nameKr:'안바르',nameAr:'الانبار',city:'라마디',usd:600,count:587,change:-11.63,coords:[33.4250,43.2990]},
+    {key:'kirkuk',nameKr:'키르쿠크',nameAr:'كركوك',city:'키르쿠크',usd:585,count:239,change:-7.74,coords:[35.4681,44.3922]},
+    {key:'dhi_qar',nameKr:'디카르',nameAr:'ذي قار',city:'나시리야',usd:874,count:195,change:-7.72,coords:[31.0439,46.2573]},
+    {key:'najaf',nameKr:'나자프',nameAr:'النجف',city:'나자프',usd:1003,count:115,change:6.40,coords:[31.9996,44.3267]},
+    {key:'maysan',nameKr:'마이산',nameAr:'ميسان',city:'아마라',usd:609,count:45,change:0,coords:[31.8356,47.1448]},
+    {key:'baghdad',nameKr:'바그다드',nameAr:'بغداد',city:'바그다드',usd:1820,count:389,change:-29.70,coords:[33.3152,44.3661]}
+  ];
+
   const listEl = document.getElementById('district-list');
   const chartEl = document.getElementById('compare-panel');
   const viewTitle = document.getElementById('view-section-title');
@@ -967,6 +993,16 @@
   function renderList(){
     refreshComplexOrdering();
     listEl.innerHTML = '';
+    if(activeMode==='national'){
+      [...nationalGovernorates].sort((a,b)=>b.usd-a.usd).forEach((d,i)=>{
+        const row=document.createElement('div'); row.className='district-row'; row.dataset.key=d.key;
+        const primary=currencyMode==='usd'?`$${d.usd.toLocaleString()}`:`${Math.round(d.usd*RATE).toLocaleString()} IQD`;
+        const secondary=currencyMode==='usd'?`${Math.round(d.usd*RATE).toLocaleString()} IQD`:`$${d.usd.toLocaleString()}`;
+        row.innerHTML=`<div class="rank">${String(i+1).padStart(2,'0')}</div><div class="district-info"><span class="name-kr">${d.nameKr}</span><span class="name-en">${d.nameAr}</span><div class="complex">${d.city} · Ibaity 전국 통계</div><div class="meta-line">표본 ${d.count.toLocaleString()}건 · 변동 ${d.change>0?'+':''}${d.change.toFixed(2)}%</div></div><div class="district-price"><div class="usd">${primary}</div><div class="iqd">${secondary}</div><div class="district-badge"><span class="badge sample">Ibaity</span></div></div>`;
+        row.addEventListener('click',()=>selectGovernorate(d.key)); listEl.appendChild(row);
+      });
+      return;
+    }
     if(activeMode==='region'){
       orderedRegionKeys.forEach((key,i)=>{
         const d = districts[key];
@@ -1019,6 +1055,11 @@
 
   function renderChart(){
     chartEl.innerHTML = '';
+    if(activeMode==='national'){
+      const sorted=[...nationalGovernorates].sort((a,b)=>b.usd-a.usd); const max=sorted[0].usd;
+      sorted.forEach(d=>{const primary=currencyMode==='usd'?`$${d.usd.toLocaleString()}`:`${Math.round(d.usd*RATE).toLocaleString()} IQD`;const secondary=currencyMode==='usd'?`${Math.round(d.usd*RATE).toLocaleString()} IQD`:`$${d.usd.toLocaleString()}`;const row=document.createElement('div');row.className='bar-row';row.innerHTML=`<div class="bar-label">${d.nameKr}<span class="en">${d.nameAr}</span></div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(d.usd/max*100)}%"></div></div><div class="bar-value">${primary}<br><small>${secondary}</small></div><div class="badge sample">${d.count.toLocaleString()}건</div>`;chartEl.appendChild(row);});
+      chartSubtitle.textContent=`IRAQ GOVERNORATES · ${currencyMode.toUpperCase()}`; return;
+    }
     const data = activeMode==='region' ? districts : complexes;
     const keys = activeMode==='region' ? orderedRegionKeys.filter(k=>hasPrice(districts[k])) : pricedComplexKeys;
     if(!keys.length){ chartSubtitle.textContent=`PRICE PER M² · ${currencyMode.toUpperCase()}`; return; }
@@ -1132,6 +1173,10 @@
   // has valid pixel bounds when the callout groups are attached.
   const fullBounds = L.latLngBounds(Object.values(districts).flatMap(d=>d.coords).concat(greenZone.coords));
   const complexBounds = L.latLngBounds(Object.values(complexes).map(d=>d.centroid));
+  const nationalBounds = L.latLngBounds(nationalGovernorates.map(d=>d.coords));
+  const nationalLayerGroup = L.layerGroup();
+  const nationalMarkerLayers = {};
+  const greenZoneLayers = [];
   map.fitBounds(complexBounds,{padding:[24,24]});
 
   const polyLayers = {};
@@ -1171,22 +1216,36 @@
 
   // Green Zone uses its own pane so the emerald treatment stays visible
   // even when a district polygon is selected and brought to the front.
-  L.polygon(greenZone.coords,{
+  const greenZoneGlow=L.polygon(greenZone.coords,{
     pane:'greenZonePane',color:'#77D6AA',weight:8,opacity:.34,
     fillColor:varGreenZone,fillOpacity:.08,lineCap:'round',lineJoin:'round',interactive:false
-  }).addTo(map);
-  L.polygon(greenZone.coords,{
+  }).addTo(map); greenZoneLayers.push(greenZoneGlow);
+  const greenZoneBoundary=L.polygon(greenZone.coords,{
     pane:'greenZonePane',className:'green-zone-boundary',
     color:'#075B40',weight:2.5,opacity:.96,dashArray:'9,5',
     fillColor:varGreenZone,fillOpacity:.30,lineCap:'round',lineJoin:'round',interactive:false
-  }).addTo(map);
-  L.marker(greenZone.centroid,{
+  }).addTo(map); greenZoneLayers.push(greenZoneBoundary);
+  const greenZoneLabel=L.marker(greenZone.centroid,{
     icon:L.divIcon({
       className:'',
       html:'<div class="green-zone-text">그린존</div>',
       iconSize:null
     }),interactive:false
-  }).addTo(map);
+  }).addTo(map); greenZoneLayers.push(greenZoneLabel);
+
+  function setGreenZoneVisibility(visible){
+    greenZoneGlow.setStyle({opacity:visible?.34:0,fillOpacity:visible?.08:0});
+    greenZoneBoundary.setStyle({opacity:visible?.96:0,fillOpacity:visible?.30:0});
+    greenZoneLabel.setOpacity(visible?1:0);
+  }
+
+  nationalGovernorates.forEach(d=>{
+    const icon=L.divIcon({className:'',html:`<div class="national-marker" id="national-marker-${d.key}">${d.nameKr}<br><b>$${d.usd.toLocaleString()}</b></div>`,iconSize:null,iconAnchor:[0,0]});
+    const marker=L.marker(d.coords,{icon,keyboard:true,title:`${d.nameKr} · $${d.usd.toLocaleString()}/m²`}).addTo(nationalLayerGroup);
+    marker.bindTooltip(`${d.nameKr} · ${d.nameAr} · $${d.usd.toLocaleString()}/m²`,{direction:'top'});
+    marker.on('click',()=>selectGovernorate(d.key));
+    nationalMarkerLayers[d.key]=marker;
+  });
 
   function popupHtml(d){
     if(!hasPrice(d)) {
@@ -1318,7 +1377,9 @@
   legend.onAdd=()=>{legendDiv=L.DomUtil.create('div','map-legend');return legendDiv;};
   legend.addTo(map);
   function updateLegend(){
-    if(activeMode==='region'){
+    if(activeMode==='national'){
+      legendDiv.innerHTML='<b>이라크 전체 주별 시세</b><br><span class="dot" style="background:#315EBA"></span>Ibaity 주별 대표 단가<br><small>대표 위치: 주도 기준</small>';
+    }else if(activeMode==='region'){
       legendDiv.innerHTML=`<b>지역 평균 단가 수준</b><br><span class="sw" style="background:#D94800"></span>상위 1/3<br><span class="sw" style="background:#FF8A3D"></span>중위 1/3<br><span class="sw" style="background:#FFC896"></span>하위 1/3<br><span class="sw" style="background:#C9CDD3"></span>시세 미확인<br><span class="sw" style="background:#149764;border:1px solid #075B40"></span>그린존<br>`;
     }else{
       legendDiv.innerHTML=`<b>단지 시세 · ${currencyMode.toUpperCase()}</b><br><span class="dot" style="background:#315EBA"></span>복수 매물 호가 중앙값<br><span class="dot" style="background:#1A8A3F"></span>비스마야 공식 분양가<br><small>카드에서 모든 원문 확인</small>`;
@@ -1399,18 +1460,42 @@
     calloutSets.complex.anchors[key].openPopup();
   }
 
+  function selectGovernorate(key){
+    if(activeMode!=='national') return;
+    const d=nationalGovernorates.find(item=>item.key===key); if(!d) return;
+    document.querySelectorAll('.district-row').forEach(r=>r.classList.toggle('active',r.dataset.key===key));
+    document.querySelector(`.district-row[data-key="${key}"]`)?.scrollIntoView({block:'nearest',behavior:'smooth'});
+    Object.values(nationalMarkerLayers).forEach(marker=>marker.getElement()?.classList.remove('selected'));
+    nationalMarkerLayers[key]?.getElement()?.classList.add('selected');
+    map.flyTo(d.coords,Math.max(map.getZoom(),6),{duration:.6});
+    nationalMarkerLayers[key]?.openTooltip();
+  }
+
   function switchMode(mode){
     if(mode===activeMode) return;
     activeMode=mode;
     map.closePopup();
     const regionBtn=document.getElementById('btn-region-view');
     const complexBtn=document.getElementById('btn-complex-view');
+    const nationalBtn=document.getElementById('btn-national-view');
+    nationalBtn.classList.toggle('active',mode==='national');
     regionBtn.classList.toggle('active',mode==='region');
     complexBtn.classList.toggle('active',mode==='complex');
     regionBtn.setAttribute('aria-pressed',mode==='region');
     complexBtn.setAttribute('aria-pressed',mode==='complex');
+    nationalBtn.setAttribute('aria-pressed',mode==='national');
 
-    if(mode==='region'){
+    if(mode==='national'){
+      map.removeLayer(calloutGroups.complex);map.removeLayer(calloutGroups.region);map.addLayer(nationalLayerGroup);
+      Object.values(polyLayers).forEach(poly=>{poly.closeTooltip();poly.unbindTooltip();poly.setStyle({fillOpacity:0,opacity:0});});
+      greenZoneLayers.forEach(layer=>layer.setStyle?layer.setStyle({opacity:0,fillOpacity:0}):layer.setOpacity(0));
+      viewTitle.textContent='이라크 전체 주별 시세';viewSub.textContent='IRAQ GOVERNORATES';
+      viewNote.textContent='Ibaity 전국 통계 기준 · 왼쪽 주별 리스트 또는 지도 표식을 클릭하면 해당 지역으로 이동합니다';
+      listPanelTitle.textContent='이라크 18개 주';listPanelCount.textContent='18 GOVERNORATES';mapPanelCount.textContent='주도 기준 대표 위치';
+      chartTitle.textContent='이라크 주별 m² 단가 비교'; map.fitBounds(nationalBounds,{padding:[24,24]});
+    }else if(mode==='region'){
+      setGreenZoneVisibility(true);
+      map.removeLayer(nationalLayerGroup);map.removeLayer(calloutGroups.complex);map.addLayer(calloutGroups.region);
       map.removeLayer(calloutGroups.complex);map.addLayer(calloutGroups.region);
       Object.entries(polyLayers).forEach(([key,poly])=>{
         poly.setStyle({color:'#fff',weight:key===selectedDistrictKey?3:1.5,fillOpacity:.62,opacity:1});
@@ -1422,6 +1507,8 @@
       chartTitle.textContent='지역별 m² 단가 비교';
       map.fitBounds(fullBounds,{padding:[24,24]});
     }else{
+      setGreenZoneVisibility(true);
+      map.removeLayer(nationalLayerGroup);
       map.removeLayer(calloutGroups.region);map.addLayer(calloutGroups.complex);
       Object.values(polyLayers).forEach(poly=>{poly.closeTooltip();poly.unbindTooltip();poly.setStyle({color:'#9A9CA2',weight:1,fillOpacity:.07,opacity:.45});});
       viewTitle.textContent='바그다드 아파트 단지별 시세';viewSub.textContent='RESIDENTIAL COMPLEXES';
@@ -1436,6 +1523,7 @@
 
   document.getElementById('btn-region-view').addEventListener('click',()=>switchMode('region'));
   document.getElementById('btn-complex-view').addEventListener('click',()=>switchMode('complex'));
+  document.getElementById('btn-national-view').addEventListener('click',()=>switchMode('national'));
 
   const btnIqd=document.getElementById('btn-iqd');
   const btnUsd=document.getElementById('btn-usd');
