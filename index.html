@@ -1179,6 +1179,7 @@
   const nationalBounds = L.latLngBounds(nationalGovernorates.map(d=>d.coords));
   const nationalLayerGroup = L.layerGroup();
   const nationalMarkerLayers = {};
+  const nationalCalloutSets = {labels:{},leaders:{},anchors:{}};
   const greenZoneLayers = [];
   map.fitBounds(complexBounds,{padding:[24,24]});
 
@@ -1243,11 +1244,17 @@
   }
 
   nationalGovernorates.forEach(d=>{
-    const icon=L.divIcon({className:'price-callout-icon',html:`<div class="region-callout complex" id="national-marker-${d.key}" style="--pin-color:#315EBA"><div class="region-label"><span class="name">${d.nameKr}</span><span class="callout-prices"><span class="price">${nationalCalloutPrice(d)}</span></span></div></div>`,iconSize:[1,1],iconAnchor:[0,0]});
+    const leader=L.polyline([d.coords,[d.coords[0]+.005,d.coords[1]+.005]],{color:'#315EBA',weight:2.2,opacity:.95,interactive:false,className:'region-leader'}).addTo(nationalLayerGroup);
+    const anchor=L.circleMarker(d.coords,{radius:4,color:'#315EBA',weight:2,fillColor:'#fff',fillOpacity:1,interactive:true}).addTo(nationalLayerGroup);
+    const icon=L.divIcon({className:'price-callout-icon',html:`<div class="region-callout complex" id="lbl-national-${d.key}" style="--pin-color:#315EBA"><div class="region-label"><span class="name">${d.nameKr}</span><span class="callout-prices"><span class="price">${nationalCalloutPrice(d)}</span></span></div></div>`,iconSize:[1,1],iconAnchor:[0,0]});
     const marker=L.marker(d.coords,{icon,keyboard:true,title:`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`}).addTo(nationalLayerGroup);
     marker.bindTooltip(`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`,{direction:'top'});
-    marker.on('click',()=>selectGovernorate(d.key));
+    const select=()=>selectGovernorate(d.key);
+    marker.on('click',select); anchor.on('click',select);
     nationalMarkerLayers[d.key]=marker;
+    nationalCalloutSets.labels[d.key]=marker;
+    nationalCalloutSets.leaders[d.key]=leader;
+    nationalCalloutSets.anchors[d.key]=anchor;
   });
 
   function popupHtml(d){
@@ -1311,24 +1318,26 @@
   }
 
   function layoutCallouts(){
-    const data = activeMode==='region' ? districts : complexes;
-    const layers = calloutSets[activeMode];
-    const selected = activeMode==='region' ? selectedDistrictKey : selectedComplexKey;
+    const isNational=activeMode==='national';
+    const data=isNational ? Object.fromEntries(nationalGovernorates.map(d=>[d.key,d])) : (activeMode==='region' ? districts : complexes);
+    const layers=isNational ? nationalCalloutSets : calloutSets[activeMode];
+    const selected=isNational ? null : (activeMode==='region' ? selectedDistrictKey : selectedComplexKey);
     const size = map.getSize();
     const mapRect = map.getContainer().getBoundingClientRect();
     const items = [];
 
     Object.entries(data).forEach(([key,d])=>{
-      const point = map.latLngToContainerPoint(d.centroid);
+      const origin=isNational ? d.coords : d.centroid;
+      const point = map.latLngToContainerPoint(origin);
       const visible = point.x>=-12&&point.x<=size.x+12&&point.y>=-12&&point.y<=size.y+12;
       layers.labels[key].setOpacity(visible?1:0);
       layers.leaders[key].setStyle({opacity:visible ? .78 : 0});
       layers.anchors[key].setStyle({opacity:visible?1:0,fillOpacity:visible?1:0});
       if(!visible) return;
-      const el=document.getElementById(`lbl-${activeMode}-${key}`);
-      const bounds=el?el.getBoundingClientRect():{width:activeMode==='complex'?120:90,height:activeMode==='complex'?54:40};
-      const offset=calloutOffsets[activeMode][key]||[76,-52];
-      items.push({key,point,width:Math.max(activeMode==='complex'?112:78,bounds.width),height:Math.max(activeMode==='complex'?50:38,bounds.height),preferredAngle:Math.atan2(offset[1],offset[0]),preferredRadius:Math.max(activeMode==='complex'?82:68,Math.hypot(...offset))});
+      const complexMode=activeMode==='complex'||isNational;
+      const bounds=el?el.getBoundingClientRect():{width:complexMode?120:90,height:complexMode?54:40};
+      const offset=!isNational && calloutOffsets[activeMode][key] ? calloutOffsets[activeMode][key] : [76,-52];
+      items.push({key,point,width:Math.max(complexMode?112:78,bounds.width),height:Math.max(complexMode?50:38,bounds.height),preferredAngle:Math.atan2(offset[1],offset[0]),preferredRadius:Math.max(complexMode?82:68,Math.hypot(...offset))});
     });
 
     const obstacles=['.leaflet-control-zoom','.map-legend','.cbd-label'].map(selector=>document.querySelector(selector)).filter(Boolean).map(el=>{
@@ -1364,7 +1373,8 @@
     items.forEach(item=>{
       const end=connectorEnd(item.point,item);
       layers.labels[item.key].setLatLng(map.containerPointToLatLng(L.point(item.x,item.y)));
-      layers.leaders[item.key].setLatLngs([data[item.key].centroid,map.containerPointToLatLng(end)]);
+      const origin=isNational ? data[item.key].coords : data[item.key].centroid;
+      layers.leaders[item.key].setLatLngs([origin,map.containerPointToLatLng(end)]);
     });
   }
 
@@ -1469,14 +1479,18 @@
     document.querySelectorAll('.district-row').forEach(r=>r.classList.toggle('active',r.dataset.key===key));
     document.querySelector(`.district-row[data-key="${key}"]`)?.scrollIntoView({block:'nearest',behavior:'smooth'});
     Object.values(nationalMarkerLayers).forEach(marker=>marker.getElement()?.classList.remove('selected'));
+    Object.values(nationalCalloutSets.leaders).forEach(leader=>leader.setStyle({color:'#315EBA',weight:2.2,opacity:.95}));
+    Object.values(nationalCalloutSets.anchors).forEach(anchor=>anchor.setStyle({color:'#315EBA',weight:2}));
     nationalMarkerLayers[key]?.getElement()?.classList.add('selected');
-    map.flyTo(d.coords,Math.max(map.getZoom(),6),{duration:.6});
+    nationalCalloutSets.leaders[key]?.setStyle({color:'#A9430B',weight:3.2});
+    nationalCalloutSets.anchors[key]?.setStyle({color:'#A9430B',weight:3});
+    map.flyTo(d.coords,Math.max(map.getZoom(),10),{duration:.6});
     nationalMarkerLayers[key]?.openTooltip();
   }
 
   function updateNationalMarkerTexts(){
     nationalGovernorates.forEach(d=>{
-      const el=document.getElementById(`national-marker-${d.key}`);
+      const el=document.getElementById(`lbl-national-${d.key}`);
       if(!el) return;
       const price=el.querySelector('.price'); if(price) price.textContent=nationalCalloutPrice(d);
       nationalMarkerLayers[d.key]?.setTooltipContent(`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`);
