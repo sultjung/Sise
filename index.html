@@ -887,6 +887,9 @@
     if(item.sourceKind!=='dual') return `<span class="price">${calloutPrice(item)}</span>`;
     return `<span class="price dual-official">공식 ${officialCalloutPrice(item)}</span><span class="price dual-market">시장 ${calloutPrice(item)}</span>`;
   }
+  function nationalCalloutPrice(d){
+    return currencyMode==='iqd' ? `${Math.round(d.usd*RATE).toLocaleString()} IQD` : `$${d.usd.toLocaleString()}`;
+  }
   function tierForComplex(item){ if(!hasPrice(item)) return 'pending'; return item.iqd>=2300000 ? 'high' : item.iqd>=1600000 ? 'mid' : 'low'; }
   function tierForDistrict(item){
     if(!hasPrice(item)) return 'pending';
@@ -1240,9 +1243,9 @@
   }
 
   nationalGovernorates.forEach(d=>{
-    const icon=L.divIcon({className:'',html:`<div class="national-marker" id="national-marker-${d.key}">${d.nameKr}<br><b>$${d.usd.toLocaleString()}</b></div>`,iconSize:null,iconAnchor:[0,0]});
-    const marker=L.marker(d.coords,{icon,keyboard:true,title:`${d.nameKr} · $${d.usd.toLocaleString()}/m²`}).addTo(nationalLayerGroup);
-    marker.bindTooltip(`${d.nameKr} · ${d.nameAr} · $${d.usd.toLocaleString()}/m²`,{direction:'top'});
+    const icon=L.divIcon({className:'price-callout-icon',html:`<div class="region-callout complex" id="national-marker-${d.key}" style="--pin-color:#315EBA"><div class="region-label"><span class="name">${d.nameKr}</span><span class="callout-prices"><span class="price">${nationalCalloutPrice(d)}</span></span></div></div>`,iconSize:[1,1],iconAnchor:[0,0]});
+    const marker=L.marker(d.coords,{icon,keyboard:true,title:`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`}).addTo(nationalLayerGroup);
+    marker.bindTooltip(`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`,{direction:'top'});
     marker.on('click',()=>selectGovernorate(d.key));
     nationalMarkerLayers[d.key]=marker;
   });
@@ -1471,6 +1474,15 @@
     nationalMarkerLayers[key]?.openTooltip();
   }
 
+  function updateNationalMarkerTexts(){
+    nationalGovernorates.forEach(d=>{
+      const el=document.getElementById(`national-marker-${d.key}`);
+      if(!el) return;
+      const price=el.querySelector('.price'); if(price) price.textContent=nationalCalloutPrice(d);
+      nationalMarkerLayers[d.key]?.setTooltipContent(`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`);
+    });
+  }
+
   function switchMode(mode){
     if(mode===activeMode) return;
     activeMode=mode;
@@ -1533,7 +1545,7 @@
     document.body.classList.toggle('usd-active',mode==='usd');
     btnIqd.classList.toggle('active',mode==='iqd');btnUsd.classList.toggle('active',mode==='usd');
     btnIqd.setAttribute('aria-pressed',mode==='iqd');btnUsd.setAttribute('aria-pressed',mode==='usd');
-    renderList();renderChart();updateCalloutTexts();updateLegend();scheduleCalloutLayout();
+    renderList();renderChart();updateCalloutTexts();updateNationalMarkerTexts();updateLegend();scheduleCalloutLayout();
   }
   btnIqd.addEventListener('click',()=>setCurrency('iqd'));
   btnUsd.addEventListener('click',()=>setCurrency('usd'));
