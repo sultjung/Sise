@@ -1180,6 +1180,7 @@
   const nationalLayerGroup = L.layerGroup();
   const nationalMarkerLayers = {};
   const nationalCalloutSets = {labels:{},leaders:{},anchors:{}};
+  const nationalPolygonLayers = {};
   const greenZoneLayers = [];
   map.fitBounds(complexBounds,{padding:[24,24]});
 
@@ -1242,6 +1243,40 @@
     greenZoneBoundary.setStyle({opacity:visible?.96:0,fillOpacity:visible?.30:0});
     greenZoneLabel.setOpacity(visible?1:0);
   }
+
+  const nationalNameToKey={
+    'Dihok':'duhok','Arbil':'erbil','Al-Basrah':'basra','Al-Muthannia':'muthanna',
+    'As-Sulaymaniyah':'sulaymaniyah','Diyala':'diyala','Wasit':'wasit','Maysan':'maysan',
+    'Al-Anbar':'anbar','An-Najaf':'najaf','Ninawa':'nineveh','Sala ad-Din':'salahaddin',
+    "At-Ta'mim":'kirkuk','Baghdad':'baghdad','Babil':'babel','Al-Qādisiyyah':'diwaniyah',
+    'Dhi-Qar':'dhi_qar','Karbala':'karbala'
+  };
+  const nationalUsdRange={min:Math.min(...nationalGovernorates.map(d=>d.usd)),max:Math.max(...nationalGovernorates.map(d=>d.usd))};
+  function nationalShade(d){
+    const t=(d.usd-nationalUsdRange.min)/Math.max(1,nationalUsdRange.max-nationalUsdRange.min);
+    const light=Math.round(88-t*48);
+    return `hsl(24 100% ${light}%)`;
+  }
+  fetch(`./data/iraq-governorates.geojson?v=${Date.now()}`,{cache:'no-store'})
+    .then(response=>response.ok?response.json():null)
+    .then(geo=>{
+      if(!geo) return;
+      L.geoJSON(geo,{
+        style:feature=>{
+          const key=nationalNameToKey[feature.properties?.name];
+          const d=nationalGovernorates.find(item=>item.key===key);
+          return {color:'#fff',weight:1.4,fillColor:d?nationalShade(d):'#F3C8A8',fillOpacity:.48,opacity:.9};
+        },
+        onEachFeature:(feature,layer)=>{
+          const key=nationalNameToKey[feature.properties?.name];
+          if(!key) return;
+          nationalPolygonLayers[key]=layer;
+          layer.bindTooltip(`${nationalGovernorates.find(d=>d.key===key)?.nameKr||feature.properties.name}`,{sticky:true});
+          layer.on('click',()=>{if(activeMode==='national')selectGovernorate(key);});
+        }
+      }).addTo(nationalLayerGroup);
+    })
+    .catch(()=>{});
 
   nationalGovernorates.forEach(d=>{
     const leader=L.polyline([d.coords,[d.coords[0]+.005,d.coords[1]+.005]],{color:'#315EBA',weight:2.2,opacity:.95,interactive:false,className:'region-leader'}).addTo(nationalLayerGroup);
@@ -1392,7 +1427,7 @@
   legend.addTo(map);
   function updateLegend(){
     if(activeMode==='national'){
-      legendDiv.innerHTML='<b>이라크 전체 주별 시세</b><br><span class="dot" style="background:#315EBA"></span>Ibaity 주별 대표 단가<br><small>대표 위치: 주도 기준</small>';
+      legendDiv.innerHTML='<b>이라크 전체 주별 시세</b><br><span class="sw" style="background:#D94800"></span>고가 주<br><span class="sw" style="background:#FFC896"></span>저가 주<br><span class="dot" style="background:#315EBA"></span>주별 대표 단가<br><small>음영: Ibaity 단가 상대 비교 · 위치: 주도 기준</small>';
     }else if(activeMode==='region'){
       legendDiv.innerHTML=`<b>지역 평균 단가 수준</b><br><span class="sw" style="background:#D94800"></span>상위 1/3<br><span class="sw" style="background:#FF8A3D"></span>중위 1/3<br><span class="sw" style="background:#FFC896"></span>하위 1/3<br><span class="sw" style="background:#C9CDD3"></span>시세 미확인<br><span class="sw" style="background:#149764;border:1px solid #075B40"></span>그린존<br>`;
     }else{
