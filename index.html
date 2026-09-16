@@ -1334,6 +1334,7 @@
       layers.leaders[key].setStyle({opacity:visible ? .78 : 0});
       layers.anchors[key].setStyle({opacity:visible?1:0,fillOpacity:visible?1:0});
       if(!visible) return;
+      const el=document.getElementById(`lbl-${activeMode}-${key}`);
       const complexMode=activeMode==='complex'||isNational;
       const bounds=el?el.getBoundingClientRect():{width:complexMode?120:90,height:complexMode?54:40};
       const offset=!isNational && calloutOffsets[activeMode][key] ? calloutOffsets[activeMode][key] : [76,-52];
