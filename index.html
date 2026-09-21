@@ -1122,11 +1122,13 @@
       {key:'2026-q2',label:'2026년 2분기',test:date=>/^2026-(04|05|06)-/.test(date)},
       {key:'2026-q3',label:'2026년 3분기',test:date=>/^2026-(07|08|09)-/.test(date)}
     ];
-    const allListings=(ibaitySnapshot?.listings||[]).filter(listing=>listing.complex_key===complexKey && isPriceEligibleListing(listing) && Number.isFinite(Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd)));
-    const currentSummary=Object.values(ibaitySnapshot?.by_complex||{}).find(summary=>summary.complex_key===complexKey);
-    const currentIds=new Set(currentSummary?.listing_ids||[]);
+    // Use the complete dated listing ledger for every period.  The previous
+    // implementation used the current 90-day listing_ids for Q3 only, which
+    // made the result depend on the refresh window and could hide valid
+    // historical observations from the downloaded raw data.
+    const allListings=(ibaitySnapshot?.listings||[]).filter(listing=>listing.complex_key===complexKey && isPriceEligibleListing(listing) && Number.isFinite(Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd)) && /^\d{4}-\d{2}-\d{2}/.test(String(listing.created_at||'')));
     return periods.map(period=>{
-      const listings=period.key==='2026-q3' && currentIds.size ? allListings.filter(listing=>currentIds.has(String(listing.id))) : allListings.filter(listing=>period.test(String(listing.created_at||'').slice(0,10)));
+      const listings=allListings.filter(listing=>period.test(String(listing.created_at||'').slice(0,10)));
       const values=listings.map(listing=>Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd));
       return {period:period.key,label:period.label,value:median(values),sample:values.length};
     });
@@ -1684,7 +1686,7 @@
     applyIbaityRegionPrices(snapshot);
     updateBismayahMarketLinks(snapshot);
     refreshComplexOrdering();
-    renderList();renderChart();updateCalloutTexts();updateLegend();scheduleCalloutLayout();
+    renderList();renderChart();renderTrend();updateCalloutTexts();updateLegend();scheduleCalloutLayout();
   }
 
   function updateBismayahMarketLinks(snapshot){
@@ -1887,10 +1889,37 @@
       });
     const districtSheet=XLSX.utils.aoa_to_sheet([districtHeaders,...districtRows]);
     applyExcelSheetStyle(districtSheet,0,[24,16,24,24,28],{2:'#,##0',3:'#,##0'});
+
+    // Keep the downloadable workbook on the same dated raw-ledger basis as
+    // the on-screen quarterly comparison.  This makes it possible to audit
+    // every displayed median from the exported source rows.
+    const quarterlyPeriods=[
+      {label:'2025년',test:date=>/^2025-/.test(date)},
+      {label:'2026년 1분기',test:date=>/^2026-(01|02|03)-/.test(date)},
+      {label:'2026년 2분기',test:date=>/^2026-(04|05|06)-/.test(date)},
+      {label:'2026년 3분기',test:date=>/^2026-(07|08|09)-/.test(date)}
+    ];
+    const quarterlyHeaders=['단지명',...quarterlyPeriods.flatMap(period=>[`${period.label} 중위값(IQD/m²)`,`${period.label} 표본 수(건)`]),'산출 기준'];
+    const quarterlyRows=Object.keys(complexes)
+      .filter(key=>complexes[key])
+      .sort((a,b)=>complexes[a].nameKr.localeCompare(complexes[b].nameKr,'ko'))
+      .map(key=>{
+        const values=quarterlyPeriods.flatMap(period=>{
+          const periodValues=(ibaitySnapshot?.listings||[])
+            .filter(listing=>listing.complex_key===key && isPriceEligibleListing(listing) && Number.isFinite(Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd)) && period.test(String(listing.created_at||'').slice(0,10)))
+            .map(listing=>Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd));
+          const iqd=median(periodValues);
+          return [excelValue(iqd),excelValue(periodValues.length||null)];
+        });
+        return [excelValue(complexes[key].nameKr),...values,'등록일 기준 공개 매물 m² 단가 중위값'];
+      });
+    const quarterlySheet=XLSX.utils.aoa_to_sheet([quarterlyHeaders,...quarterlyRows]);
+    applyExcelSheetStyle(quarterlySheet,0,[24,20,16,20,16,20,16,20,16,34],{1:'#,##0',3:'#,##0',5:'#,##0',7:'#,##0'});
     const workbook=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook,complexSheet,'단지별 리스트');
     XLSX.utils.book_append_sheet(workbook,regionSheet,'단지별 평단가');
     XLSX.utils.book_append_sheet(workbook,districtSheet,'지역별 평균');
+    XLSX.utils.book_append_sheet(workbook,quarterlySheet,'분기별 중위값');
     const updatedAt=ibaitySnapshot?.updated_at||new Date().toISOString().slice(0,10);
     XLSX.writeFile(workbook,`sise-단지별-지역별-${updatedAt}.xlsx`);
   }
