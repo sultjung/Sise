@@ -1259,6 +1259,43 @@
     const light=Math.round(88-t*48);
     return `hsl(24 100% ${light}%)`;
   }
+  function nationalCalloutColor(d){
+    const t=(d.usd-nationalUsdRange.min)/Math.max(1,nationalUsdRange.max-nationalUsdRange.min);
+    return t>=.67 ? '#D94800' : t>=.34 ? '#FF8A3D' : '#FFC896';
+  }
+  function nationalPolygonRings(layer){
+    const rings=[];
+    const visit=nodes=>{
+      if(!Array.isArray(nodes)||!nodes.length) return;
+      if(nodes[0]&&Number.isFinite(nodes[0].lat)&&Number.isFinite(nodes[0].lng)){rings.push(nodes);return;}
+      nodes.forEach(visit);
+    };
+    visit(layer?.getLatLngs?.()||[]);
+    return rings;
+  }
+  function closestPointOnSegment(point,a,b){
+    const ab=L.point(b.x-a.x,b.y-a.y);
+    const length2=ab.x*ab.x+ab.y*ab.y;
+    const t=length2 ? Math.max(0,Math.min(1,((point.x-a.x)*ab.x+(point.y-a.y)*ab.y)/length2)) : 0;
+    return L.point(a.x+ab.x*t,a.y+ab.y*t);
+  }
+  function nationalLeaderOrigin(key,labelPoint){
+    const fallback=nationalGovernorates.find(d=>d.key===key)?.coords;
+    const rings=nationalPolygonRings(nationalPolygonLayers[key]);
+    if(!rings.length||!fallback) return {latLng:L.latLng(fallback),point:map.latLngToContainerPoint(fallback)};
+    let best=null;
+    rings.forEach(ring=>{
+      for(let i=0;i<ring.length;i++){
+        const a=map.latLngToContainerPoint(ring[i]);
+        const b=map.latLngToContainerPoint(ring[(i+1)%ring.length]);
+        const candidate=closestPointOnSegment(labelPoint,a,b);
+        const distance=labelPoint.distanceTo(candidate);
+        if(!best||distance<best.distance) best={point:candidate,distance};
+      }
+    });
+    const point=best?.point||map.latLngToContainerPoint(fallback);
+    return {latLng:map.containerPointToLatLng(point),point};
+  }
   fetch(`./data/iraq-governorates.geojson?v=${Date.now()}`,{cache:'no-store'})
     .then(response=>response.ok?response.json():null)
     .then(geo=>{
@@ -1281,9 +1318,10 @@
     .catch(()=>{});
 
   nationalGovernorates.forEach(d=>{
-    const leader=L.polyline([d.coords,[d.coords[0]+.005,d.coords[1]+.005]],{color:'#315EBA',weight:2.2,opacity:.95,interactive:false,className:'region-leader'}).addTo(nationalLayerGroup);
-    const anchor=L.circleMarker(d.coords,{radius:4,color:'#315EBA',weight:2,fillColor:'#fff',fillOpacity:1,interactive:true}).addTo(nationalLayerGroup);
-    const icon=L.divIcon({className:'price-callout-icon',html:`<div class="region-callout complex" id="lbl-national-${d.key}" style="--pin-color:#315EBA"><div class="region-label"><span class="name">${d.nameKr}</span><span class="callout-prices"><span class="price">${nationalCalloutPrice(d)}</span></span></div></div>`,iconSize:[1,1],iconAnchor:[0,0]});
+    const color=nationalCalloutColor(d);
+    const leader=L.polyline([d.coords,[d.coords[0]+.005,d.coords[1]+.005]],{color,weight:2.2,opacity:.95,interactive:false,className:'region-leader'}).addTo(nationalLayerGroup);
+    const anchor=L.circleMarker(d.coords,{radius:4,color,weight:2,fillColor:'#fff',fillOpacity:1,interactive:true}).addTo(nationalLayerGroup);
+    const icon=L.divIcon({className:'price-callout-icon',html:`<div class="region-callout complex" id="lbl-national-${d.key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${d.nameKr}</span><span class="callout-prices"><span class="price">${nationalCalloutPrice(d)}</span></span></div></div>`,iconSize:[1,1],iconAnchor:[0,0]});
     const marker=L.marker(d.coords,{icon,keyboard:true,title:`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`}).addTo(nationalLayerGroup);
     marker.bindTooltip(`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`,{direction:'top'});
     const select=()=>selectGovernorate(d.key);
@@ -1409,10 +1447,17 @@
     });
 
     items.forEach(item=>{
-      const end=connectorEnd(item.point,item);
       layers.labels[item.key].setLatLng(map.containerPointToLatLng(L.point(item.x,item.y)));
-      const origin=isNational ? data[item.key].coords : data[item.key].centroid;
-      layers.leaders[item.key].setLatLngs([origin,map.containerPointToLatLng(end)]);
+      const nationalOrigin=isNational ? nationalLeaderOrigin(item.key,L.point(item.x,item.y)) : null;
+      const anchorPoint=nationalOrigin ? nationalOrigin.point : item.point;
+      const end=connectorEnd(anchorPoint,item);
+      const origin=nationalOrigin ? nationalOrigin.latLng : data[item.key].centroid;
+      if(nationalOrigin){
+        layers.anchors[item.key].setLatLng(origin);
+        layers.leaders[item.key].setLatLngs([origin,map.containerPointToLatLng(end)]);
+      }else{
+        layers.leaders[item.key].setLatLngs([origin,map.containerPointToLatLng(end)]);
+      }
     });
   }
 
@@ -1429,7 +1474,7 @@
   legend.addTo(map);
   function updateLegend(){
     if(activeMode==='national'){
-      legendDiv.innerHTML='<b>이라크 전체 주별 시세</b><br><span class="sw" style="background:#D94800"></span>고가 주<br><span class="sw" style="background:#FFC896"></span>저가 주<br><span class="dot" style="background:#315EBA"></span>주별 대표 단가<br><small>음영: Ibaity 단가 상대 비교 · 위치: 주도 기준</small>';
+      legendDiv.innerHTML='<b>이라크 전체 주별 시세</b><br><span class="sw" style="background:#D94800"></span>고가 주 / 가격표<br><span class="sw" style="background:#FF8A3D"></span>중간 주 / 가격표<br><span class="sw" style="background:#FFC896"></span>저가 주 / 가격표<br><small>음영·테두리·연결선: Ibaity 단가 상대 비교</small>';
     }else if(activeMode==='region'){
       legendDiv.innerHTML=`<b>지역 평균 단가 수준</b><br><span class="sw" style="background:#D94800"></span>상위 1/3<br><span class="sw" style="background:#FF8A3D"></span>중위 1/3<br><span class="sw" style="background:#FFC896"></span>하위 1/3<br><span class="sw" style="background:#C9CDD3"></span>시세 미확인<br><span class="sw" style="background:#149764;border:1px solid #075B40"></span>그린존<br>`;
     }else{
