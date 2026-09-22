@@ -1303,6 +1303,7 @@
   };
   const ADMIN_PASSWORD_KEY='sise-admin-edit-password-sha256';
   const SAVED_COMPLEX_OFFSETS_KEY='sise-complex-callout-offsets';
+  const SAVED_NATIONAL_OFFSETS_KEY='sise-national-callout-offsets';
   let calloutEditMode=false;
   try{
     const savedOffsets=JSON.parse(localStorage.getItem(SAVED_COMPLEX_OFFSETS_KEY)||'null');
@@ -1399,6 +1400,10 @@
     babel:[-40,-82],karbala:[-88,-48],najaf:[-112,4],diwaniyah:[-82,42],
     muthanna:[-105,84],wasit:[100,24],dhi_qar:[92,70],maysan:[112,32],basra:[118,72]
   };
+  try{
+    const savedOffsets=JSON.parse(localStorage.getItem(SAVED_NATIONAL_OFFSETS_KEY)||'null');
+    if(savedOffsets&&typeof savedOffsets==='object') Object.assign(nationalCalloutOffsets,savedOffsets);
+  }catch(error){ /* local storage may be unavailable */ }
   fetch(`./data/iraq-governorates.geojson?v=${Date.now()}`,{cache:'no-store'})
     .then(response=>response.ok?response.json():null)
     .then(geo=>{
@@ -1425,7 +1430,8 @@
     const leader=L.polyline([d.coords,[d.coords[0]+.005,d.coords[1]+.005]],{color,weight:2.2,opacity:.95,interactive:false,className:'region-leader'}).addTo(nationalLayerGroup);
     const anchor=L.circleMarker(d.coords,{radius:4,color,weight:2,fillColor:'#fff',fillOpacity:1,interactive:true}).addTo(nationalLayerGroup);
     const icon=L.divIcon({className:'price-callout-icon',html:`<div class="region-callout complex" id="lbl-national-${d.key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${d.nameKr}</span><span class="callout-prices"><span class="price">${nationalCalloutPrice(d)}</span></span></div></div>`,iconSize:[1,1],iconAnchor:[0,0]});
-    const marker=L.marker(d.coords,{icon,keyboard:true,title:`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`}).addTo(nationalLayerGroup);
+    const marker=L.marker(d.coords,{icon,keyboard:true,draggable:true,title:`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`}).addTo(nationalLayerGroup);
+    marker.dragging.disable();
     marker.bindTooltip(`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`,{direction:'top'});
     const select=()=>selectGovernorate(d.key);
     marker.on('click',select); anchor.on('click',select);
@@ -1498,7 +1504,7 @@
   }
 
   function layoutCallouts(){
-    if(calloutEditMode && activeMode==='complex') return;
+    if(calloutEditMode && (activeMode==='complex'||activeMode==='national')) return;
     const isNational=activeMode==='national';
     const data=isNational ? Object.fromEntries(nationalGovernorates.map(d=>[d.key,d])) : (activeMode==='region' ? districts : complexes);
     const layers=isNational ? nationalCalloutSets : calloutSets[activeMode];
@@ -1580,61 +1586,75 @@
     modal.hidden=true;
     document.getElementById('admin-edit-form').reset();
   }
-  function calloutLabelBox(key){
-    const marker=calloutSets.complex.labels[key],el=document.getElementById(`lbl-complex-${key}`),mapRect=map.getContainer().getBoundingClientRect();
+  function editCalloutConfig(mode=activeMode){
+    const national=mode==='national';
+    return {
+      mode,
+      data:national?Object.fromEntries(nationalGovernorates.map(d=>[d.key,d])):complexes,
+      layers:national?nationalCalloutSets:calloutSets.complex,
+      offsets:national?nationalCalloutOffsets:calloutOffsets.complex,
+      storageKey:national?SAVED_NATIONAL_OFFSETS_KEY:SAVED_COMPLEX_OFFSETS_KEY,
+      anchorOf:d=>national?d.coords:d.centroid
+    };
+  }
+  function calloutLabelBox(mode,key){
+    const config=editCalloutConfig(mode),marker=config.layers.labels[key],el=document.getElementById(`lbl-${mode}-${key}`);
     const point=map.latLngToContainerPoint(marker.getLatLng()),rect=el?.getBoundingClientRect();
-    return {x:point.x,y:point.y,width:rect?.width||112,height:rect?.height||50,mapRect};
+    return {x:point.x,y:point.y,width:rect?.width||(mode==='national'?120:112),height:rect?.height||(mode==='national'?54:50)};
   }
-  function syncComplexCalloutLeader(key){
-    const marker=calloutSets.complex.labels[key],data=complexes[key];
+  function syncCalloutLeader(mode,key){
+    const config=editCalloutConfig(mode),marker=config.layers.labels[key],data=config.data[key];
     if(!marker||!data) return;
-    const label=calloutLabelBox(key),anchor=map.latLngToContainerPoint(data.centroid);
-    const end=connectorEnd(anchor,label);
-    calloutSets.complex.leaders[key].setLatLngs([data.centroid,map.containerPointToLatLng(end)]);
+    const anchorLatLng=L.latLng(config.anchorOf(data)),anchor=map.latLngToContainerPoint(anchorLatLng),label=calloutLabelBox(mode,key),end=connectorEnd(anchor,label);
+    config.layers.leaders[key].setLatLngs([anchorLatLng,map.containerPointToLatLng(end)]);
   }
-  function persistComplexCalloutOffsets(){
-    const offsets=Object.fromEntries(Object.entries(calloutOffsets.complex).map(([key,value])=>[key,value.map(number=>Math.round(number))]));
-    try{localStorage.setItem(SAVED_COMPLEX_OFFSETS_KEY,JSON.stringify(offsets));}catch(error){ /* local storage may be unavailable */ }
-    const blob=new Blob([JSON.stringify({version:1,view:'complex',offsets},null,2)],{type:'application/json'});
+  function persistCalloutOffsets(mode=activeMode){
+    const config=editCalloutConfig(mode),offsets=Object.fromEntries(Object.entries(config.offsets).map(([key,value])=>[key,value.map(number=>Math.round(number))]));
+    try{localStorage.setItem(config.storageKey,JSON.stringify(offsets));}catch(error){ /* local storage may be unavailable */ }
+    const blob=new Blob([JSON.stringify({version:1,view:mode,offsets},null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob),link=document.createElement('a');
-    link.href=url;link.download='sise-complex-callout-offsets.json';link.click();
+    link.href=url;link.download=`sise-${mode}-callout-offsets.json`;link.click();
     setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
-  function handleComplexCalloutDrag(key){
-    const marker=calloutSets.complex.labels[key],anchor=map.latLngToContainerPoint(complexes[key].centroid),label=map.latLngToContainerPoint(marker.getLatLng());
-    calloutOffsets.complex[key]=[Math.round(label.x-anchor.x),Math.round(label.y-anchor.y)];
-    syncComplexCalloutLeader(key);
-    try{localStorage.setItem(SAVED_COMPLEX_OFFSETS_KEY,JSON.stringify(calloutOffsets.complex));}catch(error){ /* local storage may be unavailable */ }
+  function handleCalloutDrag(mode,key){
+    const config=editCalloutConfig(mode),marker=config.layers.labels[key],anchor=map.latLngToContainerPoint(config.anchorOf(config.data[key])),label=map.latLngToContainerPoint(marker.getLatLng());
+    config.offsets[key]=[Math.round(label.x-anchor.x),Math.round(label.y-anchor.y)];
+    syncCalloutLeader(mode,key);
+    try{localStorage.setItem(config.storageKey,JSON.stringify(config.offsets));}catch(error){ /* local storage may be unavailable */ }
   }
-  function startComplexCalloutEditing(){
+  function startCalloutEditing(){
+    const mode=activeMode;
+    if(mode!=='complex'&&mode!=='national') return;
+    const config=editCalloutConfig(mode);
     calloutEditMode=true;
     document.body.classList.add('admin-editing');
     map.dragging.disable();
-    Object.keys(complexes).forEach(key=>{
-      const marker=calloutSets.complex.labels[key];
+    Object.keys(config.data).forEach(key=>{
+      const marker=config.layers.labels[key];
       if(!marker) return;
-      if(!marker._siseDragHandlerAttached){
-        marker.on('dragend',()=>handleComplexCalloutDrag(key));
-        marker._siseDragHandlerAttached=true;
+      if(!marker[`_siseDragHandlerAttached_${mode}`]){
+        marker.on('dragend',()=>handleCalloutDrag(mode,key));
+        marker[`_siseDragHandlerAttached_${mode}`]=true;
       }
       marker.dragging.enable();
       marker.setZIndexOffset(2000);
-      syncComplexCalloutLeader(key);
+      syncCalloutLeader(mode,key);
     });
     const button=document.getElementById('btn-adjust-callouts');
     button.textContent='조정 종료';
     closeAdminEditDialog();
   }
-  function stopComplexCalloutEditing(){
+  function stopCalloutEditing(){
     calloutEditMode=false;
     document.body.classList.remove('admin-editing');
     map.dragging.enable();
     Object.values(calloutSets.complex.labels).forEach(marker=>{marker.dragging.disable();marker.setZIndexOffset(0);});
+    Object.values(nationalCalloutSets.labels).forEach(marker=>{marker.dragging.disable();marker.setZIndexOffset(0);});
     document.getElementById('btn-adjust-callouts').textContent='표식 위치 조정';
     scheduleCalloutLayout();
   }
   async function openAdminEditDialog(){
-    if(activeMode!=='complex'){alert('먼저 아파트 단지별 지도에서 실행해 주세요.');return;}
+    if(activeMode!=='complex'&&activeMode!=='national'){alert('아파트 단지별 또는 이라크 전체 지도에서 실행해 주세요.');return;}
     const modal=document.getElementById('admin-edit-modal'),hasPassword=Boolean(getAdminPasswordHash()),confirmWrap=document.getElementById('admin-edit-confirm-wrap'),help=document.getElementById('admin-edit-help'),submit=document.getElementById('admin-edit-submit');
     confirmWrap.hidden=hasPassword;
     help.textContent=hasPassword?'관리자 비밀번호를 입력해야 표식 위치를 수정할 수 있습니다.':'처음 사용하는 경우 이 브라우저에 관리자 비밀번호를 설정합니다. 비밀번호는 이 브라우저에만 저장됩니다.';
@@ -1765,7 +1785,7 @@
   }
 
   function switchMode(mode){
-    if(calloutEditMode) stopComplexCalloutEditing();
+    if(calloutEditMode) stopCalloutEditing();
     if(mode===activeMode) return;
     activeMode=mode;
     map.closePopup();
@@ -2154,7 +2174,7 @@
     XLSX.writeFile(workbook,`sise-단지별-지역별-${updatedAt}.xlsx`);
   }
   document.getElementById('download-excel').addEventListener('click',downloadExcel);
-  document.getElementById('btn-adjust-callouts').addEventListener('click',()=>calloutEditMode?stopComplexCalloutEditing():openAdminEditDialog());
+  document.getElementById('btn-adjust-callouts').addEventListener('click',()=>calloutEditMode?stopCalloutEditing():openAdminEditDialog());
   document.getElementById('admin-edit-close').addEventListener('click',closeAdminEditDialog);
   document.getElementById('admin-edit-cancel').addEventListener('click',closeAdminEditDialog);
   document.getElementById('admin-edit-form').addEventListener('submit',async event=>{
@@ -2167,11 +2187,11 @@
     if(!existing){
       if(password!==confirm){help.textContent='비밀번호가 일치하지 않습니다.';return;}
       try{localStorage.setItem(ADMIN_PASSWORD_KEY,await adminPasswordHash(password));}catch(error){help.textContent='브라우저 저장소를 사용할 수 없어 설정하지 못했습니다.';return;}
-      startComplexCalloutEditing();
+      startCalloutEditing();
       return;
     }
     if(await adminPasswordHash(password)!==existing){help.textContent='비밀번호가 올바르지 않습니다.';return;}
-    startComplexCalloutEditing();
+    startCalloutEditing();
   });
 
   refreshComplexOrdering();
