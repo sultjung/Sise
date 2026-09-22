@@ -1146,7 +1146,10 @@
     document.getElementById('trend-section-sub').textContent=national?'GOVERNORATE PRICE TREND':'DISTRICT PRICE TREND';
     const periods=national?(governorateHistory?.periods||[]):(regionHistory||[]).map(row=>({label:row.date,row}));
     const entries=national?nationalGovernorates.map(d=>({key:d.key,name:d.nameKr})):orderedRegionKeys.map(k=>({key:k,name:districts[k].nameKr}));
-    const available=entries.filter(e=>periods.some(p=>{const v=national?p.values?.[e.key]:p.row?.by_district?.[e.key];return Number.isFinite(v?.avg_price_per_m2_iqd);}));
+    // Keep all 18 governorates visible even when the attached historical PDF
+    // does not contain a Baghdad row. Missing historical periods remain
+    // "미확인" instead of silently removing the governorate from the UI.
+    const available=national?entries:entries.filter(e=>periods.some(p=>{const v=p.row?.by_district?.[e.key];return Number.isFinite(v?.avg_price_per_m2_iqd);}));
     if(!available.length){holder.innerHTML='<div class="trend-empty">첨부 자료에서 표시할 지역별 시세 이력이 없습니다.</div>';controls.innerHTML='';table.innerHTML='';return;}
     if(selectedHistoryKey!=='all'&&!available.some(e=>e.key===selectedHistoryKey)) selectedHistoryKey='all';
     const valueOf=(period,key)=>national?period.values?.[key]:period.row?.by_district?.[key];
@@ -1157,8 +1160,12 @@
     const selected=selectedHistoryKey==='all'?available[0]:available.find(e=>e.key===selectedHistoryKey);
     const series=historyTrendPoints(selected.key,periods,valueOf);
     const display=v=>selectedTrendCurrency==='usd'?v/RATE:v;
-    const allLatest=available.map(e=>{const p=historyTrendPoints(e.key==='x'?e.key:e.key,periods,valueOf);const last=[...p].reverse().find(x=>Number.isFinite(x.value));return {...e,value:last?.value||null};}).filter(e=>Number.isFinite(e.value));
-    const points=selectedHistoryKey==='all'?allLatest.map(e=>({label:e.name,value:e.value,sample:0})):series;
+    const allLatest=available.map(e=>{const p=historyTrendPoints(e.key,periods,valueOf);const last=[...p].reverse().find(x=>Number.isFinite(x.value));const fallback=nationalGovernorates.find(d=>d.key===e.key);return {...e,value:last?.value??(national&&fallback?Math.round(fallback.usd*RATE):null),sample:last?.sample||fallback?.count||0};}).filter(e=>Number.isFinite(e.value));
+    let points=selectedHistoryKey==='all'?allLatest.map(e=>({label:e.name,value:e.value,sample:e.sample})):series;
+    if(selectedHistoryKey!=='all'&&!points.some(p=>Number.isFinite(p.value))&&national){
+      const fallback=nationalGovernorates.find(d=>d.key===selectedHistoryKey);
+      if(fallback) points=[{label:'현재 지도값',value:Math.round(fallback.usd*RATE),sample:fallback.count}];
+    }
     const vals=points.filter(p=>Number.isFinite(p.value)).map(p=>display(p.value));
     if(!vals.length){holder.innerHTML='<div class="trend-empty">선택한 지역의 시세 이력이 없습니다.</div>';return;}
     const W=900,H=250,P=42,max=Math.max(...vals),min=Math.min(...vals),range=Math.max(max-min,max*.04,1);
@@ -1170,7 +1177,7 @@
     holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${national?'이라크 주별':'바그다드 지역별'} 시세 변화"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${selectedHistoryKey==='all'?bars:(selectedTrendType==='bar'?bars:line)}</svg>`;
     const rows=available.map(e=>{const pts=historyTrendPoints(e.key,periods,valueOf);const cells=pts.map(p=>Number.isFinite(p.value)?`${fmt(p.value)}<small>표본 ${p.sample||0}건</small>`:'미확인').join('</td><td>');return `<tr><td>${e.name}</td><td>${cells}</td></tr>`;}).join('');
     table.innerHTML=`<table class="comparison-table"><thead><tr><th>${national?'주':'지역'}</th>${periods.map(p=>`<th>${p.label}<br>IQD/m²</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
-    meta.textContent=national?`이라크 18개 주 · 첨부 Baity/Ibaity PDF 8개 기간 · 보고서 평균 가격 · 환율 1 USD=${RATE.toLocaleString()} IQD`:`바그다드 지역별 · 공개 매물 평균값 이력 · 자료가 있는 기간만 표시`;
+    meta.textContent=national?`이라크 18개 주 · 첨부 Baity/Ibaity PDF 8개 기간 · 보고서 평균 가격 · 바그다드는 PDF 미수록으로 현재 지도값만 별도 표시 · 환율 1 USD=${RATE.toLocaleString()} IQD`:`바그다드 지역별 · 공개 매물 평균값 이력 · 자료가 있는 기간만 표시`;
     document.getElementById('trend-section-title').textContent=national?'이라크 전체 주별 시세 변화':'지역별 시세 변화';
     document.getElementById('trend-section-sub').textContent=national?'GOVERNORATE PRICE TREND':'DISTRICT PRICE TREND';
   }
