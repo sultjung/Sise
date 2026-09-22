@@ -1302,12 +1302,17 @@
     }
   };
   const ADMIN_PASSWORD_KEY='sise-admin-edit-password-sha256';
+  const SAVED_REGION_OFFSETS_KEY='sise-region-callout-offsets';
   const SAVED_COMPLEX_OFFSETS_KEY='sise-complex-callout-offsets';
   const SAVED_NATIONAL_OFFSETS_KEY='sise-national-callout-offsets';
   let calloutEditMode=false;
   try{
     const savedOffsets=JSON.parse(localStorage.getItem(SAVED_COMPLEX_OFFSETS_KEY)||'null');
     if(savedOffsets&&typeof savedOffsets==='object') Object.assign(calloutOffsets.complex,savedOffsets);
+  }catch(error){ /* local storage may be unavailable */ }
+  try{
+    const savedOffsets=JSON.parse(localStorage.getItem(SAVED_REGION_OFFSETS_KEY)||'null');
+    if(savedOffsets&&typeof savedOffsets==='object') Object.assign(calloutOffsets.region,savedOffsets);
   }catch(error){ /* local storage may be unavailable */ }
 
   function districtTooltip(d){
@@ -1475,9 +1480,9 @@
     const marker = L.marker(d.centroid,{
       icon:L.divIcon({className:'price-callout-icon',html:calloutMarkup(mode,key,d,color),iconSize:[1,1],iconAnchor:[0,0]}),
       interactive:true,
-      draggable:mode==='complex'
+      draggable:mode==='complex'||mode==='region'
     }).addTo(group);
-    if(mode==='complex'&&marker.dragging) marker.dragging.disable();
+    if((mode==='complex'||mode==='region')&&marker.dragging) marker.dragging.disable();
     const select = ()=> mode==='region' ? selectDistrict(key) : selectComplex(key);
     marker.on('click',select);
     anchor.on('click',select);
@@ -1504,7 +1509,7 @@
   }
 
   function layoutCallouts(){
-    if(calloutEditMode && (activeMode==='complex'||activeMode==='national')) return;
+    if(calloutEditMode && (activeMode==='complex'||activeMode==='region'||activeMode==='national')) return;
     const isNational=activeMode==='national';
     const data=isNational ? Object.fromEntries(nationalGovernorates.map(d=>[d.key,d])) : (activeMode==='region' ? districts : complexes);
     const layers=isNational ? nationalCalloutSets : calloutSets[activeMode];
@@ -1588,12 +1593,13 @@
   }
   function editCalloutConfig(mode=activeMode){
     const national=mode==='national';
+    const region=mode==='region';
     return {
       mode,
-      data:national?Object.fromEntries(nationalGovernorates.map(d=>[d.key,d])):complexes,
-      layers:national?nationalCalloutSets:calloutSets.complex,
-      offsets:national?nationalCalloutOffsets:calloutOffsets.complex,
-      storageKey:national?SAVED_NATIONAL_OFFSETS_KEY:SAVED_COMPLEX_OFFSETS_KEY,
+      data:national?Object.fromEntries(nationalGovernorates.map(d=>[d.key,d])):(region?districts:complexes),
+      layers:national?nationalCalloutSets:calloutSets[mode],
+      offsets:national?nationalCalloutOffsets:calloutOffsets[mode],
+      storageKey:national?SAVED_NATIONAL_OFFSETS_KEY:(region?SAVED_REGION_OFFSETS_KEY:SAVED_COMPLEX_OFFSETS_KEY),
       anchorOf:d=>national?d.coords:d.centroid
     };
   }
@@ -1624,7 +1630,7 @@
   }
   function startCalloutEditing(){
     const mode=activeMode;
-    if(mode!=='complex'&&mode!=='national') return;
+    if(mode!=='complex'&&mode!=='region'&&mode!=='national') return;
     const config=editCalloutConfig(mode);
     calloutEditMode=true;
     document.body.classList.add('admin-editing');
@@ -1649,12 +1655,13 @@
     document.body.classList.remove('admin-editing');
     map.dragging.enable();
     Object.values(calloutSets.complex.labels).forEach(marker=>{if(marker.dragging) marker.dragging.disable();marker.setZIndexOffset(0);});
+    Object.values(calloutSets.region.labels).forEach(marker=>{if(marker.dragging) marker.dragging.disable();marker.setZIndexOffset(0);});
     Object.values(nationalCalloutSets.labels).forEach(marker=>{if(marker.dragging) marker.dragging.disable();marker.setZIndexOffset(0);});
     document.getElementById('btn-adjust-callouts').textContent='표식 위치 조정';
     scheduleCalloutLayout();
   }
   async function openAdminEditDialog(){
-    if(activeMode!=='complex'&&activeMode!=='national'){alert('아파트 단지별 또는 이라크 전체 지도에서 실행해 주세요.');return;}
+    if(activeMode!=='complex'&&activeMode!=='region'&&activeMode!=='national'){alert('아파트 단지별, 바그다드 지역별 또는 이라크 전체 지도에서 실행해 주세요.');return;}
     const modal=document.getElementById('admin-edit-modal'),hasPassword=Boolean(getAdminPasswordHash()),confirmWrap=document.getElementById('admin-edit-confirm-wrap'),help=document.getElementById('admin-edit-help'),submit=document.getElementById('admin-edit-submit');
     confirmWrap.hidden=hasPassword;
     help.textContent=hasPassword?'관리자 비밀번호를 입력해야 표식 위치를 수정할 수 있습니다.':'처음 사용하는 경우 이 브라우저에 관리자 비밀번호를 설정합니다. 비밀번호는 이 브라우저에만 저장됩니다.';
