@@ -660,8 +660,8 @@
       }
     },
     {
-      "key": "2025-q3",
-      "label": "2025년 3분기",
+      "key": "2026-q1",
+      "label": "2026년 1분기",
       "source_file": "2026-01.pdf",
       "period_start": "2025-09-01",
       "period_end": "2025-12-31",
@@ -791,8 +791,8 @@
       }
     },
     {
-      "key": "2026-q1",
-      "label": "2026년 1분기",
+      "key": "2026-q2",
+      "label": "2026년 2분기",
       "source_file": "2026-05.pdf",
       "period_start": "2026-01-01",
       "period_end": "2026-04-30",
@@ -909,12 +909,19 @@
           "min_price_per_m2_iqd": 350000,
           "max_price_per_m2_iqd": 1600000,
           "sample_count": 134
+        },
+        "baghdad": {
+          "avg_price_per_m2_iqd": 3700500,
+          "change_percent": 10.45,
+          "min_price_per_m2_iqd": 1115000,
+          "max_price_per_m2_iqd": 6286000,
+          "sample_count": 471
         }
       }
     },
     {
-      "key": "2026-q2",
-      "label": "2026년 2분기",
+      "key": "2026-q3",
+      "label": "2026년 3분기",
       "source_file": "2026-09.pdf",
       "period_start": "2026-05-01",
       "period_end": "2026-08-31",
