@@ -439,6 +439,7 @@
 <script>
   const RATE = 1320; // 1 USD ≈ 1320 IQD
   let trendHistory = [];
+  let regionHistory = [];
   let governorateHistory = null;
   let selectedHistoryKey = 'all';
   let ibaitySnapshot = null;
@@ -1141,7 +1142,7 @@
   function renderHistoryTrend(kind){
     const controls=document.getElementById('trend-controls'),holder=document.getElementById('trend-chart'),table=document.getElementById('comparison-table'),meta=document.getElementById('trend-meta');
     const national=kind==='national';
-    const periods=national?(governorateHistory?.periods||[]):(trendHistory||[]).map(row=>({label:row.date,row}));
+    const periods=national?(governorateHistory?.periods||[]):(regionHistory||[]).map(row=>({label:row.date,row}));
     const entries=national?nationalGovernorates.map(d=>({key:d.key,name:d.nameKr})):orderedRegionKeys.map(k=>({key:k,name:districts[k].nameKr}));
     const available=entries.filter(e=>periods.some(p=>{const v=national?p.values?.[e.key]:p.row?.by_district?.[e.key];return Number.isFinite(v?.avg_price_per_m2_iqd);}));
     if(!available.length){holder.innerHTML='<div class="trend-empty">첨부 자료에서 표시할 지역별 시세 이력이 없습니다.</div>';controls.innerHTML='';table.innerHTML='';return;}
@@ -2016,6 +2017,9 @@
   renderList();renderChart();renderTrend();updateLegend();scheduleCalloutLayout();
   fetch(`./data/complex-history.json?v=${Date.now()}`,{cache:'no-store'})
     .then(r=>r.ok?r.json():[]).then(rows=>{ trendHistory=Array.isArray(rows)?rows:[]; renderTrend(); })
+    .catch(()=>renderTrend());
+  fetch(`./data/history.json?v=${Date.now()}`,{cache:'no-store'})
+    .then(r=>r.ok?r.json():[]).then(rows=>{ regionHistory=Array.isArray(rows)?rows:[]; renderTrend(); })
     .catch(()=>renderTrend());
   fetch(`./data/governorate-history.json?v=${Date.now()}`,{cache:'no-store'})
     .then(r=>r.ok?r.json():null).then(data=>{ governorateHistory=data; renderTrend(); })
