@@ -130,6 +130,8 @@
           "min_price_per_m2_iqd": 580000,
           "max_price_per_m2_iqd": 1250000,
           "sample_count": 21
+        },
+        "baghdad": { "avg_price_per_m2_iqd": 3240000, "change_percent": 0.0, "min_price_per_m2_iqd": 780000, "max_price_per_m2_iqd": 5700000, "sample_count": 438
         }
       }
     },
@@ -259,6 +261,8 @@
           "min_price_per_m2_iqd": 570000,
           "max_price_per_m2_iqd": 1483000,
           "sample_count": 7
+        },
+        "baghdad": { "avg_price_per_m2_iqd": 3295500, "change_percent": 1.10, "min_price_per_m2_iqd": 800000, "max_price_per_m2_iqd": 5791000, "sample_count": 771
         }
       }
     },
@@ -388,6 +392,8 @@
           "min_price_per_m2_iqd": 500000,
           "max_price_per_m2_iqd": 1383000,
           "sample_count": 15
+        },
+        "baghdad": { "avg_price_per_m2_iqd": 3366000, "change_percent": 10.08, "min_price_per_m2_iqd": 982000, "max_price_per_m2_iqd": 5750000, "sample_count": 344
         }
       }
     },
@@ -517,6 +523,8 @@
           "min_price_per_m2_iqd": 400000,
           "max_price_per_m2_iqd": 1350000,
           "sample_count": 21
+        },
+        "baghdad": { "avg_price_per_m2_iqd": 3090000, "change_percent": -9.02, "min_price_per_m2_iqd": 700000, "max_price_per_m2_iqd": 5480000, "sample_count": 398
         }
       }
     },
@@ -646,6 +654,8 @@
           "min_price_per_m2_iqd": 346000,
           "max_price_per_m2_iqd": 1450000,
           "sample_count": 17
+        },
+        "baghdad": { "avg_price_per_m2_iqd": 3000000, "change_percent": -21.23, "min_price_per_m2_iqd": 667000, "max_price_per_m2_iqd": 5333000, "sample_count": 375
         }
       }
     },
@@ -775,6 +785,8 @@
           "min_price_per_m2_iqd": 375000,
           "max_price_per_m2_iqd": 1700000,
           "sample_count": 104
+        },
+        "baghdad": { "avg_price_per_m2_iqd": 3625000, "change_percent": 35.89, "min_price_per_m2_iqd": 1000000, "max_price_per_m2_iqd": 6250000, "sample_count": 356
         }
       }
     },
@@ -1026,10 +1038,11 @@
           "min_price_per_m2_iqd": 325000,
           "max_price_per_m2_iqd": 1500000,
           "sample_count": 45
+        },
+        "baghdad": { "avg_price_per_m2_iqd": 2729500, "change_percent": -29.72, "min_price_per_m2_iqd": 459000, "max_price_per_m2_iqd": 5000000, "sample_count": 386
         }
       }
     }
   ]
 }
-
 
