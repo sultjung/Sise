@@ -1135,6 +1135,24 @@
   function historyTrendPoints(key, periods, valueOf){
     return periods.map(period=>{const v=valueOf(period,key);const value=v?.avg_price_per_m2_iqd ?? v?.value;return {label:period.label,value:Number.isFinite(value)?value:null,sample:v?.sample_count||0};});
   }
+  const nationalHistoryKeyAliases={
+    duhok:['duhok','dihok','dahuk','دهوك'],
+    diwaniyah:['diwaniyah','al_qadisiyyah','al-qadisiyyah','qadisiyyah'],
+    nineveh:['nineveh','ninawa'],
+    salahaddin:['salahaddin','salah_ad_din','sala_ad_din'],
+    sulaymaniyah:['sulaymaniyah','as_sulaymaniyah','as-sulaymaniyah'],
+    muthanna:['muthanna','al_muthannia','al-muthannia'],
+    anbar:['anbar','al_anbar','al-anbar'],
+    najaf:['najaf','an_najaf','an-najaf'],
+    babel:['babel','babil'],
+    dhi_qar:['dhi_qar','dhi-qar']
+  };
+  function nationalHistoryValue(period,key){
+    const values=period?.values||{};
+    const aliases=nationalHistoryKeyAliases[key]||[key];
+    for(const alias of aliases){ if(values[alias]) return values[alias]; }
+    return undefined;
+  }
   function renderHistoryTrend(kind){
     const controls=document.getElementById('trend-controls'),holder=document.getElementById('trend-chart'),table=document.getElementById('comparison-table'),meta=document.getElementById('trend-meta');
     const national=kind==='national';
@@ -1148,7 +1166,7 @@
     const available=national?entries:entries.filter(e=>periods.some(p=>{const v=p.row?.by_district?.[e.key];return Number.isFinite(v?.avg_price_per_m2_iqd);}));
     if(!available.length){holder.innerHTML='<div class="trend-empty">첨부 자료에서 표시할 지역별 시세 이력이 없습니다.</div>';controls.innerHTML='';table.innerHTML='';return;}
     if(selectedHistoryKey!=='all'&&!available.some(e=>e.key===selectedHistoryKey)) selectedHistoryKey='all';
-    const valueOf=(period,key)=>national?period.values?.[key]:period.row?.by_district?.[key];
+    const valueOf=(period,key)=>national?nationalHistoryValue(period,key):period.row?.by_district?.[key];
     controls.innerHTML=`<div class="trend-toolbar"><div><button class="${selectedHistoryKey==='all'?'active':''}" data-history-key="all">전체 지역 비교</button>${available.map(e=>`<button class="${e.key===selectedHistoryKey?'active':''}" data-history-key="${e.key}">${e.name}</button>`).join('')}</div><div class="trend-type"><button class="${selectedTrendType==='bar'?'active':''}" data-trend-type="bar">막대</button><button class="${selectedTrendType==='line'?'active':''}" data-trend-type="line">선</button><button class="${selectedTrendCurrency==='usd'?'active':''}" data-trend-currency="usd">USD</button><button class="${selectedTrendCurrency==='iqd'?'active':''}" data-trend-currency="iqd">IQD</button></div></div>`;
     controls.querySelectorAll('[data-history-key]').forEach(b=>b.addEventListener('click',()=>{selectedHistoryKey=b.dataset.historyKey;renderTrend();}));
     controls.querySelectorAll('[data-trend-type]').forEach(b=>b.addEventListener('click',()=>{selectedTrendType=b.dataset.trendType;renderTrend();}));
@@ -1165,13 +1183,13 @@
     const vals=points.filter(p=>Number.isFinite(p.value)).map(p=>display(p.value));
     if(!vals.length){holder.innerHTML='<div class="trend-empty">선택한 지역의 시세 이력이 없습니다.</div>';return;}
     const W=900,H=250,P=42,max=Math.max(...vals),min=Math.min(...vals),range=Math.max(max-min,max*.04,1);
-    const xy=points.map((p,i)=>({x:P+(W-P*2)*(points.length===1?.5:i/(points.length-1)),y:H-P-(display(p.value)-min+range*.18)/(range*1.36)*(H-P*2),...p}));
-    const labels=xy.map(p=>p.label.replace(/^202[456]년 /,'')).join('');
+    const xy=points.map((p,i)=>{const value=Number.isFinite(p.value)?display(p.value):null;return {x:P+(W-P*2)*(points.length===1?.5:i/(points.length-1)),y:value===null?null:H-P-(value-min+range*.18)/(range*1.36)*(H-P*2),...p};});
     const maxPointValue=Math.max(...points.filter(p=>Number.isFinite(p.value)).map(p=>p.value));
     const barWidth=Math.min(42,Math.max(18,(W-P*2)/Math.max(points.length,1)*.62));
-    const bars=xy.map(p=>{const d=display(p.value),h=Math.max(2,H-P-p.y),isHighest=national&&p.value===maxPointValue,fill=isHighest?'#FF8A3D':'#AEB3BB',labelColor=isHighest?'#9E3500':'#4B515A';return `<rect x="${p.x-barWidth/2}" y="${p.y}" width="${barWidth}" height="${h}" rx="5" fill="${fill}"><title>${p.label}: ${fmt(p.value)} IQD/m²</title></rect><text x="${p.x}" y="${p.y-8}" text-anchor="middle" font-size="10" font-weight="700" fill="${labelColor}">${selectedTrendCurrency==='usd'?'$'+fmt(Math.round(d)):fmt(Math.round(d))}</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label}</text>`}).join('');
-    const path=xy.map((p,i)=>`${i?'L':'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-    const line=`<path d="${path}" fill="none" stroke="#D94800" stroke-width="3"/>${xy.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="5" fill="#D94800"><title>${p.label}: ${fmt(p.value)} IQD/m²</title></circle><text x="${p.x}" y="${p.y-10}" text-anchor="middle" font-size="10" font-weight="700" fill="#9E3500">${selectedTrendCurrency==='usd'?'$'+fmt(Math.round(display(p.value))):fmt(Math.round(display(p.value)))}</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label}</text>`).join('')}`;
+    const bars=xy.map(p=>{if(!Number.isFinite(p.value))return `<text x="${p.x}" y="${H-P-10}" text-anchor="middle" font-size="10" fill="#9B9DA2">미확인</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label}</text>`;const d=display(p.value),h=Math.max(2,H-P-p.y),isHighest=national&&p.value===maxPointValue,fill=isHighest?'#FF8A3D':'#AEB3BB',labelColor=isHighest?'#9E3500':'#4B515A';return `<rect x="${p.x-barWidth/2}" y="${p.y}" width="${barWidth}" height="${h}" rx="5" fill="${fill}"><title>${p.label}: ${fmt(p.value)} IQD/m²</title></rect><text x="${p.x}" y="${p.y-8}" text-anchor="middle" font-size="10" font-weight="700" fill="${labelColor}">${selectedTrendCurrency==='usd'?'$'+fmt(Math.round(d)):fmt(Math.round(d))}</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label}</text>`}).join('');
+    const segments=[];let segment='';xy.forEach(p=>{if(p.y===null){if(segment)segments.push(segment);segment='';return;}segment+=(segment?'L':'M')+`${p.x.toFixed(1)},${p.y.toFixed(1)} `;});if(segment)segments.push(segment);
+    const path=segments.join('');
+    const line=`${segments.map(d=>`<path d="${d}" fill="none" stroke="#D94800" stroke-width="3"/>`).join('')}${xy.map(p=>Number.isFinite(p.value)?`<circle cx="${p.x}" cy="${p.y}" r="5" fill="#D94800"><title>${p.label}: ${fmt(p.value)} IQD/m²</title></circle><text x="${p.x}" y="${p.y-10}" text-anchor="middle" font-size="10" font-weight="700" fill="#9E3500">${selectedTrendCurrency==='usd'?'$'+fmt(Math.round(display(p.value))):fmt(Math.round(display(p.value)))}</text>`:`<text x="${p.x}" y="${H-P-10}" text-anchor="middle" font-size="10" fill="#9B9DA2">미확인</text>`).join('')}${xy.map(p=>`<text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label}</text>`).join('')}`;
     holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${national?'이라크 주별':'바그다드 지역별'} 시세 변화"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${selectedHistoryKey==='all'?bars:(selectedTrendType==='bar'?bars:line)}</svg>`;
     const historyUnit=selectedTrendCurrency==='usd'?'USD/m²':'IQD/m²';
     const historyDisplay=value=>selectedTrendCurrency==='usd'?Math.round(value/RATE):value;
@@ -2047,4 +2065,3 @@
 
 </body>
 </html>
-
