@@ -171,7 +171,7 @@
   .region-label .name{ display:block; font-weight:750; font-size:10.5px; letter-spacing:-.1px; color:#232428; }
   .region-callout.national .region-label{ min-width:132px; padding:8px 10px; }
   .region-callout.national .region-label .name{ font-size:16px; font-weight:850; letter-spacing:-.45px; line-height:1.08; }
-  .region-callout.national .region-label .population{ display:block; margin-top:3px; color:#4B5563; font-size:10.5px; font-weight:700; }
+  .region-callout.national .region-label .population{ display:inline; margin-left:3px; color:#4B5563; font-size:10px; font-weight:700; }
   .region-callout.national .region-label .price{ margin-top:5px; font-size:15px; }
   .region-label .name small{ font-size:8.7px; font-weight:600; color:var(--hw-ink-soft); }
   .region-label .price{ display:block; margin-top:3px; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:14.5px; line-height:1.2; color:#9E3500; }
@@ -1444,7 +1444,7 @@
     const halo=L.polyline([d.coords,[d.coords[0]+.005,d.coords[1]+.005]],{color:'#fff',weight:5.5,opacity:.88,interactive:false,className:'region-leader-halo'}).addTo(nationalLayerGroup);
     const leader=L.polyline([d.coords,[d.coords[0]+.005,d.coords[1]+.005]],{color:'#374151',weight:2.2,opacity:.94,interactive:false,className:'region-leader'}).addTo(nationalLayerGroup);
     const anchor=L.circleMarker(d.coords,{radius:4,color,weight:2,fillColor:'#fff',fillOpacity:1,interactive:true}).addTo(nationalLayerGroup);
-    const icon=L.divIcon({className:'price-callout-icon',html:`<div class="region-callout national" id="lbl-national-${d.key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${d.nameKr}</span><span class="population">${compactPopulation(d.population)}</span><span class="callout-prices"><span class="price">${nationalCalloutPrice(d)}</span></span></div></div>`,iconSize:[1,1],iconAnchor:[0,0]});
+    const icon=L.divIcon({className:'price-callout-icon',html:`<div class="region-callout national" id="lbl-national-${d.key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${d.nameKr}<small class="population">(${compactPopulation(d.population).replace(/^인구\s*/,'')})</small></span><span class="callout-prices"><span class="price">${nationalCalloutPrice(d)}</span></span></div></div>`,iconSize:[1,1],iconAnchor:[0,0]});
     const marker=L.marker(d.coords,{icon,keyboard:true,draggable:true,title:`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`}).addTo(nationalLayerGroup);
     if(marker.dragging) marker.dragging.disable();
     marker.bindTooltip(`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`,{direction:'top'});
