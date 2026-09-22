@@ -1431,7 +1431,7 @@
     const anchor=L.circleMarker(d.coords,{radius:4,color,weight:2,fillColor:'#fff',fillOpacity:1,interactive:true}).addTo(nationalLayerGroup);
     const icon=L.divIcon({className:'price-callout-icon',html:`<div class="region-callout complex" id="lbl-national-${d.key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${d.nameKr}</span><span class="callout-prices"><span class="price">${nationalCalloutPrice(d)}</span></span></div></div>`,iconSize:[1,1],iconAnchor:[0,0]});
     const marker=L.marker(d.coords,{icon,keyboard:true,draggable:true,title:`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`}).addTo(nationalLayerGroup);
-    marker.dragging.disable();
+    if(marker.dragging) marker.dragging.disable();
     marker.bindTooltip(`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`,{direction:'top'});
     const select=()=>selectGovernorate(d.key);
     marker.on('click',select); anchor.on('click',select);
@@ -1477,7 +1477,7 @@
       interactive:true,
       draggable:mode==='complex'
     }).addTo(group);
-    if(mode==='complex') marker.dragging.disable();
+    if(mode==='complex'&&marker.dragging) marker.dragging.disable();
     const select = ()=> mode==='region' ? selectDistrict(key) : selectComplex(key);
     marker.on('click',select);
     anchor.on('click',select);
@@ -1636,7 +1636,7 @@
         marker.on('dragend',()=>handleCalloutDrag(mode,key));
         marker[`_siseDragHandlerAttached_${mode}`]=true;
       }
-      marker.dragging.enable();
+      if(marker.dragging) marker.dragging.enable();
       marker.setZIndexOffset(2000);
       syncCalloutLeader(mode,key);
     });
@@ -1648,8 +1648,8 @@
     calloutEditMode=false;
     document.body.classList.remove('admin-editing');
     map.dragging.enable();
-    Object.values(calloutSets.complex.labels).forEach(marker=>{marker.dragging.disable();marker.setZIndexOffset(0);});
-    Object.values(nationalCalloutSets.labels).forEach(marker=>{marker.dragging.disable();marker.setZIndexOffset(0);});
+    Object.values(calloutSets.complex.labels).forEach(marker=>{if(marker.dragging) marker.dragging.disable();marker.setZIndexOffset(0);});
+    Object.values(nationalCalloutSets.labels).forEach(marker=>{if(marker.dragging) marker.dragging.disable();marker.setZIndexOffset(0);});
     document.getElementById('btn-adjust-callouts').textContent='표식 위치 조정';
     scheduleCalloutLayout();
   }
