@@ -1351,21 +1351,20 @@
   }
   function nationalLeaderOrigin(key,labelPoint){
     const fallback=nationalGovernorates.find(d=>d.key===key)?.coords;
-    const rings=nationalPolygonRings(nationalPolygonLayers[key]);
-    if(!rings.length||!fallback) return {latLng:L.latLng(fallback),point:map.latLngToContainerPoint(fallback)};
-    let best=null;
-    rings.forEach(ring=>{
-      for(let i=0;i<ring.length;i++){
-        const a=map.latLngToContainerPoint(ring[i]);
-        const b=map.latLngToContainerPoint(ring[(i+1)%ring.length]);
-        const candidate=closestPointOnSegment(labelPoint,a,b);
-        const distance=labelPoint.distanceTo(candidate);
-        if(!best||distance<best.distance) best={point:candidate,distance};
-      }
-    });
-    const point=best?.point||map.latLngToContainerPoint(fallback);
-    return {latLng:map.containerPointToLatLng(point),point};
+    // Governorate labels are connected from the governorate capital, not from
+    // whichever boundary point happens to be closest to the label.
+    return fallback ? {latLng:L.latLng(fallback),point:map.latLngToContainerPoint(fallback)} : null;
   }
+  // Label directions follow the way users normally read Iraq geographically:
+  // Anbar to the west, the Kurdish governorates to the north, the southern
+  // governorates toward the bottom, and Baghdad directly above its capital.
+  const nationalCalloutOffsets={
+    anbar:[-175,-8],
+    nineveh:[-12,-112],duhok:[18,-112],erbil:[-30,-105],sulaymaniyah:[80,-92],
+    kirkuk:[72,-74],salahaddin:[-72,-84],diyala:[92,-58],baghdad:[0,-96],
+    babel:[-40,-82],karbala:[-88,-48],najaf:[-112,4],diwaniyah:[-82,42],
+    muthanna:[-105,84],wasit:[100,24],dhi_qar:[92,70],maysan:[112,32],basra:[118,72]
+  };
   fetch(`./data/iraq-governorates.geojson?v=${Date.now()}`,{cache:'no-store'})
     .then(response=>response.ok?response.json():null)
     .then(geo=>{
@@ -1482,7 +1481,9 @@
       const el=document.getElementById(`lbl-${activeMode}-${key}`);
       const complexMode=activeMode==='complex'||isNational;
       const bounds=el?el.getBoundingClientRect():{width:complexMode?120:90,height:complexMode?54:40};
-      const offset=!isNational && calloutOffsets[activeMode][key] ? calloutOffsets[activeMode][key] : [76,-52];
+      const offset=isNational
+        ? (nationalCalloutOffsets[key]||[76,-52])
+        : (calloutOffsets[activeMode][key]||[76,-52]);
       items.push({key,point,width:Math.max(complexMode?112:78,bounds.width),height:Math.max(complexMode?50:38,bounds.height),preferredAngle:Math.atan2(offset[1],offset[0]),preferredRadius:Math.max(complexMode?82:68,Math.hypot(...offset))});
     });
 
