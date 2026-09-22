@@ -170,7 +170,7 @@
   .region-label{ min-width:78px; font-family:'Pretendard',sans-serif; text-align:center; background:rgba(255,255,255,.96); border:1px solid var(--pin-color); border-radius:6px; padding:5px 8px; box-shadow:0 1px 5px rgba(0,0,0,.2); white-space:nowrap; line-height:1.15; transition:.15s; }
   .region-label .name{ display:block; font-weight:750; font-size:10.5px; letter-spacing:-.1px; color:#232428; }
   .region-callout.national .region-label{ min-width:132px; padding:8px 10px; }
-  .region-callout.national .region-label .name{ font-size:20px; font-weight:850; letter-spacing:-.7px; line-height:1.05; }
+  .region-callout.national .region-label .name{ font-size:16px; font-weight:850; letter-spacing:-.45px; line-height:1.08; }
   .region-callout.national .region-label .population{ display:block; margin-top:3px; color:#4B5563; font-size:10.5px; font-weight:700; }
   .region-callout.national .region-label .price{ margin-top:5px; font-size:15px; }
   .region-label .name small{ font-size:8.7px; font-weight:600; color:var(--hw-ink-soft); }
@@ -1792,9 +1792,25 @@
     calloutSets.complex.anchors[key].openPopup();
   }
 
+  function clearGovernorateSelection(){
+    selectedHistoryKey='all';
+    renderTrend();
+    document.querySelectorAll('.district-row').forEach(r=>r.classList.remove('active'));
+    Object.values(nationalMarkerLayers).forEach(marker=>marker.getElement()?.classList.remove('selected'));
+    Object.values(nationalCalloutSets.halos).forEach(halo=>halo.setStyle({color:'#fff',weight:5.5,opacity:.88}));
+    Object.values(nationalCalloutSets.leaders).forEach(leader=>leader.setStyle({color:'#374151',weight:2.2,opacity:.94}));
+    Object.values(nationalCalloutSets.anchors).forEach(anchor=>anchor.setStyle({color:'#315EBA',weight:2}));
+    map.fitBounds(nationalBounds,{padding:[24,24],duration:.6});
+    scheduleCalloutLayout();
+  }
+
   function selectGovernorate(key){
     if(activeMode!=='national') return;
     const d=nationalGovernorates.find(item=>item.key===key); if(!d) return;
+    if(selectedHistoryKey===key){
+      clearGovernorateSelection();
+      return;
+    }
     selectedHistoryKey=key;
     renderTrend();
     document.querySelectorAll('.district-row').forEach(r=>r.classList.toggle('active',r.dataset.key===key));
