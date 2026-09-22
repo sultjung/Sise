@@ -1195,7 +1195,7 @@
     const historyDisplay=value=>selectedTrendCurrency==='usd'?Math.round(value/RATE):value;
     const rows=available.map(e=>{const pts=historyTrendPoints(e.key,periods,valueOf);const cells=pts.map(p=>Number.isFinite(p.value)?`${fmt(historyDisplay(p.value))}<small>표본 ${p.sample||0}건</small>`:'미확인').join('</td><td>');return `<tr><td>${e.name}</td><td>${cells}</td></tr>`;}).join('');
     table.innerHTML=`<table class="comparison-table"><thead><tr><th>${national?'주':'지역'}</th>${periods.map(p=>`<th>${p.label}<br>${historyUnit}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
-    meta.textContent=national?`이라크 18개 주 · 첨부 Baity/Ibaity PDF 8개 기간 · 보고서 평균 가격 · 바그다드는 PDF 미수록으로 현재 지도값만 별도 표시 · 환율 1 USD=${RATE.toLocaleString()} IQD`:`바그다드 지역별 · 공개 매물 평균값 이력 · 자료가 있는 기간만 표시`;
+    meta.textContent=national?`이라크 18개 주 · 첨부 Baity/Ibaity PDF 8개 기간 · 보고서 평균 가격 · 기간별 원자료가 없는 값은 미확인 · 환율 1 USD=${RATE.toLocaleString()} IQD`:`바그다드 지역별 · 공개 매물 평균값 이력 · 자료가 있는 기간만 표시`;
     document.getElementById('trend-section-title').textContent=national?'이라크 전체 주별 시세 변화':'지역별 시세 변화';
     document.getElementById('trend-section-sub').textContent=national?'GOVERNORATE PRICE TREND':'DISTRICT PRICE TREND';
   }
