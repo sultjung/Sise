@@ -1,0 +1,1035 @@
+{
+  "source": "Baity/Ibaity residential property statistics PDFs",
+  "metric": "average_price_per_m2_iqd",
+  "metric_label": "보고서 평균 가격",
+  "note": "첨부 PDF는 거래 중위값이 아니라 기간별 공개 부동산 평균 가격을 제공하므로 역사 그래프는 보고서 평균값을 표시합니다.",
+  "periods": [
+    {
+      "key": "2024-q1",
+      "label": "2024년 1분기",
+      "source_file": "2024-05.pdf",
+      "period_start": "2024-01-01",
+      "period_end": "2024-04-30",
+      "total_properties": 2704,
+      "values": {
+        "muthanna": {
+          "avg_price_per_m2_iqd": 689500,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 326000,
+          "max_price_per_m2_iqd": 1053000,
+          "sample_count": 56
+        },
+        "duhok": {
+          "avg_price_per_m2_iqd": 1053500,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 457000,
+          "max_price_per_m2_iqd": 1650000,
+          "sample_count": 36
+        },
+        "basra": {
+          "avg_price_per_m2_iqd": 1608500,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 317000,
+          "max_price_per_m2_iqd": 2900000,
+          "sample_count": 370
+        },
+        "karbala": {
+          "avg_price_per_m2_iqd": 1134500,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 269000,
+          "max_price_per_m2_iqd": 2000000,
+          "sample_count": 211
+        },
+        "diwaniyah": {
+          "avg_price_per_m2_iqd": 871000,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 378000,
+          "max_price_per_m2_iqd": 1364000,
+          "sample_count": 27
+        },
+        "erbil": {
+          "avg_price_per_m2_iqd": 1021000,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 492000,
+          "max_price_per_m2_iqd": 1550000,
+          "sample_count": 694
+        },
+        "babel": {
+          "avg_price_per_m2_iqd": 634000,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 250000,
+          "max_price_per_m2_iqd": 1018000,
+          "sample_count": 83
+        },
+        "wasit": {
+          "avg_price_per_m2_iqd": 882500,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 215000,
+          "max_price_per_m2_iqd": 1550000,
+          "sample_count": 23
+        },
+        "nineveh": {
+          "avg_price_per_m2_iqd": 1179000,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 525000,
+          "max_price_per_m2_iqd": 1833000,
+          "sample_count": 49
+        },
+        "diyala": {
+          "avg_price_per_m2_iqd": 925000,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 350000,
+          "max_price_per_m2_iqd": 1500000,
+          "sample_count": 47
+        },
+        "salahaddin": {
+          "avg_price_per_m2_iqd": 577000,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 333000,
+          "max_price_per_m2_iqd": 821000,
+          "sample_count": 84
+        },
+        "sulaymaniyah": {
+          "avg_price_per_m2_iqd": 1069000,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 544000,
+          "max_price_per_m2_iqd": 1594000,
+          "sample_count": 63
+        },
+        "anbar": {
+          "avg_price_per_m2_iqd": 785500,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 291000,
+          "max_price_per_m2_iqd": 1280000,
+          "sample_count": 86
+        },
+        "kirkuk": {
+          "avg_price_per_m2_iqd": 706500,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 280000,
+          "max_price_per_m2_iqd": 1133000,
+          "sample_count": 130
+        },
+        "dhi_qar": {
+          "avg_price_per_m2_iqd": 1140000,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 230000,
+          "max_price_per_m2_iqd": 2050000,
+          "sample_count": 66
+        },
+        "najaf": {
+          "avg_price_per_m2_iqd": 1065000,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 280000,
+          "max_price_per_m2_iqd": 1850000,
+          "sample_count": 220
+        },
+        "maysan": {
+          "avg_price_per_m2_iqd": 915000,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 580000,
+          "max_price_per_m2_iqd": 1250000,
+          "sample_count": 21
+        }
+      }
+    },
+    {
+      "key": "2024-q2",
+      "label": "2024년 2분기",
+      "source_file": "2024-09.pdf",
+      "period_start": "2024-05-01",
+      "period_end": "2024-08-31",
+      "total_properties": 4216,
+      "values": {
+        "muthanna": {
+          "avg_price_per_m2_iqd": 623500,
+          "change_percent": -3.89,
+          "min_price_per_m2_iqd": 367000,
+          "max_price_per_m2_iqd": 880000,
+          "sample_count": 9
+        },
+        "duhok": {
+          "avg_price_per_m2_iqd": 1037500,
+          "change_percent": 2.48,
+          "min_price_per_m2_iqd": 650000,
+          "max_price_per_m2_iqd": 1425000,
+          "sample_count": 43
+        },
+        "basra": {
+          "avg_price_per_m2_iqd": 1898000,
+          "change_percent": 40.37,
+          "min_price_per_m2_iqd": 433000,
+          "max_price_per_m2_iqd": 3363000,
+          "sample_count": 397
+        },
+        "karbala": {
+          "avg_price_per_m2_iqd": 1748500,
+          "change_percent": 60.67,
+          "min_price_per_m2_iqd": 640000,
+          "max_price_per_m2_iqd": 2857000,
+          "sample_count": 65
+        },
+        "diwaniyah": {
+          "avg_price_per_m2_iqd": 662500,
+          "change_percent": -26.15,
+          "min_price_per_m2_iqd": 325000,
+          "max_price_per_m2_iqd": 1000000,
+          "sample_count": 12
+        },
+        "erbil": {
+          "avg_price_per_m2_iqd": 1118500,
+          "change_percent": 7.64,
+          "min_price_per_m2_iqd": 612000,
+          "max_price_per_m2_iqd": 1625000,
+          "sample_count": 1754
+        },
+        "babel": {
+          "avg_price_per_m2_iqd": 1062500,
+          "change_percent": 51.34,
+          "min_price_per_m2_iqd": 275000,
+          "max_price_per_m2_iqd": 1850000,
+          "sample_count": 86
+        },
+        "wasit": {
+          "avg_price_per_m2_iqd": 617500,
+          "change_percent": 9.25,
+          "min_price_per_m2_iqd": 355000,
+          "max_price_per_m2_iqd": 880000,
+          "sample_count": 30
+        },
+        "nineveh": {
+          "avg_price_per_m2_iqd": 1090000,
+          "change_percent": 2.73,
+          "min_price_per_m2_iqd": 500000,
+          "max_price_per_m2_iqd": 1680000,
+          "sample_count": 303
+        },
+        "diyala": {
+          "avg_price_per_m2_iqd": 1615500,
+          "change_percent": 54.75,
+          "min_price_per_m2_iqd": 531000,
+          "max_price_per_m2_iqd": 2700000,
+          "sample_count": 58
+        },
+        "salahaddin": {
+          "avg_price_per_m2_iqd": 608000,
+          "change_percent": -5.65,
+          "min_price_per_m2_iqd": 387000,
+          "max_price_per_m2_iqd": 829000,
+          "sample_count": 65
+        },
+        "sulaymaniyah": {
+          "avg_price_per_m2_iqd": 1152500,
+          "change_percent": 11.72,
+          "min_price_per_m2_iqd": 700000,
+          "max_price_per_m2_iqd": 1605000,
+          "sample_count": 28
+        },
+        "anbar": {
+          "avg_price_per_m2_iqd": 959500,
+          "change_percent": 13.36,
+          "min_price_per_m2_iqd": 500000,
+          "max_price_per_m2_iqd": 1419000,
+          "sample_count": 19
+        },
+        "kirkuk": {
+          "avg_price_per_m2_iqd": 845000,
+          "change_percent": 25.41,
+          "min_price_per_m2_iqd": 290000,
+          "max_price_per_m2_iqd": 1400000,
+          "sample_count": 409
+        },
+        "dhi_qar": {
+          "avg_price_per_m2_iqd": 1607000,
+          "change_percent": 49.41,
+          "min_price_per_m2_iqd": 325000,
+          "max_price_per_m2_iqd": 2889000,
+          "sample_count": 17
+        },
+        "najaf": {
+          "avg_price_per_m2_iqd": 956000,
+          "change_percent": 1.01,
+          "min_price_per_m2_iqd": 350000,
+          "max_price_per_m2_iqd": 1562000,
+          "sample_count": 143
+        },
+        "maysan": {
+          "avg_price_per_m2_iqd": 1026500,
+          "change_percent": 10.16,
+          "min_price_per_m2_iqd": 570000,
+          "max_price_per_m2_iqd": 1483000,
+          "sample_count": 7
+        }
+      }
+    },
+    {
+      "key": "2024-q3",
+      "label": "2024년 3분기",
+      "source_file": "2025-01.pdf",
+      "period_start": "2024-09-01",
+      "period_end": "2024-12-31",
+      "total_properties": 3231,
+      "values": {
+        "muthanna": {
+          "avg_price_per_m2_iqd": 623500,
+          "change_percent": -5.43,
+          "min_price_per_m2_iqd": 367000,
+          "max_price_per_m2_iqd": 880000,
+          "sample_count": 12
+        },
+        "duhok": {
+          "avg_price_per_m2_iqd": 1030500,
+          "change_percent": -0.9,
+          "min_price_per_m2_iqd": 636000,
+          "max_price_per_m2_iqd": 1425000,
+          "sample_count": 44
+        },
+        "basra": {
+          "avg_price_per_m2_iqd": 2056500,
+          "change_percent": -1.45,
+          "min_price_per_m2_iqd": 375000,
+          "max_price_per_m2_iqd": 3738000,
+          "sample_count": 159
+        },
+        "karbala": {
+          "avg_price_per_m2_iqd": 1920000,
+          "change_percent": 1.78,
+          "min_price_per_m2_iqd": 507000,
+          "max_price_per_m2_iqd": 3333000,
+          "sample_count": 38
+        },
+        "diwaniyah": {
+          "avg_price_per_m2_iqd": 666500,
+          "change_percent": 5.98,
+          "min_price_per_m2_iqd": 400000,
+          "max_price_per_m2_iqd": 933000,
+          "sample_count": 9
+        },
+        "erbil": {
+          "avg_price_per_m2_iqd": 1137500,
+          "change_percent": 2.45,
+          "min_price_per_m2_iqd": 650000,
+          "max_price_per_m2_iqd": 1625000,
+          "sample_count": 1470
+        },
+        "babel": {
+          "avg_price_per_m2_iqd": 1296000,
+          "change_percent": 15.4,
+          "min_price_per_m2_iqd": 425000,
+          "max_price_per_m2_iqd": 2167000,
+          "sample_count": 44
+        },
+        "wasit": {
+          "avg_price_per_m2_iqd": 399000,
+          "change_percent": -5.94,
+          "min_price_per_m2_iqd": 278000,
+          "max_price_per_m2_iqd": 520000,
+          "sample_count": 32
+        },
+        "nineveh": {
+          "avg_price_per_m2_iqd": 1012000,
+          "change_percent": -13.05,
+          "min_price_per_m2_iqd": 479000,
+          "max_price_per_m2_iqd": 1545000,
+          "sample_count": 138
+        },
+        "diyala": {
+          "avg_price_per_m2_iqd": 1438000,
+          "change_percent": -1.39,
+          "min_price_per_m2_iqd": 556000,
+          "max_price_per_m2_iqd": 2320000,
+          "sample_count": 53
+        },
+        "salahaddin": {
+          "avg_price_per_m2_iqd": 578500,
+          "change_percent": -0.54,
+          "min_price_per_m2_iqd": 308000,
+          "max_price_per_m2_iqd": 849000,
+          "sample_count": 68
+        },
+        "sulaymaniyah": {
+          "avg_price_per_m2_iqd": 937500,
+          "change_percent": -17.11,
+          "min_price_per_m2_iqd": 270000,
+          "max_price_per_m2_iqd": 1605000,
+          "sample_count": 43
+        },
+        "anbar": {
+          "avg_price_per_m2_iqd": 832500,
+          "change_percent": -6.48,
+          "min_price_per_m2_iqd": 500000,
+          "max_price_per_m2_iqd": 1165000,
+          "sample_count": 31
+        },
+        "kirkuk": {
+          "avg_price_per_m2_iqd": 825000,
+          "change_percent": -0.4,
+          "min_price_per_m2_iqd": 290000,
+          "max_price_per_m2_iqd": 1360000,
+          "sample_count": 479
+        },
+        "dhi_qar": {
+          "avg_price_per_m2_iqd": 1614500,
+          "change_percent": -28.47,
+          "min_price_per_m2_iqd": 340000,
+          "max_price_per_m2_iqd": 2889000,
+          "sample_count": 20
+        },
+        "najaf": {
+          "avg_price_per_m2_iqd": 1380000,
+          "change_percent": 24.9,
+          "min_price_per_m2_iqd": 360000,
+          "max_price_per_m2_iqd": 2400000,
+          "sample_count": 232
+        },
+        "maysan": {
+          "avg_price_per_m2_iqd": 941500,
+          "change_percent": -5.09,
+          "min_price_per_m2_iqd": 500000,
+          "max_price_per_m2_iqd": 1383000,
+          "sample_count": 15
+        }
+      }
+    },
+    {
+      "key": "2025-q1",
+      "label": "2025년 1분기",
+      "source_file": "2025-05.pdf",
+      "period_start": "2025-01-01",
+      "period_end": "2025-04-30",
+      "total_properties": 2842,
+      "values": {
+        "muthanna": {
+          "avg_price_per_m2_iqd": 663500,
+          "change_percent": 5.99,
+          "min_price_per_m2_iqd": 367000,
+          "max_price_per_m2_iqd": 960000,
+          "sample_count": 47
+        },
+        "duhok": {
+          "avg_price_per_m2_iqd": 896500,
+          "change_percent": -20.18,
+          "min_price_per_m2_iqd": 443000,
+          "max_price_per_m2_iqd": 1350000,
+          "sample_count": 22
+        },
+        "basra": {
+          "avg_price_per_m2_iqd": 1687500,
+          "change_percent": -28.39,
+          "min_price_per_m2_iqd": 375000,
+          "max_price_per_m2_iqd": 3000000,
+          "sample_count": 365
+        },
+        "karbala": {
+          "avg_price_per_m2_iqd": 1683500,
+          "change_percent": 2.88,
+          "min_price_per_m2_iqd": 567000,
+          "max_price_per_m2_iqd": 2800000,
+          "sample_count": 105
+        },
+        "diwaniyah": {
+          "avg_price_per_m2_iqd": 1025000,
+          "change_percent": 46.56,
+          "min_price_per_m2_iqd": 450000,
+          "max_price_per_m2_iqd": 1600000,
+          "sample_count": 35
+        },
+        "erbil": {
+          "avg_price_per_m2_iqd": 1269000,
+          "change_percent": 7.83,
+          "min_price_per_m2_iqd": 588000,
+          "max_price_per_m2_iqd": 1950000,
+          "sample_count": 284
+        },
+        "babel": {
+          "avg_price_per_m2_iqd": 1130000,
+          "change_percent": -15.71,
+          "min_price_per_m2_iqd": 340000,
+          "max_price_per_m2_iqd": 1920000,
+          "sample_count": 86
+        },
+        "wasit": {
+          "avg_price_per_m2_iqd": 694500,
+          "change_percent": 31.58,
+          "min_price_per_m2_iqd": 278000,
+          "max_price_per_m2_iqd": 1111000,
+          "sample_count": 17
+        },
+        "nineveh": {
+          "avg_price_per_m2_iqd": 1097000,
+          "change_percent": 7.22,
+          "min_price_per_m2_iqd": 514000,
+          "max_price_per_m2_iqd": 1680000,
+          "sample_count": 131
+        },
+        "diyala": {
+          "avg_price_per_m2_iqd": 1535000,
+          "change_percent": -13.18,
+          "min_price_per_m2_iqd": 350000,
+          "max_price_per_m2_iqd": 2720000,
+          "sample_count": 35
+        },
+        "salahaddin": {
+          "avg_price_per_m2_iqd": 756500,
+          "change_percent": 42.91,
+          "min_price_per_m2_iqd": 313000,
+          "max_price_per_m2_iqd": 1200000,
+          "sample_count": 138
+        },
+        "sulaymaniyah": {
+          "avg_price_per_m2_iqd": 1053500,
+          "change_percent": 2.33,
+          "min_price_per_m2_iqd": 607000,
+          "max_price_per_m2_iqd": 1500000,
+          "sample_count": 70
+        },
+        "anbar": {
+          "avg_price_per_m2_iqd": 848000,
+          "change_percent": -2.41,
+          "min_price_per_m2_iqd": 456000,
+          "max_price_per_m2_iqd": 1240000,
+          "sample_count": 88
+        },
+        "kirkuk": {
+          "avg_price_per_m2_iqd": 910000,
+          "change_percent": 24.11,
+          "min_price_per_m2_iqd": 420000,
+          "max_price_per_m2_iqd": 1400000,
+          "sample_count": 580
+        },
+        "dhi_qar": {
+          "avg_price_per_m2_iqd": 1040000,
+          "change_percent": -7.26,
+          "min_price_per_m2_iqd": 240000,
+          "max_price_per_m2_iqd": 1840000,
+          "sample_count": 79
+        },
+        "najaf": {
+          "avg_price_per_m2_iqd": 1312500,
+          "change_percent": -21.58,
+          "min_price_per_m2_iqd": 325000,
+          "max_price_per_m2_iqd": 2300000,
+          "sample_count": 341
+        },
+        "maysan": {
+          "avg_price_per_m2_iqd": 875000,
+          "change_percent": -4.82,
+          "min_price_per_m2_iqd": 400000,
+          "max_price_per_m2_iqd": 1350000,
+          "sample_count": 21
+        }
+      }
+    },
+    {
+      "key": "2025-q2",
+      "label": "2025년 2분기",
+      "source_file": "2025-09.pdf",
+      "period_start": "2025-05-01",
+      "period_end": "2025-08-31",
+      "total_properties": 2093,
+      "values": {
+        "muthanna": {
+          "avg_price_per_m2_iqd": 735000,
+          "change_percent": 26.22,
+          "min_price_per_m2_iqd": 500000,
+          "max_price_per_m2_iqd": 970000,
+          "sample_count": 5
+        },
+        "duhok": {
+          "avg_price_per_m2_iqd": 839000,
+          "change_percent": 2.54,
+          "min_price_per_m2_iqd": 678000,
+          "max_price_per_m2_iqd": 1000000,
+          "sample_count": 2
+        },
+        "basra": {
+          "avg_price_per_m2_iqd": 1797500,
+          "change_percent": 20.74,
+          "min_price_per_m2_iqd": 359000,
+          "max_price_per_m2_iqd": 3236000,
+          "sample_count": 210
+        },
+        "karbala": {
+          "avg_price_per_m2_iqd": 1675000,
+          "change_percent": 2.39,
+          "min_price_per_m2_iqd": 550000,
+          "max_price_per_m2_iqd": 2800000,
+          "sample_count": 83
+        },
+        "diwaniyah": {
+          "avg_price_per_m2_iqd": 937500,
+          "change_percent": -3.05,
+          "min_price_per_m2_iqd": 450000,
+          "max_price_per_m2_iqd": 1425000,
+          "sample_count": 36
+        },
+        "erbil": {
+          "avg_price_per_m2_iqd": 1432500,
+          "change_percent": 21.32,
+          "min_price_per_m2_iqd": 732000,
+          "max_price_per_m2_iqd": 2133000,
+          "sample_count": 159
+        },
+        "babel": {
+          "avg_price_per_m2_iqd": 1203500,
+          "change_percent": 15.3,
+          "min_price_per_m2_iqd": 330000,
+          "max_price_per_m2_iqd": 2077000,
+          "sample_count": 77
+        },
+        "wasit": {
+          "avg_price_per_m2_iqd": 757500,
+          "change_percent": 35.66,
+          "min_price_per_m2_iqd": 340000,
+          "max_price_per_m2_iqd": 1175000,
+          "sample_count": 16
+        },
+        "nineveh": {
+          "avg_price_per_m2_iqd": 1031000,
+          "change_percent": -1.3,
+          "min_price_per_m2_iqd": 412000,
+          "max_price_per_m2_iqd": 1650000,
+          "sample_count": 146
+        },
+        "diyala": {
+          "avg_price_per_m2_iqd": 941000,
+          "change_percent": -37.3,
+          "min_price_per_m2_iqd": 232000,
+          "max_price_per_m2_iqd": 1650000,
+          "sample_count": 41
+        },
+        "salahaddin": {
+          "avg_price_per_m2_iqd": 796500,
+          "change_percent": 5.35,
+          "min_price_per_m2_iqd": 460000,
+          "max_price_per_m2_iqd": 1133000,
+          "sample_count": 111
+        },
+        "sulaymaniyah": {
+          "avg_price_per_m2_iqd": 1403500,
+          "change_percent": 34.77,
+          "min_price_per_m2_iqd": 707000,
+          "max_price_per_m2_iqd": 2100000,
+          "sample_count": 16
+        },
+        "anbar": {
+          "avg_price_per_m2_iqd": 954500,
+          "change_percent": 12.38,
+          "min_price_per_m2_iqd": 401000,
+          "max_price_per_m2_iqd": 1508000,
+          "sample_count": 182
+        },
+        "kirkuk": {
+          "avg_price_per_m2_iqd": 985000,
+          "change_percent": 8.92,
+          "min_price_per_m2_iqd": 520000,
+          "max_price_per_m2_iqd": 1450000,
+          "sample_count": 367
+        },
+        "dhi_qar": {
+          "avg_price_per_m2_iqd": 1170000,
+          "change_percent": 20.55,
+          "min_price_per_m2_iqd": 340000,
+          "max_price_per_m2_iqd": 2000000,
+          "sample_count": 81
+        },
+        "najaf": {
+          "avg_price_per_m2_iqd": 1183500,
+          "change_percent": -8.51,
+          "min_price_per_m2_iqd": 300000,
+          "max_price_per_m2_iqd": 2067000,
+          "sample_count": 169
+        },
+        "maysan": {
+          "avg_price_per_m2_iqd": 898000,
+          "change_percent": 9.69,
+          "min_price_per_m2_iqd": 346000,
+          "max_price_per_m2_iqd": 1450000,
+          "sample_count": 17
+        }
+      }
+    },
+    {
+      "key": "2025-q3",
+      "label": "2025년 3분기",
+      "source_file": "2026-01.pdf",
+      "period_start": "2025-09-01",
+      "period_end": "2025-12-31",
+      "total_properties": 3254,
+      "values": {
+        "muthanna": {
+          "avg_price_per_m2_iqd": 819500,
+          "change_percent": 0.49,
+          "min_price_per_m2_iqd": 480000,
+          "max_price_per_m2_iqd": 1159000,
+          "sample_count": 133
+        },
+        "duhok": {
+          "avg_price_per_m2_iqd": 678000,
+          "change_percent": -19.17,
+          "min_price_per_m2_iqd": 678000,
+          "max_price_per_m2_iqd": 678000,
+          "sample_count": 1
+        },
+        "basra": {
+          "avg_price_per_m2_iqd": 2054000,
+          "change_percent": 34.64,
+          "min_price_per_m2_iqd": 441000,
+          "max_price_per_m2_iqd": 3667000,
+          "sample_count": 362
+        },
+        "karbala": {
+          "avg_price_per_m2_iqd": 2121000,
+          "change_percent": 13.39,
+          "min_price_per_m2_iqd": 700000,
+          "max_price_per_m2_iqd": 3542000,
+          "sample_count": 82
+        },
+        "diwaniyah": {
+          "avg_price_per_m2_iqd": 821000,
+          "change_percent": -9.11,
+          "min_price_per_m2_iqd": 392000,
+          "max_price_per_m2_iqd": 1250000,
+          "sample_count": 129
+        },
+        "erbil": {
+          "avg_price_per_m2_iqd": 1261500,
+          "change_percent": -12.14,
+          "min_price_per_m2_iqd": 648000,
+          "max_price_per_m2_iqd": 1875000,
+          "sample_count": 563
+        },
+        "babel": {
+          "avg_price_per_m2_iqd": 1312500,
+          "change_percent": 14.56,
+          "min_price_per_m2_iqd": 375000,
+          "max_price_per_m2_iqd": 2250000,
+          "sample_count": 89
+        },
+        "wasit": {
+          "avg_price_per_m2_iqd": 850000,
+          "change_percent": 22.86,
+          "min_price_per_m2_iqd": 400000,
+          "max_price_per_m2_iqd": 1300000,
+          "sample_count": 33
+        },
+        "nineveh": {
+          "avg_price_per_m2_iqd": 1293500,
+          "change_percent": 24.45,
+          "min_price_per_m2_iqd": 520000,
+          "max_price_per_m2_iqd": 2067000,
+          "sample_count": 185
+        },
+        "diyala": {
+          "avg_price_per_m2_iqd": 619000,
+          "change_percent": -37.71,
+          "min_price_per_m2_iqd": 212000,
+          "max_price_per_m2_iqd": 1026000,
+          "sample_count": 43
+        },
+        "salahaddin": {
+          "avg_price_per_m2_iqd": 756500,
+          "change_percent": -6.24,
+          "min_price_per_m2_iqd": 388000,
+          "max_price_per_m2_iqd": 1125000,
+          "sample_count": 271
+        },
+        "sulaymaniyah": {
+          "avg_price_per_m2_iqd": 1275000,
+          "change_percent": 0.04,
+          "min_price_per_m2_iqd": 750000,
+          "max_price_per_m2_iqd": 1800000,
+          "sample_count": 38
+        },
+        "anbar": {
+          "avg_price_per_m2_iqd": 1107500,
+          "change_percent": 4.72,
+          "min_price_per_m2_iqd": 406000,
+          "max_price_per_m2_iqd": 1809000,
+          "sample_count": 378
+        },
+        "kirkuk": {
+          "avg_price_per_m2_iqd": 1120000,
+          "change_percent": 1.99,
+          "min_price_per_m2_iqd": 540000,
+          "max_price_per_m2_iqd": 1700000,
+          "sample_count": 237
+        },
+        "dhi_qar": {
+          "avg_price_per_m2_iqd": 1573500,
+          "change_percent": 36.41,
+          "min_price_per_m2_iqd": 480000,
+          "max_price_per_m2_iqd": 2667000,
+          "sample_count": 96
+        },
+        "najaf": {
+          "avg_price_per_m2_iqd": 1044500,
+          "change_percent": 19.74,
+          "min_price_per_m2_iqd": 300000,
+          "max_price_per_m2_iqd": 1789000,
+          "sample_count": 154
+        },
+        "maysan": {
+          "avg_price_per_m2_iqd": 1037500,
+          "change_percent": -1.62,
+          "min_price_per_m2_iqd": 375000,
+          "max_price_per_m2_iqd": 1700000,
+          "sample_count": 104
+        }
+      }
+    },
+    {
+      "key": "2026-q1",
+      "label": "2026년 1분기",
+      "source_file": "2026-05.pdf",
+      "period_start": "2026-01-01",
+      "period_end": "2026-04-30",
+      "total_properties": 4468,
+      "values": {
+        "muthanna": {
+          "avg_price_per_m2_iqd": 808500,
+          "change_percent": -3.29,
+          "min_price_per_m2_iqd": 417000,
+          "max_price_per_m2_iqd": 1200000,
+          "sample_count": 333
+        },
+        "basra": {
+          "avg_price_per_m2_iqd": 1972000,
+          "change_percent": 3.98,
+          "min_price_per_m2_iqd": 444000,
+          "max_price_per_m2_iqd": 3500000,
+          "sample_count": 428
+        },
+        "karbala": {
+          "avg_price_per_m2_iqd": 2154000,
+          "change_percent": 3.28,
+          "min_price_per_m2_iqd": 750000,
+          "max_price_per_m2_iqd": 3558000,
+          "sample_count": 61
+        },
+        "diwaniyah": {
+          "avg_price_per_m2_iqd": 806000,
+          "change_percent": -3.34,
+          "min_price_per_m2_iqd": 245000,
+          "max_price_per_m2_iqd": 1367000,
+          "sample_count": 178
+        },
+        "erbil": {
+          "avg_price_per_m2_iqd": 1182500,
+          "change_percent": -7.63,
+          "min_price_per_m2_iqd": 615000,
+          "max_price_per_m2_iqd": 1750000,
+          "sample_count": 958
+        },
+        "babel": {
+          "avg_price_per_m2_iqd": 1533500,
+          "change_percent": -2.8,
+          "min_price_per_m2_iqd": 567000,
+          "max_price_per_m2_iqd": 2500000,
+          "sample_count": 73
+        },
+        "wasit": {
+          "avg_price_per_m2_iqd": 780000,
+          "change_percent": -34.43,
+          "min_price_per_m2_iqd": 260000,
+          "max_price_per_m2_iqd": 1300000,
+          "sample_count": 110
+        },
+        "nineveh": {
+          "avg_price_per_m2_iqd": 1302500,
+          "change_percent": 2.78,
+          "min_price_per_m2_iqd": 650000,
+          "max_price_per_m2_iqd": 1955000,
+          "sample_count": 258
+        },
+        "diyala": {
+          "avg_price_per_m2_iqd": 627500,
+          "change_percent": 13.29,
+          "min_price_per_m2_iqd": 188000,
+          "max_price_per_m2_iqd": 1067000,
+          "sample_count": 70
+        },
+        "salahaddin": {
+          "avg_price_per_m2_iqd": 792000,
+          "change_percent": 1.12,
+          "min_price_per_m2_iqd": 417000,
+          "max_price_per_m2_iqd": 1167000,
+          "sample_count": 372
+        },
+        "sulaymaniyah": {
+          "avg_price_per_m2_iqd": 1254000,
+          "change_percent": -4.34,
+          "min_price_per_m2_iqd": 708000,
+          "max_price_per_m2_iqd": 1800000,
+          "sample_count": 77
+        },
+        "anbar": {
+          "avg_price_per_m2_iqd": 1084000,
+          "change_percent": -1.11,
+          "min_price_per_m2_iqd": 432000,
+          "max_price_per_m2_iqd": 1736000,
+          "sample_count": 485
+        },
+        "kirkuk": {
+          "avg_price_per_m2_iqd": 985000,
+          "change_percent": -0.4,
+          "min_price_per_m2_iqd": 520000,
+          "max_price_per_m2_iqd": 1450000,
+          "sample_count": 218
+        },
+        "dhi_qar": {
+          "avg_price_per_m2_iqd": 1452000,
+          "change_percent": -14.99,
+          "min_price_per_m2_iqd": 571000,
+          "max_price_per_m2_iqd": 2333000,
+          "sample_count": 149
+        },
+        "najaf": {
+          "avg_price_per_m2_iqd": 1419000,
+          "change_percent": 11.36,
+          "min_price_per_m2_iqd": 300000,
+          "max_price_per_m2_iqd": 2538000,
+          "sample_count": 93
+        },
+        "maysan": {
+          "avg_price_per_m2_iqd": 975000,
+          "change_percent": 1.05,
+          "min_price_per_m2_iqd": 350000,
+          "max_price_per_m2_iqd": 1600000,
+          "sample_count": 134
+        }
+      }
+    },
+    {
+      "key": "2026-q2",
+      "label": "2026년 2분기",
+      "source_file": "2026-09.pdf",
+      "period_start": "2026-05-01",
+      "period_end": "2026-08-31",
+      "total_properties": 4487,
+      "values": {
+        "muthanna": {
+          "avg_price_per_m2_iqd": 760000,
+          "change_percent": -4.52,
+          "min_price_per_m2_iqd": 320000,
+          "max_price_per_m2_iqd": 1200000,
+          "sample_count": 170
+        },
+        "duhok": {
+          "avg_price_per_m2_iqd": 1000000,
+          "change_percent": 0.0,
+          "min_price_per_m2_iqd": 400000,
+          "max_price_per_m2_iqd": 1600000,
+          "sample_count": 2
+        },
+        "basra": {
+          "avg_price_per_m2_iqd": 1801500,
+          "change_percent": -20.34,
+          "min_price_per_m2_iqd": 270000,
+          "max_price_per_m2_iqd": 3333000,
+          "sample_count": 279
+        },
+        "karbala": {
+          "avg_price_per_m2_iqd": 1696500,
+          "change_percent": -20.38,
+          "min_price_per_m2_iqd": 393000,
+          "max_price_per_m2_iqd": 3000000,
+          "sample_count": 122
+        },
+        "diwaniyah": {
+          "avg_price_per_m2_iqd": 750000,
+          "change_percent": -13.84,
+          "min_price_per_m2_iqd": 200000,
+          "max_price_per_m2_iqd": 1300000,
+          "sample_count": 145
+        },
+        "erbil": {
+          "avg_price_per_m2_iqd": 1192500,
+          "change_percent": -1.18,
+          "min_price_per_m2_iqd": 660000,
+          "max_price_per_m2_iqd": 1725000,
+          "sample_count": 1308
+        },
+        "babel": {
+          "avg_price_per_m2_iqd": 957000,
+          "change_percent": -15.67,
+          "min_price_per_m2_iqd": 360000,
+          "max_price_per_m2_iqd": 1554000,
+          "sample_count": 70
+        },
+        "wasit": {
+          "avg_price_per_m2_iqd": 824500,
+          "change_percent": 3.01,
+          "min_price_per_m2_iqd": 289000,
+          "max_price_per_m2_iqd": 1360000,
+          "sample_count": 81
+        },
+        "nineveh": {
+          "avg_price_per_m2_iqd": 1396500,
+          "change_percent": 5.22,
+          "min_price_per_m2_iqd": 650000,
+          "max_price_per_m2_iqd": 2143000,
+          "sample_count": 411
+        },
+        "diyala": {
+          "avg_price_per_m2_iqd": 570000,
+          "change_percent": -7.64,
+          "min_price_per_m2_iqd": 140000,
+          "max_price_per_m2_iqd": 1000000,
+          "sample_count": 57
+        },
+        "salahaddin": {
+          "avg_price_per_m2_iqd": 768500,
+          "change_percent": -4.53,
+          "min_price_per_m2_iqd": 454000,
+          "max_price_per_m2_iqd": 1083000,
+          "sample_count": 242
+        },
+        "sulaymaniyah": {
+          "avg_price_per_m2_iqd": 1113000,
+          "change_percent": -12.37,
+          "min_price_per_m2_iqd": 614000,
+          "max_price_per_m2_iqd": 1612000,
+          "sample_count": 33
+        },
+        "anbar": {
+          "avg_price_per_m2_iqd": 898500,
+          "change_percent": -11.63,
+          "min_price_per_m2_iqd": 259000,
+          "max_price_per_m2_iqd": 1538000,
+          "sample_count": 587
+        },
+        "kirkuk": {
+          "avg_price_per_m2_iqd": 876500,
+          "change_percent": -7.74,
+          "min_price_per_m2_iqd": 420000,
+          "max_price_per_m2_iqd": 1333000,
+          "sample_count": 239
+        },
+        "dhi_qar": {
+          "avg_price_per_m2_iqd": 1311500,
+          "change_percent": -7.72,
+          "min_price_per_m2_iqd": 365000,
+          "max_price_per_m2_iqd": 2258000,
+          "sample_count": 195
+        },
+        "najaf": {
+          "avg_price_per_m2_iqd": 1504000,
+          "change_percent": 6.36,
+          "min_price_per_m2_iqd": 208000,
+          "max_price_per_m2_iqd": 2800000,
+          "sample_count": 115
+        },
+        "maysan": {
+          "avg_price_per_m2_iqd": 912500,
+          "change_percent": -7.75,
+          "min_price_per_m2_iqd": 325000,
+          "max_price_per_m2_iqd": 1500000,
+          "sample_count": 45
+        }
+      }
+    }
+  ]
+}
+
+
