@@ -1137,11 +1137,13 @@
     });
   }
   function historyTrendPoints(key, periods, valueOf){
-    return periods.map(period=>{const v=valueOf(period,key);return {label:period.label,value:Number.isFinite(v?.value)?v.value:null,sample:v?.sample_count||0};});
+    return periods.map(period=>{const v=valueOf(period,key);const value=v?.avg_price_per_m2_iqd ?? v?.value;return {label:period.label,value:Number.isFinite(value)?value:null,sample:v?.sample_count||0};});
   }
   function renderHistoryTrend(kind){
     const controls=document.getElementById('trend-controls'),holder=document.getElementById('trend-chart'),table=document.getElementById('comparison-table'),meta=document.getElementById('trend-meta');
     const national=kind==='national';
+    document.getElementById('trend-section-title').textContent=national?'이라크 전체 주별 시세 변화':'지역별 시세 변화';
+    document.getElementById('trend-section-sub').textContent=national?'GOVERNORATE PRICE TREND':'DISTRICT PRICE TREND';
     const periods=national?(governorateHistory?.periods||[]):(regionHistory||[]).map(row=>({label:row.date,row}));
     const entries=national?nationalGovernorates.map(d=>({key:d.key,name:d.nameKr})):orderedRegionKeys.map(k=>({key:k,name:districts[k].nameKr}));
     const available=entries.filter(e=>periods.some(p=>{const v=national?p.values?.[e.key]:p.row?.by_district?.[e.key];return Number.isFinite(v?.avg_price_per_m2_iqd);}));
@@ -1602,6 +1604,8 @@
   function selectGovernorate(key){
     if(activeMode!=='national') return;
     const d=nationalGovernorates.find(item=>item.key===key); if(!d) return;
+    selectedHistoryKey=key;
+    renderTrend();
     document.querySelectorAll('.district-row').forEach(r=>r.classList.toggle('active',r.dataset.key===key));
     document.querySelector(`.district-row[data-key="${key}"]`)?.scrollIntoView({block:'nearest',behavior:'smooth'});
     Object.values(nationalMarkerLayers).forEach(marker=>marker.getElement()?.classList.remove('selected'));
