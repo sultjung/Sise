@@ -405,7 +405,7 @@
   </div>
 
   <div class="section-head">
-    <div class="section-title"><div class="bar"></div><h2>월별 단지·아파트 시세 추이</h2><span class="sub-en">MONTHLY PRICE TREND</span></div>
+    <div class="section-title"><div class="bar"></div><h2 id="trend-section-title">월별 단지·아파트 시세 추이</h2><span class="sub-en" id="trend-section-sub">MONTHLY PRICE TREND</span></div>
   </div>
   <div class="trend-panel">
     <div class="trend-controls" id="trend-controls"></div>
@@ -439,6 +439,8 @@
 <script>
   const RATE = 1320; // 1 USD ≈ 1320 IQD
   let trendHistory = [];
+  let governorateHistory = null;
+  let selectedHistoryKey = 'all';
   let ibaitySnapshot = null;
   let selectedTrendKey = 'all';
   let selectedTrendType = 'bar';
@@ -1133,7 +1135,47 @@
       return {period:period.key,label:period.label,value:median(values),sample:values.length};
     });
   }
+  function historyTrendPoints(key, periods, valueOf){
+    return periods.map(period=>{const v=valueOf(period,key);return {label:period.label,value:Number.isFinite(v?.value)?v.value:null,sample:v?.sample_count||0};});
+  }
+  function renderHistoryTrend(kind){
+    const controls=document.getElementById('trend-controls'),holder=document.getElementById('trend-chart'),table=document.getElementById('comparison-table'),meta=document.getElementById('trend-meta');
+    const national=kind==='national';
+    const periods=national?(governorateHistory?.periods||[]):(trendHistory||[]).map(row=>({label:row.date,row}));
+    const entries=national?nationalGovernorates.map(d=>({key:d.key,name:d.nameKr})):orderedRegionKeys.map(k=>({key:k,name:districts[k].nameKr}));
+    const available=entries.filter(e=>periods.some(p=>{const v=national?p.values?.[e.key]:p.row?.by_district?.[e.key];return Number.isFinite(v?.avg_price_per_m2_iqd);}));
+    if(!available.length){holder.innerHTML='<div class="trend-empty">첨부 자료에서 표시할 지역별 시세 이력이 없습니다.</div>';controls.innerHTML='';table.innerHTML='';return;}
+    if(selectedHistoryKey!=='all'&&!available.some(e=>e.key===selectedHistoryKey)) selectedHistoryKey='all';
+    const valueOf=(period,key)=>national?period.values?.[key]:period.row?.by_district?.[key];
+    controls.innerHTML=`<div class="trend-toolbar"><div><button class="${selectedHistoryKey==='all'?'active':''}" data-history-key="all">전체 지역 비교</button>${available.map(e=>`<button class="${e.key===selectedHistoryKey?'active':''}" data-history-key="${e.key}">${e.name}</button>`).join('')}</div><div class="trend-type"><button class="${selectedTrendType==='bar'?'active':''}" data-trend-type="bar">막대</button><button class="${selectedTrendType==='line'?'active':''}" data-trend-type="line">선</button><button class="${selectedTrendCurrency==='usd'?'active':''}" data-trend-currency="usd">USD</button><button class="${selectedTrendCurrency==='iqd'?'active':''}" data-trend-currency="iqd">IQD</button></div></div>`;
+    controls.querySelectorAll('[data-history-key]').forEach(b=>b.addEventListener('click',()=>{selectedHistoryKey=b.dataset.historyKey;renderTrend();}));
+    controls.querySelectorAll('[data-trend-type]').forEach(b=>b.addEventListener('click',()=>{selectedTrendType=b.dataset.trendType;renderTrend();}));
+    controls.querySelectorAll('[data-trend-currency]').forEach(b=>b.addEventListener('click',()=>{selectedTrendCurrency=b.dataset.trendCurrency;renderTrend();}));
+    const selected=selectedHistoryKey==='all'?available[0]:available.find(e=>e.key===selectedHistoryKey);
+    const series=historyTrendPoints(selected.key,periods,valueOf);
+    const display=v=>selectedTrendCurrency==='usd'?v/RATE:v;
+    const allLatest=available.map(e=>{const p=historyTrendPoints(e.key==='x'?e.key:e.key,periods,valueOf);const last=[...p].reverse().find(x=>Number.isFinite(x.value));return {...e,value:last?.value||null};}).filter(e=>Number.isFinite(e.value));
+    const points=selectedHistoryKey==='all'?allLatest.map(e=>({label:e.name,value:e.value,sample:0})):series;
+    const vals=points.filter(p=>Number.isFinite(p.value)).map(p=>display(p.value));
+    if(!vals.length){holder.innerHTML='<div class="trend-empty">선택한 지역의 시세 이력이 없습니다.</div>';return;}
+    const W=900,H=250,P=42,max=Math.max(...vals),min=Math.min(...vals),range=Math.max(max-min,max*.04,1);
+    const xy=points.map((p,i)=>({x:P+(W-P*2)*(points.length===1?.5:i/(points.length-1)),y:H-P-(display(p.value)-min+range*.18)/(range*1.36)*(H-P*2),...p}));
+    const labels=xy.map(p=>p.label.replace(/^202[456]년 /,'')).join('');
+    const bars=xy.map(p=>{const d=display(p.value),h=Math.max(2,H-P-p.y);return `<rect x="${p.x-28}" y="${p.y}" width="56" height="${h}" rx="5" fill="#FF8A3D"><title>${p.label}: ${fmt(p.value)} IQD/m²</title></rect><text x="${p.x}" y="${p.y-8}" text-anchor="middle" font-size="10" font-weight="700" fill="#9E3500">${selectedTrendCurrency==='usd'?'$'+fmt(Math.round(d)):fmt(Math.round(d))}</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label}</text>`}).join('');
+    const path=xy.map((p,i)=>`${i?'L':'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+    const line=`<path d="${path}" fill="none" stroke="#D94800" stroke-width="3"/>${xy.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="5" fill="#D94800"><title>${p.label}: ${fmt(p.value)} IQD/m²</title></circle><text x="${p.x}" y="${p.y-10}" text-anchor="middle" font-size="10" font-weight="700" fill="#9E3500">${selectedTrendCurrency==='usd'?'$'+fmt(Math.round(display(p.value))):fmt(Math.round(display(p.value)))}</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label}</text>`).join('')}`;
+    holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${national?'이라크 주별':'바그다드 지역별'} 시세 변화"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${selectedHistoryKey==='all'?bars:(selectedTrendType==='bar'?bars:line)}</svg>`;
+    const rows=available.map(e=>{const pts=historyTrendPoints(e.key,periods,valueOf);const cells=pts.map(p=>Number.isFinite(p.value)?`${fmt(p.value)}<small>표본 ${p.sample||0}건</small>`:'미확인').join('</td><td>');return `<tr><td>${e.name}</td><td>${cells}</td></tr>`;}).join('');
+    table.innerHTML=`<table class="comparison-table"><thead><tr><th>${national?'주':'지역'}</th>${periods.map(p=>`<th>${p.label}<br>IQD/m²</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
+    meta.textContent=national?`이라크 18개 주 · 첨부 Baity/Ibaity PDF 8개 기간 · 보고서 평균 가격 · 환율 1 USD=${RATE.toLocaleString()} IQD`:`바그다드 지역별 · 공개 매물 평균값 이력 · 자료가 있는 기간만 표시`;
+    document.getElementById('trend-section-title').textContent=national?'이라크 전체 주별 시세 변화':'지역별 시세 변화';
+    document.getElementById('trend-section-sub').textContent=national?'GOVERNORATE PRICE TREND':'DISTRICT PRICE TREND';
+  }
   function renderTrend(){
+    if(activeMode==='national') return renderHistoryTrend('national');
+    if(activeMode==='region') return renderHistoryTrend('region');
+    document.getElementById('trend-section-title').textContent='월별 단지·아파트 시세 추이';
+    document.getElementById('trend-section-sub').textContent='MONTHLY PRICE TREND';
     const controls=document.getElementById('trend-controls');
     const holder=document.getElementById('trend-chart');
     const meta=document.getElementById('trend-meta');
@@ -1626,7 +1668,7 @@
       chartTitle.textContent='시세 확인 단지별 m² 단가 비교';
       map.fitBounds(complexBounds,{padding:[24,24]});
     }
-    renderList();renderChart();updateCalloutTexts();updateLegend();
+    renderList();renderChart();renderTrend();updateCalloutTexts();updateLegend();
     setTimeout(scheduleCalloutLayout,80);
   }
 
@@ -1975,6 +2017,9 @@
   fetch(`./data/complex-history.json?v=${Date.now()}`,{cache:'no-store'})
     .then(r=>r.ok?r.json():[]).then(rows=>{ trendHistory=Array.isArray(rows)?rows:[]; renderTrend(); })
     .catch(()=>renderTrend());
+  fetch(`./data/governorate-history.json?v=${Date.now()}`,{cache:'no-store'})
+    .then(r=>r.ok?r.json():null).then(data=>{ governorateHistory=data; renderTrend(); })
+    .catch(()=>renderTrend());
   fetch(`./data/latest.json?v=${Date.now()}`,{cache:'no-store'})
     .then(response=>response.ok ? response.json() : null)
     .then(applyLatestPrices)
@@ -1987,3 +2032,4 @@
 
 </body>
 </html>
+
