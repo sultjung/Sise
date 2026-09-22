@@ -416,16 +416,6 @@
     <div class="trend-meta" id="trend-meta">월말 기준 공개 매물 호가 중앙값 · IQD/m²</div>
   </div>
 
-  <!-- COMPARE CHART -->
-  <div class="section-head">
-    <div class="section-title">
-      <div class="bar"></div>
-      <h2 id="chart-title">시세 확인 단지별 m² 단가 비교</h2>
-      <span class="sub-en" id="chart-subtitle">PRICE PER M² · USD</span>
-    </div>
-  </div>
-  <div class="compare-panel" id="compare-panel"></div>
-
   <div class="footer-note">
     <div class="footer-legal">
       <b>출처 및 이용 안내</b><br>
@@ -979,8 +969,8 @@
   const listPanelTitle = document.getElementById('list-panel-title');
   const listPanelCount = document.getElementById('list-panel-count');
   const mapPanelCount = document.getElementById('map-panel-count');
-  const chartTitle = document.getElementById('chart-title');
-  const chartSubtitle = document.getElementById('chart-subtitle');
+  const chartTitle = document.getElementById('chart-title') || {textContent:''};
+  const chartSubtitle = document.getElementById('chart-subtitle') || {textContent:''};
 
   function sourceLinksHtml(item){
     const priceSources = Array.isArray(item.sources) ? item.sources : [];
@@ -1063,6 +1053,7 @@
   }
 
   function renderChart(){
+    if(!chartEl) return;
     chartEl.innerHTML = '';
     if(activeMode==='national'){
       const sorted=[...nationalGovernorates].sort((a,b)=>b.usd-a.usd); const max=sorted[0].usd;
@@ -1099,15 +1090,17 @@
   function renderComparisonTable(){
     const el=document.getElementById('comparison-table');
     if(!el) return;
+    const unit=selectedTrendCurrency==='usd'?'USD/m²':'IQD/m²';
+    const displayValue=value=>selectedTrendCurrency==='usd'?Math.round(value/RATE):value;
     if(selectedTrendKey!=='all'){
       const points=quarterlyTrendPoints(selectedTrendKey);
       const rows=points.map((point,index)=>{
         const previous=points.slice(0,index).reverse().find(item=>Number.isFinite(item.value));
         const change=Number.isFinite(point.value)&&previous?point.value-previous.value:null;
-        const changeText=change===null?'—':`${change>0?'+':''}${fmt(change)} IQD/m² (${change>0?'+':''}${(change/previous.value*100).toFixed(1)}%)`;
-        return `<tr><td>${point.label}</td><td>${point.sample||'—'}건</td><td>${Number.isFinite(point.value)?fmt(point.value):'미확인'}</td><td>${Number.isFinite(point.value)?fmt(Math.round(point.value/RATE)):'미확인'}</td><td>${changeText}</td></tr>`;
+        const changeText=change===null?'—':`${change>0?'+':''}${fmt(displayValue(change))} ${unit} (${change>0?'+':''}${(change/previous.value*100).toFixed(1)}%)`;
+        return `<tr><td>${point.label}</td><td>${point.sample||'—'}건</td><td>${Number.isFinite(point.value)?fmt(displayValue(point.value)):'미확인'}</td><td>${changeText}</td></tr>`;
       }).join('');
-      el.innerHTML=`<table class="comparison-table"><thead><tr><th>기간</th><th>표본</th><th>IQD/m²</th><th>USD/m²</th><th>직전 확인기간 대비</th></tr></thead><tbody>${rows}</tbody></table><div class="trend-meta">※ ${complexes[selectedTrendKey].nameKr}의 기간별 공개 매물 ㎡당 호가 중앙값입니다. 표본이 없는 기간은 미확인으로 표시합니다.</div>`;
+      el.innerHTML=`<table class="comparison-table"><thead><tr><th>기간</th><th>표본</th><th>${unit}</th><th>직전 확인기간 대비</th></tr></thead><tbody>${rows}</tbody></table><div class="trend-meta">※ ${complexes[selectedTrendKey].nameKr}의 기간별 공개 매물 ㎡당 호가 중앙값입니다. 표본이 없는 기간은 미확인으로 표시합니다.</div>`;
       return;
     }
     const keys=trendOrderedComplexKeys();
@@ -1115,10 +1108,10 @@
     const periodLabels=['2025년','2026년 1분기','2026년 2분기','2026년 3분기'];
     const rows=keys.map(k=>{
       const points=quarterlyTrendPoints(k);
-      const cells=points.map(point=>Number.isFinite(point.value)?`${fmt(point.value)}<small>표본 ${point.sample}건</small>`:'미확인').join('</td><td>');
+      const cells=points.map(point=>Number.isFinite(point.value)?`${fmt(displayValue(point.value))}<small>표본 ${point.sample}건</small>`:'미확인').join('</td><td>');
       return `<tr class="trend-complex-row" data-trend-key="${k}"><td>${complexes[k].nameKr}<small>클릭하여 상세보기</small></td><td>${cells}</td></tr>`;
     }).join('');
-    el.innerHTML=`<table class="comparison-table"><thead><tr><th>단지</th>${periodLabels.map(label=>`<th>${label}<br>IQD/m²</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table><div class="trend-meta">※ 2025년 연간 및 2026년 분기별 공개 매물 ㎡당 호가 중위값입니다. 표본이 없는 기간은 미확인으로 표시하며, 단지는 최신 확인 단가가 높은 순으로 정렬합니다.</div>`;
+    el.innerHTML=`<table class="comparison-table"><thead><tr><th>단지</th>${periodLabels.map(label=>`<th>${label}<br>${unit}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table><div class="trend-meta">※ 2025년 연간 및 2026년 분기별 공개 매물 ㎡당 호가 중위값입니다. 표본이 없는 기간은 미확인으로 표시하며, 단지는 최신 확인 단가가 높은 순으로 정렬합니다.</div>`;
     el.querySelectorAll('[data-trend-key]').forEach(row=>row.addEventListener('click',()=>{selectedTrendKey=row.dataset.trendKey;renderTrend();}));
   }
   function quarterlyTrendPoints(complexKey){
@@ -1178,8 +1171,10 @@
     const path=xy.map((p,i)=>`${i?'L':'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
     const line=`<path d="${path}" fill="none" stroke="#D94800" stroke-width="3"/>${xy.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="5" fill="#D94800"><title>${p.label}: ${fmt(p.value)} IQD/m²</title></circle><text x="${p.x}" y="${p.y-10}" text-anchor="middle" font-size="10" font-weight="700" fill="#9E3500">${selectedTrendCurrency==='usd'?'$'+fmt(Math.round(display(p.value))):fmt(Math.round(display(p.value)))}</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label}</text>`).join('')}`;
     holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${national?'이라크 주별':'바그다드 지역별'} 시세 변화"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${selectedHistoryKey==='all'?bars:(selectedTrendType==='bar'?bars:line)}</svg>`;
-    const rows=available.map(e=>{const pts=historyTrendPoints(e.key,periods,valueOf);const cells=pts.map(p=>Number.isFinite(p.value)?`${fmt(p.value)}<small>표본 ${p.sample||0}건</small>`:'미확인').join('</td><td>');return `<tr><td>${e.name}</td><td>${cells}</td></tr>`;}).join('');
-    table.innerHTML=`<table class="comparison-table"><thead><tr><th>${national?'주':'지역'}</th>${periods.map(p=>`<th>${p.label}<br>IQD/m²</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
+    const historyUnit=selectedTrendCurrency==='usd'?'USD/m²':'IQD/m²';
+    const historyDisplay=value=>selectedTrendCurrency==='usd'?Math.round(value/RATE):value;
+    const rows=available.map(e=>{const pts=historyTrendPoints(e.key,periods,valueOf);const cells=pts.map(p=>Number.isFinite(p.value)?`${fmt(historyDisplay(p.value))}<small>표본 ${p.sample||0}건</small>`:'미확인').join('</td><td>');return `<tr><td>${e.name}</td><td>${cells}</td></tr>`;}).join('');
+    table.innerHTML=`<table class="comparison-table"><thead><tr><th>${national?'주':'지역'}</th>${periods.map(p=>`<th>${p.label}<br>${historyUnit}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
     meta.textContent=national?`이라크 18개 주 · 첨부 Baity/Ibaity PDF 8개 기간 · 보고서 평균 가격 · 바그다드는 PDF 미수록으로 현재 지도값만 별도 표시 · 환율 1 USD=${RATE.toLocaleString()} IQD`:`바그다드 지역별 · 공개 매물 평균값 이력 · 자료가 있는 기간만 표시`;
     document.getElementById('trend-section-title').textContent=national?'이라크 전체 주별 시세 변화':'지역별 시세 변화';
     document.getElementById('trend-section-sub').textContent=national?'GOVERNORATE PRICE TREND':'DISTRICT PRICE TREND';
