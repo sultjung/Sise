@@ -407,7 +407,7 @@
     </div>
   </div>
   <div class="section-note" id="view-section-note" style="margin:-7px 0 12px;">리스트 또는 지도 클릭 시 해당 단지로 이동하고 매물 정보가 열립니다 · 지도는 마우스 휠로 확대·축소</div>
-  <div class="data-tools"><label for="quality-filter">표시 기준</label><select id="quality-filter"><option value="all">전체 상태</option><option value="verified">검증 완료만</option><option value="pending">재검증 대상만</option></select><button id="download-excel" type="button">엑셀 다운로드</button><button id="btn-adjust-callouts" type="button">표식 위치 조정</button></div>
+  <div class="data-tools"><label for="quality-filter">표시 기준</label><select id="quality-filter"><option value="all">전체 상태</option><option value="verified">검증 완료만</option><option value="pending">재검증 대상만</option></select><button id="download-excel" type="button">엑셀 다운로드</button><button id="btn-adjust-callouts" type="button">표식 위치 조정</button><button id="btn-export-callout-offsets" type="button" hidden>전체 위치값 다운로드</button></div>
 
   <div class="split">
     <div class="panel">
@@ -1623,6 +1623,12 @@
     link.href=url;link.download=`sise-${mode}-callout-offsets.json`;link.click();
     setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
+  function downloadAllCalloutOffsets(){
+    const payload={version:1,generated_at:new Date().toISOString(),offsets:{complex:calloutOffsets.complex,region:calloutOffsets.region,national:nationalCalloutOffsets}};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+    link.href=url;link.download='sise-all-callout-offsets.json';link.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
   function handleCalloutDrag(mode,key){
     const config=editCalloutConfig(mode),marker=config.layers.labels[key],anchor=map.latLngToContainerPoint(config.anchorOf(config.data[key])),label=map.latLngToContainerPoint(marker.getLatLng());
     config.offsets[key]=[Math.round(label.x-anchor.x),Math.round(label.y-anchor.y)];
@@ -1649,6 +1655,7 @@
     });
     const button=document.getElementById('btn-adjust-callouts');
     button.textContent='조정 종료';
+    document.getElementById('btn-export-callout-offsets').hidden=false;
     closeAdminEditDialog();
   }
   function stopCalloutEditing(){
@@ -1659,6 +1666,7 @@
     Object.values(calloutSets.region.labels).forEach(marker=>{if(marker.dragging) marker.dragging.disable();marker.setZIndexOffset(0);});
     Object.values(nationalCalloutSets.labels).forEach(marker=>{if(marker.dragging) marker.dragging.disable();marker.setZIndexOffset(0);});
     document.getElementById('btn-adjust-callouts').textContent='표식 위치 조정';
+    document.getElementById('btn-export-callout-offsets').hidden=true;
     scheduleCalloutLayout();
   }
   async function openAdminEditDialog(){
@@ -2183,6 +2191,7 @@
   }
   document.getElementById('download-excel').addEventListener('click',downloadExcel);
   document.getElementById('btn-adjust-callouts').addEventListener('click',()=>calloutEditMode?stopCalloutEditing():openAdminEditDialog());
+  document.getElementById('btn-export-callout-offsets').addEventListener('click',downloadAllCalloutOffsets);
   document.getElementById('admin-edit-close').addEventListener('click',closeAdminEditDialog);
   document.getElementById('admin-edit-cancel').addEventListener('click',closeAdminEditDialog);
   document.getElementById('admin-edit-form').addEventListener('submit',async event=>{
