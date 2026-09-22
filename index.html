@@ -190,6 +190,19 @@
   .map-legend{ background:rgba(255,255,255,.97); border:1px solid var(--hw-border); border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.85; box-shadow:0 2px 10px rgba(0,0,0,.08); }
   .map-legend .sw{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px;}
   .map-legend .dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin:0 8px 0 2px; vertical-align:0; }
+  .admin-modal{ position:fixed; inset:0; z-index:5000; display:grid; place-items:center; padding:20px; background:rgba(20,22,26,.42); }
+  .admin-modal[hidden]{ display:none; }
+  .admin-dialog{ width:min(360px,100%); padding:20px; border:1px solid var(--hw-border); border-radius:12px; background:#fff; box-shadow:0 18px 60px rgba(0,0,0,.22); }
+  .admin-dialog h3{ margin:0 0 8px; font-size:16px; }
+  .admin-dialog p{ margin:7px 0; color:var(--hw-ink-soft); font-size:11px; line-height:1.55; }
+  .admin-dialog .admin-warning{ color:#9E3500; font-weight:750; }
+  .admin-dialog label{ display:block; margin-top:12px; color:var(--hw-ink); font-size:11px; font-weight:700; }
+  .admin-dialog input{ display:block; width:100%; box-sizing:border-box; margin-top:5px; padding:9px 10px; border:1px solid var(--hw-border); border-radius:7px; font:13px 'Pretendard',sans-serif; }
+  .admin-dialog .admin-actions{ display:flex; justify-content:flex-end; gap:7px; margin-top:16px; }
+  .admin-dialog button{ border:1px solid var(--hw-border); border-radius:7px; padding:8px 11px; background:#fff; color:var(--hw-ink); font:700 11px 'Pretendard',sans-serif; cursor:pointer; }
+  .admin-dialog button.primary{ border-color:var(--hw-ink); background:var(--hw-ink); color:#fff; }
+  .admin-dialog .admin-close{ float:right; padding:2px 6px; border:0; font-size:18px; line-height:1; }
+  .admin-editing #map{ outline:2px dashed #D94800; outline-offset:-3px; }
   .national-marker{ background:#fff; border:2px solid #315EBA; border-radius:50%; box-shadow:0 1px 5px rgba(0,0,0,.3); color:#183E8F; font:700 11px 'IBM Plex Mono',monospace; padding:5px 7px; white-space:nowrap; text-align:center; }
   .national-marker.selected{ background:#315EBA; color:#fff; border-color:#183E8F; }
 
@@ -393,7 +406,7 @@
     </div>
   </div>
   <div class="section-note" id="view-section-note" style="margin:-7px 0 12px;">리스트 또는 지도 클릭 시 해당 단지로 이동하고 매물 정보가 열립니다 · 지도는 마우스 휠로 확대·축소</div>
-  <div class="data-tools"><label for="quality-filter">표시 기준</label><select id="quality-filter"><option value="all">전체 상태</option><option value="verified">검증 완료만</option><option value="pending">재검증 대상만</option></select><button id="download-excel" type="button">엑셀 다운로드</button></div>
+  <div class="data-tools"><label for="quality-filter">표시 기준</label><select id="quality-filter"><option value="all">전체 상태</option><option value="verified">검증 완료만</option><option value="pending">재검증 대상만</option></select><button id="download-excel" type="button">엑셀 다운로드</button><button id="btn-adjust-callouts" type="button">표식 위치 조정</button></div>
 
   <div class="split">
     <div class="panel">
@@ -425,6 +438,20 @@
     </div>
   </div>
 
+</div>
+
+<div id="admin-edit-modal" class="admin-modal" hidden>
+  <div class="admin-dialog" role="dialog" aria-modal="true" aria-labelledby="admin-edit-title">
+    <button id="admin-edit-close" class="admin-close" type="button" aria-label="닫기">×</button>
+    <h3 id="admin-edit-title">표식 위치 조정</h3>
+    <p class="admin-warning">관리자 외 수정 불가</p>
+    <p id="admin-edit-help">단지별 가격표 위치를 수정하려면 관리자 비밀번호를 입력하세요.</p>
+    <form id="admin-edit-form">
+      <label for="admin-edit-password">관리자 비밀번호<input id="admin-edit-password" type="password" autocomplete="new-password" required></label>
+      <label id="admin-edit-confirm-wrap" for="admin-edit-password-confirm">비밀번호 확인<input id="admin-edit-password-confirm" type="password" autocomplete="new-password"></label>
+      <div class="admin-actions"><button id="admin-edit-cancel" type="button">취소</button><button id="admin-edit-submit" class="primary" type="submit">비밀번호 설정 후 시작</button></div>
+    </form>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -1274,6 +1301,13 @@
       dar_alsalam:[84,-68],millennium:[-88,22],yarmouk_compound:[-96,-34],yamama_city:[98,-12],al_zahraa:[-88,50],al_wud:[94,28]
     }
   };
+  const ADMIN_PASSWORD_KEY='sise-admin-edit-password-sha256';
+  const SAVED_COMPLEX_OFFSETS_KEY='sise-complex-callout-offsets';
+  let calloutEditMode=false;
+  try{
+    const savedOffsets=JSON.parse(localStorage.getItem(SAVED_COMPLEX_OFFSETS_KEY)||'null');
+    if(savedOffsets&&typeof savedOffsets==='object') Object.assign(calloutOffsets.complex,savedOffsets);
+  }catch(error){ /* local storage may be unavailable */ }
 
   function districtTooltip(d){
     if(!hasPrice(d)) return `<b>${d.nameKr} · ${d.nameEn}</b><br>실제 평균 산출을 위한 공개 매물 표본 수집 중`;
@@ -1434,8 +1468,10 @@
     const anchor = L.circleMarker(d.centroid,{radius:4,color,weight:2,fillColor:'#fff',fillOpacity:1,interactive:true}).addTo(group);
     const marker = L.marker(d.centroid,{
       icon:L.divIcon({className:'price-callout-icon',html:calloutMarkup(mode,key,d,color),iconSize:[1,1],iconAnchor:[0,0]}),
-      interactive:true
+      interactive:true,
+      draggable:mode==='complex'
     }).addTo(group);
+    if(mode==='complex') marker.dragging.disable();
     const select = ()=> mode==='region' ? selectDistrict(key) : selectComplex(key);
     marker.on('click',select);
     anchor.on('click',select);
@@ -1462,6 +1498,7 @@
   }
 
   function layoutCallouts(){
+    if(calloutEditMode && activeMode==='complex') return;
     const isNational=activeMode==='national';
     const data=isNational ? Object.fromEntries(nationalGovernorates.map(d=>[d.key,d])) : (activeMode==='region' ? districts : complexes);
     const layers=isNational ? nationalCalloutSets : calloutSets[activeMode];
@@ -1530,6 +1567,80 @@
         layers.leaders[item.key].setLatLngs([origin,map.containerPointToLatLng(end)]);
       }
     });
+  }
+
+  function adminPasswordHash(value){
+    return crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)).then(bytes=>Array.from(new Uint8Array(bytes)).map(byte=>byte.toString(16).padStart(2,'0')).join(''));
+  }
+  function getAdminPasswordHash(){
+    try{return localStorage.getItem(ADMIN_PASSWORD_KEY)||'';}catch(error){return '';}
+  }
+  function closeAdminEditDialog(){
+    const modal=document.getElementById('admin-edit-modal');
+    modal.hidden=true;
+    document.getElementById('admin-edit-form').reset();
+  }
+  function calloutLabelBox(key){
+    const marker=calloutSets.complex.labels[key],el=document.getElementById(`lbl-complex-${key}`),mapRect=map.getContainer().getBoundingClientRect();
+    const point=map.latLngToContainerPoint(marker.getLatLng()),rect=el?.getBoundingClientRect();
+    return {x:point.x,y:point.y,width:rect?.width||112,height:rect?.height||50,mapRect};
+  }
+  function syncComplexCalloutLeader(key){
+    const marker=calloutSets.complex.labels[key],data=complexes[key];
+    if(!marker||!data) return;
+    const label=calloutLabelBox(key),anchor=map.latLngToContainerPoint(data.centroid);
+    const end=connectorEnd(anchor,label);
+    calloutSets.complex.leaders[key].setLatLngs([data.centroid,map.containerPointToLatLng(end)]);
+  }
+  function persistComplexCalloutOffsets(){
+    const offsets=Object.fromEntries(Object.entries(calloutOffsets.complex).map(([key,value])=>[key,value.map(number=>Math.round(number))]));
+    try{localStorage.setItem(SAVED_COMPLEX_OFFSETS_KEY,JSON.stringify(offsets));}catch(error){ /* local storage may be unavailable */ }
+    const blob=new Blob([JSON.stringify({version:1,view:'complex',offsets},null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob),link=document.createElement('a');
+    link.href=url;link.download='sise-complex-callout-offsets.json';link.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  function handleComplexCalloutDrag(key){
+    const marker=calloutSets.complex.labels[key],anchor=map.latLngToContainerPoint(complexes[key].centroid),label=map.latLngToContainerPoint(marker.getLatLng());
+    calloutOffsets.complex[key]=[Math.round(label.x-anchor.x),Math.round(label.y-anchor.y)];
+    syncComplexCalloutLeader(key);
+    try{localStorage.setItem(SAVED_COMPLEX_OFFSETS_KEY,JSON.stringify(calloutOffsets.complex));}catch(error){ /* local storage may be unavailable */ }
+  }
+  function startComplexCalloutEditing(){
+    calloutEditMode=true;
+    document.body.classList.add('admin-editing');
+    map.dragging.disable();
+    Object.keys(complexes).forEach(key=>{
+      const marker=calloutSets.complex.labels[key];
+      if(!marker) return;
+      if(!marker._siseDragHandlerAttached){
+        marker.on('dragend',()=>handleComplexCalloutDrag(key));
+        marker._siseDragHandlerAttached=true;
+      }
+      marker.dragging.enable();
+      marker.setZIndexOffset(2000);
+      syncComplexCalloutLeader(key);
+    });
+    const button=document.getElementById('btn-adjust-callouts');
+    button.textContent='조정 종료';
+    closeAdminEditDialog();
+  }
+  function stopComplexCalloutEditing(){
+    calloutEditMode=false;
+    document.body.classList.remove('admin-editing');
+    map.dragging.enable();
+    Object.values(calloutSets.complex.labels).forEach(marker=>{marker.dragging.disable();marker.setZIndexOffset(0);});
+    document.getElementById('btn-adjust-callouts').textContent='표식 위치 조정';
+    scheduleCalloutLayout();
+  }
+  async function openAdminEditDialog(){
+    if(activeMode!=='complex'){alert('먼저 아파트 단지별 지도에서 실행해 주세요.');return;}
+    const modal=document.getElementById('admin-edit-modal'),hasPassword=Boolean(getAdminPasswordHash()),confirmWrap=document.getElementById('admin-edit-confirm-wrap'),help=document.getElementById('admin-edit-help'),submit=document.getElementById('admin-edit-submit');
+    confirmWrap.hidden=hasPassword;
+    help.textContent=hasPassword?'관리자 비밀번호를 입력해야 표식 위치를 수정할 수 있습니다.':'처음 사용하는 경우 이 브라우저에 관리자 비밀번호를 설정합니다. 비밀번호는 이 브라우저에만 저장됩니다.';
+    submit.textContent=hasPassword?'비밀번호 확인 후 시작':'비밀번호 설정 후 시작';
+    modal.hidden=false;
+    document.getElementById('admin-edit-password').focus();
   }
 
   let calloutFrame=0;
@@ -1654,6 +1765,7 @@
   }
 
   function switchMode(mode){
+    if(calloutEditMode) stopComplexCalloutEditing();
     if(mode===activeMode) return;
     activeMode=mode;
     map.closePopup();
@@ -2042,6 +2154,25 @@
     XLSX.writeFile(workbook,`sise-단지별-지역별-${updatedAt}.xlsx`);
   }
   document.getElementById('download-excel').addEventListener('click',downloadExcel);
+  document.getElementById('btn-adjust-callouts').addEventListener('click',()=>calloutEditMode?stopComplexCalloutEditing():openAdminEditDialog());
+  document.getElementById('admin-edit-close').addEventListener('click',closeAdminEditDialog);
+  document.getElementById('admin-edit-cancel').addEventListener('click',closeAdminEditDialog);
+  document.getElementById('admin-edit-form').addEventListener('submit',async event=>{
+    event.preventDefault();
+    const password=document.getElementById('admin-edit-password').value;
+    const confirm=document.getElementById('admin-edit-password-confirm').value;
+    const help=document.getElementById('admin-edit-help');
+    if(password.length<6){help.textContent='비밀번호는 6자 이상 입력해 주세요.';return;}
+    const existing=getAdminPasswordHash();
+    if(!existing){
+      if(password!==confirm){help.textContent='비밀번호가 일치하지 않습니다.';return;}
+      try{localStorage.setItem(ADMIN_PASSWORD_KEY,await adminPasswordHash(password));}catch(error){help.textContent='브라우저 저장소를 사용할 수 없어 설정하지 못했습니다.';return;}
+      startComplexCalloutEditing();
+      return;
+    }
+    if(await adminPasswordHash(password)!==existing){help.textContent='비밀번호가 올바르지 않습니다.';return;}
+    startComplexCalloutEditing();
+  });
 
   refreshComplexOrdering();
   renderList();renderChart();renderTrend();updateLegend();scheduleCalloutLayout();
