@@ -1740,18 +1740,21 @@
     middle:{label:'중학교',color:'#0F9D8A'},
     high:{label:'고등학교',color:'#7C3AED'},
     university:{label:'대학교',color:'#1E3A5F'},
-    unknown:{label:'학교(구분 미상)',color:'#64748B'}
+    unknown:{label:'학교(구분 미상)',color:'#64748B'},
+    hospital:{label:'병원',color:'#16A34A'}
   };
   const educationLayers=Object.fromEntries(Object.keys(educationTypes).map(type=>[type,L.layerGroup()]));
-  const educationEnabled={primary:false,middle:false,high:false,university:false};
+  const educationEnabled={primary:false,middle:false,high:false,university:false,unknown:false,hospital:false};
   let educationLoadedMode=null;
   let educationLoadedBounds=null;
   let educationLoading=false;
+  let educationError='';
 
   function classifyEducation(tags={}){
     const name=String(tags.name||tags['name:ar']||tags['name:en']||'');
     const amenity=String(tags.amenity||'').toLowerCase();
     const level=String(tags['school:level']||tags.education||'').toLowerCase();
+    if(['hospital','clinic','doctors'].includes(amenity)) return 'hospital';
     if(['university','college'].includes(amenity)||/جامعة|كلية|university|college/.test(name.toLowerCase())) return 'university';
     if(/ابتدائية|ابتدائي|primary|elementary|basic/.test((name+' '+level).toLowerCase())) return 'primary';
     if(/متوسطة|متوسط|intermediate|middle/.test((name+' '+level).toLowerCase())) return 'middle';
@@ -1766,7 +1769,7 @@
     const english=tags['name:en']||tags['official_name:en']||tags.name_en;
     const raw=String(tags.name||'').trim();
     const latinRaw=raw&&!/[\\u0600-\\u06FF]/.test(raw)?raw:'';
-    const fallback={primary:'Primary School',middle:'Middle School',high:'High School',university:'University',unknown:'School (level unknown)'};
+    const fallback={primary:'Primary School',middle:'Middle School',high:'High School',university:'University',unknown:'School (level unknown)',hospital:'Hospital'};
     return String(english||latinRaw||'').trim()||fallback[type]||'Education facility';
   }
   function clearEducationLayers(){
@@ -1785,9 +1788,9 @@
     const south=bounds.getSouth(),west=bounds.getWest(),north=bounds.getNorth(),east=bounds.getEast();
     const box=`${south},${west},${north},${east}`;
     return `[out:json][timeout:25];(
-      node["amenity"~"school|university|college"](${box});
-      way["amenity"~"school|university|college"](${box});
-      relation["amenity"~"school|university|college"](${box});
+      node["amenity"~"school|university|college|hospital|clinic|doctors"](${box});
+      way["amenity"~"school|university|college|hospital|clinic|doctors"](${box});
+      relation["amenity"~"school|university|college|hospital|clinic|doctors"](${box});
       node["school:level"](${box});
       way["school:level"](${box});
       way["building"="school"](${box});
@@ -1797,13 +1800,21 @@
   async function loadEducationForCurrentView(){
     if(activeMode==='national'||educationLoading) return;
     const bounds=map.getBounds().pad(.08);
-    if(educationLoadedMode===activeMode&&educationLoadedBounds&&educationLoadedBounds.contains(bounds)) return;
+    if(!educationError&&educationLoadedMode===activeMode&&educationLoadedBounds&&educationLoadedBounds.contains(bounds)) return;
     educationLoading=true;
+    educationError='';
     updateLegend();
     try{
-      const url='https://overpass-api.de/api/interpreter?data='+encodeURIComponent(educationQuery(bounds));
-      const response=await fetch(url,{cache:'no-store'});
-      if(!response.ok) throw new Error('education data unavailable');
+      const query=encodeURIComponent(educationQuery(bounds));
+      const endpoints=['https://overpass-api.de/api/interpreter?data=','https://overpass.kumi.systems/api/interpreter?data='];
+      let response=null;
+      for(const endpoint of endpoints){
+        try{
+          const candidate=await fetch(endpoint+query,{cache:'no-store'});
+          if(candidate.ok){response=candidate;break;}
+        }catch(error){ /* try next endpoint */ }
+      }
+      if(!response) throw new Error('facility data unavailable');
       const data=await response.json();
       clearEducationLayers();
       const elements=data.elements||[];
@@ -1825,11 +1836,13 @@
         if(seen.has(key)) return;
         if(type==='university'&&/college|faculty|department/.test(displayName.toLowerCase())&&parentUniversities.some(parent=>Math.abs(parent.lat-lat)<.06&&Math.abs(parent.lng-lng)<.08)) return;
         seen.add(key);
-        const marker=type==='university'
-          ? L.marker([lat,lng],{pane:'educationPane',icon:L.divIcon({className:'education-marker',html:'<span class="education-symbol university"></span>',iconSize:[9,9],iconAnchor:[4.5,4.5]})})
-          : L.circleMarker([lat,lng],{pane:'educationPane',radius:3,color:educationTypes[type].color,weight:1,fillColor:educationTypes[type].color,fillOpacity:.92});
+        const marker=L.marker([lat,lng],{pane:'educationPane',icon:L.divIcon({
+          className:'facility-marker',
+          html:type==='hospital'?'<span class="facility-map-symbol hospital"></span>':type==='university'?'<span class="facility-map-symbol university"></span>':`<span class="facility-map-symbol school ${type}"></span>`,
+          iconSize:[14,14],iconAnchor:[7,7]
+        })});
         marker.bindTooltip(displayName,{direction:'top',offset:[0,-4],opacity:.96});
-        marker.bindPopup(`<div class="education-popup"><b>${escapeEducationText(displayName)}</b><span>${type==='unknown'?'School (level unknown)':educationTypes[type].label}</span></div>`,{closeButton:true,autoPan:false});
+        marker.bindPopup(`<div class="education-popup"><b>${escapeEducationText(displayName)}</b><span>${type==='unknown'?'School (level unknown)':type==='hospital'?'Hospital':educationTypes[type].label}</span></div>`,{closeButton:true,autoPan:false});
         marker.on('click',event=>L.DomEvent.stopPropagation(event));
         marker.addTo(educationLayers[type]);
       });
@@ -1837,8 +1850,9 @@
       educationLoadedBounds=bounds;
     }catch(error){
       clearEducationLayers();
-      educationLoadedMode=activeMode;
-      educationLoadedBounds=bounds;
+      educationLoadedMode=null;
+      educationLoadedBounds=null;
+      educationError='학교·병원 위치를 불러오지 못했습니다. 범례를 다시 눌러 재시도해 주세요.';
     }finally{
       educationLoading=false;
       setEducationLayerVisibility();
@@ -1856,7 +1870,7 @@
   function educationControlsHtml(){
     if(activeMode==='national') return '';
     const buttons=Object.entries(educationTypes).map(([type,item])=>`<button type="button" class="education-toggle${educationEnabled[type]?' active':''}" data-education-type="${type}" aria-pressed="${educationEnabled[type]}"><span class="education-symbol ${type}"></span>${item.label}</button>`).join('');
-    return `<div class="education-controls"><strong>교육시설 표시</strong>${buttons}${educationLoading?'<span class="education-loading">학교 위치 불러오는 중…</span>':'<span class="education-note">아이콘을 클릭하면 지도에 표시됩니다</span>'}</div>`;
+    return `<div class="education-controls"><strong>학교·병원 표시</strong>${buttons}${educationLoading?'<span class="education-loading">학교·병원 위치 불러오는 중…</span>':educationError?`<span class="education-loading">${educationError}</span>`:'<span class="education-note">아이콘을 클릭하면 지도에 표시됩니다</span>'}</div>`;
   }
 
   function bindEducationControls(){
