@@ -203,6 +203,11 @@
   .education-symbol.primary{background:#3B82F6}.education-symbol.middle{background:#16A34A}.education-symbol.high{background:#9333EA}
   .education-symbol.university{width:9px;height:9px;border-radius:2px;background:#1E3A8A;transform:rotate(45deg);margin:0 1px}
   .education-note{display:block;margin-top:4px;color:var(--hw-ink-soft);font-size:9px;line-height:1.35}
+  .education-popup{min-width:125px;line-height:1.35}
+  .education-popup b{display:block;font-size:12px;color:var(--hw-ink)}
+  .education-popup span{display:block;margin-top:3px;font-size:10px;color:var(--hw-ink-soft)}
+  .map-attribution-note{padding:8px 12px;border-top:1px solid var(--hw-border);background:#FAFAFB;color:var(--hw-ink-soft);font-size:10px;line-height:1.5}
+  .map-attribution-note a{color:#315EBA;text-decoration:none;border-bottom:1px solid #C6D4F0}
   .education-loading{color:#9E3500;font-size:9px}
   .admin-modal{ position:fixed; inset:0; z-index:5000; display:grid; place-items:center; padding:20px; background:rgba(20,22,26,.42); }
   .admin-modal[hidden]{ display:none; }
@@ -431,6 +436,12 @@
     <div class="panel">
       <div class="panel-head"><h3>지도로 보기</h3><div class="count" id="map-panel-count">확인 위치·참고 위치</div></div>
       <div id="map"></div>
+      <div class="map-attribution-note">
+        지도 데이터 출처 및 이용조건: 본 지도와 교육시설 위치 데이터는
+        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>의 데이터를 기반으로 하며,
+        <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">Open Database License(ODbL) 1.0</a>에 따라 이용됩니다.
+        지도 데이터의 정확성·완전성·최신성을 보증하지 않습니다. © OpenStreetMap contributors.
+      </div>
     </div>
   </div>
 
@@ -1747,8 +1758,12 @@
     return null;
   }
 
-  function educationName(tags={}){
-    return tags['name:ko']||tags.name||tags['name:ar']||tags['name:en']||'교육시설';
+  function escapeEducationText(value){
+    return String(value||'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  }
+  function educationName(tags={},type){
+    const english=tags['name:en']||tags['official_name:en']||tags.name_en;
+    return String(english||'').trim()||educationTypes[type]?.label||'Education facility';
   }
 
   function clearEducationLayers(){
@@ -1794,7 +1809,9 @@
         const marker=type==='university'
           ? L.marker([lat,lng],{pane:'educationPane',icon:L.divIcon({className:'education-marker',html:'<span class="education-symbol university"></span>',iconSize:[11,11],iconAnchor:[5.5,5.5]})})
           : L.circleMarker([lat,lng],{pane:'educationPane',radius:4,color:educationTypes[type].color,weight:1,fillColor:educationTypes[type].color,fillOpacity:.9});
-        marker.bindTooltip(`${educationName(tags)} · ${educationTypes[type].label}`,{direction:'top',offset:[0,-4],opacity:.96});
+        const displayName=educationName(tags,type);
+        marker.bindTooltip(displayName,{direction:'top',offset:[0,-4],opacity:.96});
+        marker.bindPopup(`<div class="education-popup"><b>${escapeEducationText(displayName)}</b><span>${educationTypes[type].label}</span></div>`,{closeButton:true,autoPan:false});
         marker.on('click',event=>L.DomEvent.stopPropagation(event));
         marker.addTo(educationLayers[type]);
       });
@@ -1821,7 +1838,7 @@
   function educationControlsHtml(){
     if(activeMode==='national') return '';
     const buttons=Object.entries(educationTypes).map(([type,item])=>`<button type="button" class="education-toggle${educationEnabled[type]?' active':''}" data-education-type="${type}" aria-pressed="${educationEnabled[type]}"><span class="education-symbol ${type}"></span>${item.label}</button>`).join('');
-    return `<div class="education-controls"><strong>교육시설 표시</strong>${buttons}${educationLoading?'<span class="education-loading">학교 위치 불러오는 중…</span>':'<span class="education-note">아이콘을 클릭하면 지도에 표시됩니다 · 자료: OpenStreetMap</span>'}</div>`;
+    return `<div class="education-controls"><strong>교육시설 표시</strong>${buttons}${educationLoading?'<span class="education-loading">학교 위치 불러오는 중…</span>':'<span class="education-note">아이콘을 클릭하면 지도에 표시됩니다</span>'}</div>`;
   }
 
   function bindEducationControls(){
@@ -1831,16 +1848,11 @@
   }
 
   function updateLegend(){
-    if(activeMode==='national'){
-      legendDiv.innerHTML='<b>이라크 전체 주별 시세</b><br><span class="sw" style="background:#D94800"></span>고가 주 / 가격표<br><span class="sw" style="background:#FF8A3D"></span>중간 주 / 가격표<br><span class="sw" style="background:#FFC896"></span>저가 주 / 가격표<br><small>음영·테두리·연결선: Ibaity 단가 상대 비교</small>';
-    }else if(activeMode==='region'){
-      legendDiv.innerHTML=`<b>지역 평균 단가 수준</b><br><span class="sw" style="background:#D94800"></span>상위 1/3<br><span class="sw" style="background:#FF8A3D"></span>중위 1/3<br><span class="sw" style="background:#FFC896"></span>하위 1/3<br><span class="sw" style="background:#C9CDD3"></span>시세 미확인<br><span class="sw" style="background:#149764;border:1px solid #075B40"></span>그린존<br>${educationControlsHtml()}`;
-    }else{
-      legendDiv.innerHTML=`<b>단지 시세 · ${currencyMode.toUpperCase()}</b><br><span class="dot" style="background:#315EBA"></span>복수 매물 호가 중앙값<br><span class="dot" style="background:#1A8A3F"></span>비스마야 공식 분양가<br><small>카드에서 모든 원문 확인</small>${educationControlsHtml()}`;
-    }
+    const showEducationLegend=activeMode!=='national';
+    legendDiv.style.display=showEducationLegend?'block':'none';
+    legendDiv.innerHTML=showEducationLegend?educationControlsHtml():'';
     bindEducationControls();
   }
-
   function updateCalloutTexts(){
     [['region',districts],['complex',complexes]].forEach(([mode,data])=>{
       Object.entries(data).forEach(([key,d])=>{
