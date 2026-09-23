@@ -1788,7 +1788,8 @@
     return text.split('').map(char=>map[char]??char).join('').replace(/[^A-Za-z0-9&'().,\-/ ]/g,' ').replace(/\s+/g,' ').trim();
   }
   function educationName(tags={},type){
-    const english=String(tags['name:en']||tags['official_name:en']||tags.name_en||'').trim();
+    const englishCandidate=String(tags['name:en']||tags['official_name:en']||tags.name_en||'').trim();
+    const english=englishCandidate&&!/[\\u0600-\\u06FF]/.test(englishCandidate)?englishCandidate:'';
     const raw=String(tags.name||'').trim();
     const latinRaw=raw&&!/[\\u0600-\\u06FF]/.test(raw)?raw:'';
     const fallback={primary:'Primary School',middle:'Middle School',high:'High School',university:'University',unknown:'School',hospital:'Hospital'};
