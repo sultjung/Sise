@@ -50,7 +50,7 @@ jobs:
               "bbox": [33.00, 44.20, 33.65, 44.90],
               "elements": data.get("elements", [])
           }
-          with open("data/facilities.json", "w", encoding="utf-8") as file:
+          with open("/tmp/facilities.json", "w", encoding="utf-8") as file:
               json.dump(payload, file, ensure_ascii=False, separators=(",", ":"))
           print(f"Saved {len(payload['elements'])} facilities")
           PY
@@ -58,7 +58,27 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git rebase origin/main
-          git add data/facilities.json
-          git diff --cached --quiet || (git commit -m "Update facility map data" && git push origin HEAD:main)
+
+          for attempt in 1 2 3 4 5; do
+            echo "Commit attempt $attempt"
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/facilities.json data/facilities.json
+            git add data/facilities.json
+
+            if git diff --cached --quiet; then
+              echo "Facility data is already up to date."
+              exit 0
+            fi
+
+            git commit -m "Update facility map data"
+            if git push origin HEAD:main; then
+              echo "Facility data pushed successfully."
+              exit 0
+            fi
+
+            echo "Push raced with another update; retrying."
+          done
+
+          echo "Could not push facility data after 5 attempts."
+          exit 1
