@@ -201,6 +201,11 @@
   .education-toggle[aria-pressed="true"]{font-weight:750;color:var(--hw-ink)}
   .education-symbol{display:inline-block;width:9px;height:9px;border-radius:50%;border:1px solid rgba(35,36,40,.32);flex:0 0 auto}
   .education-symbol.primary{background:#2563EB}.education-symbol.middle{background:#0F9D8A}.education-symbol.high{background:#7C3AED}.education-symbol.unknown{background:#64748B}
+  .facility-map-symbol{display:inline-flex;position:relative;width:11px;height:11px;align-items:center;justify-content:center;flex:none;border:1px solid rgba(255,255,255,.95);box-shadow:0 0 0 1px rgba(35,36,40,.45),0 1px 3px rgba(0,0,0,.35);}
+  .facility-map-symbol.school{border-radius:3px;background:#2563EB}.facility-map-symbol.school.middle{background:#0F9D8A}.facility-map-symbol.school.high{background:#7C3AED}.facility-map-symbol.school.unknown{background:#64748B}
+  .facility-map-symbol.university{width:10px;height:10px;background:#1E3A5F;border-radius:2px;transform:rotate(45deg)}
+  .facility-map-symbol.hospital{width:13px;height:13px;border-radius:50%;background:#16A34A}
+  .facility-map-symbol.hospital:before,.facility-map-symbol.hospital:after{content:"";position:absolute;background:#fff;border-radius:1px}.facility-map-symbol.hospital:before{width:7px;height:2px}.facility-map-symbol.hospital:after{width:2px;height:7px}
   .education-symbol.university{width:8px;height:8px;border-radius:2px;background:#1E3A5F;transform:rotate(45deg);margin:0 1px}
   .education-note{display:block;margin-top:4px;color:var(--hw-ink-soft);font-size:9px;line-height:1.35}
   .education-popup{min-width:125px;line-height:1.35}
