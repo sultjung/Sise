@@ -1754,6 +1754,7 @@
   let educationLoadedBounds=null;
   let educationLoading=false;
   let educationError='';
+  let educationLoadedTypes='';
 
   function classifyEducation(tags={}){
     const name=String(tags.name||tags['name:ar']||tags['name:en']||'');
@@ -1789,26 +1790,30 @@
     });
   }
 
-  function educationQuery(bounds){
+  function educationQuery(bounds,types){
     const south=bounds.getSouth(),west=bounds.getWest(),north=bounds.getNorth(),east=bounds.getEast();
     const box=`${south},${west},${north},${east}`;
-    return `[out:json][timeout:8];(
-      node["amenity"~"school|university|college|hospital|clinic|doctors"](${box});
-      way["amenity"~"school|university|college|hospital|clinic|doctors"](${box});
-      node["school:level"](${box});
-      way["school:level"](${box});
-    );out center tags qt;`;
+    const clauses=[];
+    if(types.some(type=>['primary','middle','high','unknown'].includes(type))){
+      clauses.push(`node["amenity"="school"](${box});`,`way["amenity"="school"](${box});`,`node["school:level"](${box});`,`way["school:level"](${box});`);
+    }
+    if(types.includes('university')) clauses.push(`node["amenity"~"university|college"](${box});`,`way["amenity"~"university|college"](${box});`);
+    if(types.includes('hospital')) clauses.push(`node["amenity"~"hospital|clinic|doctors"](${box});`,`way["amenity"~"hospital|clinic|doctors"](${box});`);
+    return `[out:json][timeout:8];(${clauses.join('')});out center tags qt;`;
   }
 
   async function loadEducationForCurrentView(){
     if(activeMode==='national'||educationLoading) return;
     const bounds=map.getBounds();
-    if(!educationError&&educationLoadedMode===activeMode&&educationLoadedBounds&&educationLoadedBounds.contains(bounds)) return;
+    const requestedTypes=Object.keys(educationEnabled).filter(type=>educationEnabled[type]).sort();
+    if(!requestedTypes.length) return;
+    const requestedTypesKey=requestedTypes.join(',');
+    if(!educationError&&educationLoadedMode===activeMode&&educationLoadedTypes===requestedTypesKey&&educationLoadedBounds&&educationLoadedBounds.contains(bounds)) return;
     educationLoading=true;
     educationError='';
     updateLegend();
     try{
-      const query=educationQuery(bounds);
+      const query=educationQuery(bounds,requestedTypes);
       const endpoints=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
       let response=null;
       for(const endpoint of endpoints){
@@ -1854,10 +1859,12 @@
         marker.addTo(educationLayers[type]);
       });
       educationLoadedMode=activeMode;
+      educationLoadedTypes=requestedTypesKey;
       educationLoadedBounds=bounds;
     }catch(error){
       clearEducationLayers();
       educationLoadedMode=null;
+      educationLoadedTypes='';
       educationLoadedBounds=null;
       educationError='학교·병원 위치를 불러오지 못했습니다. 범례를 다시 눌러 재시도해 주세요.';
     }finally{
