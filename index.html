@@ -194,6 +194,16 @@
   .map-legend{ background:rgba(255,255,255,.97); border:1px solid var(--hw-border); border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.85; box-shadow:0 2px 10px rgba(0,0,0,.08); }
   .map-legend .sw{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px;}
   .map-legend .dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin:0 8px 0 2px; vertical-align:0; }
+  .education-controls{margin-top:8px;padding-top:8px;border-top:1px solid var(--hw-border)}
+  .education-controls strong{display:block;margin-bottom:5px;font-size:10px}
+  .education-toggle{display:flex;align-items:center;gap:6px;width:100%;border:0;background:transparent;border-radius:5px;padding:4px 5px;color:var(--hw-ink-soft);font:600 10px 'Pretendard',sans-serif;text-align:left;cursor:pointer}
+  .education-toggle:hover,.education-toggle.active{background:var(--hw-orange-light);color:var(--hw-ink)}
+  .education-toggle[aria-pressed="true"]{font-weight:750;color:var(--hw-ink)}
+  .education-symbol{display:inline-block;width:9px;height:9px;border-radius:50%;border:1px solid rgba(35,36,40,.32);flex:0 0 auto}
+  .education-symbol.primary{background:#3B82F6}.education-symbol.middle{background:#16A34A}.education-symbol.high{background:#9333EA}
+  .education-symbol.university{width:9px;height:9px;border-radius:2px;background:#1E3A8A;transform:rotate(45deg);margin:0 1px}
+  .education-note{display:block;margin-top:4px;color:var(--hw-ink-soft);font-size:9px;line-height:1.35}
+  .education-loading{color:#9E3500;font-size:9px}
   .admin-modal{ position:fixed; inset:0; z-index:5000; display:grid; place-items:center; padding:20px; background:rgba(20,22,26,.42); }
   .admin-modal[hidden]{ display:none; }
   .admin-dialog{ width:min(360px,100%); padding:20px; border:1px solid var(--hw-border); border-radius:12px; background:#fff; box-shadow:0 18px 60px rgba(0,0,0,.22); }
@@ -1275,6 +1285,9 @@
 
   /* ---------- MAP ---------- */
   const map = L.map('map',{scrollWheelZoom:true});
+  map.createPane('educationPane');
+  map.getPane('educationPane').style.zIndex='445';
+  map.getPane('educationPane').style.pointerEvents='auto';
   map.createPane('greenZonePane');
   map.getPane('greenZonePane').style.zIndex='410';
   map.getPane('greenZonePane').style.pointerEvents='none';
@@ -1704,19 +1717,128 @@
     calloutFrame=requestAnimationFrame(layoutCallouts);
   }
   map.on('move zoom resize',scheduleCalloutLayout);
+  map.on('moveend',()=>{if(activeMode!=='national'&&Object.values(educationEnabled).some(Boolean)) loadEducationForCurrentView();});
 
   let legendDiv;
   const legend=L.control({position:'topright'});
   legend.onAdd=()=>{legendDiv=L.DomUtil.create('div','map-legend');return legendDiv;};
   legend.addTo(map);
+
+  const educationTypes={
+    primary:{label:'초등학교',color:'#3B82F6'},
+    middle:{label:'중학교',color:'#16A34A'},
+    high:{label:'고등학교',color:'#9333EA'},
+    university:{label:'대학교',color:'#1E3A8A'}
+  };
+  const educationLayers=Object.fromEntries(Object.keys(educationTypes).map(type=>[type,L.layerGroup()]));
+  const educationEnabled={primary:false,middle:false,high:false,university:false};
+  let educationLoadedMode=null;
+  let educationLoadedBounds=null;
+  let educationLoading=false;
+
+  function classifyEducation(tags={}){
+    const name=String(tags.name||tags['name:ar']||tags['name:en']||'');
+    const amenity=String(tags.amenity||'').toLowerCase();
+    const level=String(tags['school:level']||tags.education||'').toLowerCase();
+    if(['university','college'].includes(amenity)||/جامعة|كلية|university|college/.test(name.toLowerCase())) return 'university';
+    if(/ابتدائية|ابتدائي|primary|elementary/.test((name+' '+level).toLowerCase())) return 'primary';
+    if(/متوسطة|متوسط|intermediate|middle/.test((name+' '+level).toLowerCase())) return 'middle';
+    if(/اعدادية|إعدادية|ثانوية|ثانوي|secondary|high school/.test((name+' '+level).toLowerCase())) return 'high';
+    return null;
+  }
+
+  function educationName(tags={}){
+    return tags['name:ko']||tags.name||tags['name:ar']||tags['name:en']||'교육시설';
+  }
+
+  function clearEducationLayers(){
+    Object.values(educationLayers).forEach(layer=>layer.clearLayers());
+  }
+
+  function setEducationLayerVisibility(){
+    Object.entries(educationLayers).forEach(([type,layer])=>{
+      const visible=activeMode!=='national'&&educationEnabled[type];
+      if(visible){if(!map.hasLayer(layer)) layer.addTo(map);}
+      else if(map.hasLayer(layer)) map.removeLayer(layer);
+    });
+  }
+
+  function educationQuery(bounds){
+    const south=bounds.getSouth(),west=bounds.getWest(),north=bounds.getNorth(),east=bounds.getEast();
+    const box=`${south},${west},${north},${east}`;
+    return `[out:json][timeout:25];(
+      node["amenity"~"school|university|college"](${box});
+      way["amenity"~"school|university|college"](${box});
+      relation["amenity"~"school|university|college"](${box});
+    );out center tags;`;
+  }
+
+  async function loadEducationForCurrentView(){
+    if(activeMode==='national'||educationLoading) return;
+    const bounds=map.getBounds().pad(.08);
+    if(educationLoadedMode===activeMode&&educationLoadedBounds&&educationLoadedBounds.contains(bounds)) return;
+    educationLoading=true;
+    updateLegend();
+    try{
+      const url='https://overpass-api.de/api/interpreter?data='+encodeURIComponent(educationQuery(bounds));
+      const response=await fetch(url,{cache:'no-store'});
+      if(!response.ok) throw new Error('education data unavailable');
+      const data=await response.json();
+      clearEducationLayers();
+      (data.elements||[]).forEach(element=>{
+        const tags=element.tags||{};
+        const type=classifyEducation(tags);
+        if(!type) return;
+        const lat=Number(element.lat??element.center?.lat),lng=Number(element.lon??element.center?.lon);
+        if(!Number.isFinite(lat)||!Number.isFinite(lng)) return;
+        const marker=type==='university'
+          ? L.marker([lat,lng],{pane:'educationPane',icon:L.divIcon({className:'education-marker',html:'<span class="education-symbol university"></span>',iconSize:[11,11],iconAnchor:[5.5,5.5]})})
+          : L.circleMarker([lat,lng],{pane:'educationPane',radius:4,color:educationTypes[type].color,weight:1,fillColor:educationTypes[type].color,fillOpacity:.9});
+        marker.bindTooltip(`${educationName(tags)} · ${educationTypes[type].label}`,{direction:'top',offset:[0,-4],opacity:.96});
+        marker.on('click',event=>L.DomEvent.stopPropagation(event));
+        marker.addTo(educationLayers[type]);
+      });
+      educationLoadedMode=activeMode;
+      educationLoadedBounds=bounds;
+    }catch(error){
+      clearEducationLayers();
+      educationLoadedMode=activeMode;
+      educationLoadedBounds=bounds;
+    }finally{
+      educationLoading=false;
+      setEducationLayerVisibility();
+      updateLegend();
+    }
+  }
+
+  function toggleEducationType(type){
+    educationEnabled[type]=!educationEnabled[type];
+    setEducationLayerVisibility();
+    if(educationEnabled[type]) loadEducationForCurrentView();
+    updateLegend();
+  }
+
+  function educationControlsHtml(){
+    if(activeMode==='national') return '';
+    const buttons=Object.entries(educationTypes).map(([type,item])=>`<button type="button" class="education-toggle${educationEnabled[type]?' active':''}" data-education-type="${type}" aria-pressed="${educationEnabled[type]}"><span class="education-symbol ${type}"></span>${item.label}</button>`).join('');
+    return `<div class="education-controls"><strong>교육시설 표시</strong>${buttons}${educationLoading?'<span class="education-loading">학교 위치 불러오는 중…</span>':'<span class="education-note">아이콘을 클릭하면 지도에 표시됩니다 · 자료: OpenStreetMap</span>'}</div>`;
+  }
+
+  function bindEducationControls(){
+    legendDiv.querySelectorAll('[data-education-type]').forEach(button=>{
+      button.addEventListener('click',()=>toggleEducationType(button.dataset.educationType));
+    });
+  }
+
   function updateLegend(){
     if(activeMode==='national'){
       legendDiv.innerHTML='<b>이라크 전체 주별 시세</b><br><span class="sw" style="background:#D94800"></span>고가 주 / 가격표<br><span class="sw" style="background:#FF8A3D"></span>중간 주 / 가격표<br><span class="sw" style="background:#FFC896"></span>저가 주 / 가격표<br><small>음영·테두리·연결선: Ibaity 단가 상대 비교</small>';
     }else if(activeMode==='region'){
-      legendDiv.innerHTML=`<b>지역 평균 단가 수준</b><br><span class="sw" style="background:#D94800"></span>상위 1/3<br><span class="sw" style="background:#FF8A3D"></span>중위 1/3<br><span class="sw" style="background:#FFC896"></span>하위 1/3<br><span class="sw" style="background:#C9CDD3"></span>시세 미확인<br><span class="sw" style="background:#149764;border:1px solid #075B40"></span>그린존<br>`;
+      legendDiv.innerHTML=`<b>지역 평균 단가 수준</b><br><span class="sw" style="background:#D94800"></span>상위 1/3<br><span class="sw" style="background:#FF8A3D"></span>중위 1/3<br><span class="sw" style="background:#FFC896"></span>하위 1/3<br><span class="sw" style="background:#C9CDD3"></span>시세 미확인<br><span class="sw" style="background:#149764;border:1px solid #075B40"></span>그린존<br>${educationControlsHtml()}`;
     }else{
-      legendDiv.innerHTML=`<b>단지 시세 · ${currencyMode.toUpperCase()}</b><br><span class="dot" style="background:#315EBA"></span>복수 매물 호가 중앙값<br><span class="dot" style="background:#1A8A3F"></span>비스마야 공식 분양가<br><small>카드에서 모든 원문 확인</small>`;
+      legendDiv.innerHTML=`<b>단지 시세 · ${currencyMode.toUpperCase()}</b><br><span class="dot" style="background:#315EBA"></span>복수 매물 호가 중앙값<br><span class="dot" style="background:#1A8A3F"></span>비스마야 공식 분양가<br><small>카드에서 모든 원문 확인</small>${educationControlsHtml()}`;
     }
+    bindEducationControls();
   }
 
   function updateCalloutTexts(){
@@ -1884,7 +2006,8 @@
       chartTitle.textContent='시세 확인 단지별 m² 단가 비교';
       map.fitBounds(complexBounds,{padding:[24,24]});
     }
-    renderList();renderChart();renderTrend();updateCalloutTexts();updateLegend();
+    renderList();renderChart();renderTrend();updateCalloutTexts();setEducationLayerVisibility();updateLegend();
+    if(activeMode!=='national'&&Object.values(educationEnabled).some(Boolean)) loadEducationForCurrentView();
     setTimeout(scheduleCalloutLayout,80);
   }
 
@@ -1900,7 +2023,7 @@
     document.body.classList.toggle('usd-active',mode==='usd');
     btnIqd.classList.toggle('active',mode==='iqd');btnUsd.classList.toggle('active',mode==='usd');
     btnIqd.setAttribute('aria-pressed',mode==='iqd');btnUsd.setAttribute('aria-pressed',mode==='usd');
-    renderList();renderChart();updateCalloutTexts();updateNationalMarkerTexts();updateLegend();scheduleCalloutLayout();
+    renderList();renderChart();updateCalloutTexts();updateNationalMarkerTexts();setEducationLayerVisibility();updateLegend();scheduleCalloutLayout();
   }
   btnIqd.addEventListener('click',()=>setCurrency('iqd'));
   btnUsd.addEventListener('click',()=>setCurrency('usd'));
