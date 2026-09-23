@@ -917,9 +917,12 @@
   function nationalCalloutPrice(d){
     return currencyMode==='iqd' ? `${Math.round(d.usd*RATE).toLocaleString()} IQD` : `$${d.usd.toLocaleString()}`;
   }
-  function compactPopulation(value){
+  function populationLabel(value){
     if(!Number.isFinite(value)) return '인구 확인 중';
-    return `인구 ${Math.round(value/10000).toLocaleString()}만명`;
+    return `${Math.round(value/10000).toLocaleString()}만명`;
+  }
+  function compactPopulation(value){
+    return `인구 ${populationLabel(value)}`;
   }
   function tierForComplex(item){ if(!hasPrice(item)) return 'pending'; return item.iqd>=2300000 ? 'high' : item.iqd>=1600000 ? 'mid' : 'low'; }
   function tierForDistrict(item){
@@ -976,24 +979,24 @@
   // Ibaity statistics page, 2026-09-15. Values are the midpoint of the
   // published high/low USD per-m² range, matching the site's displayed rate.
   const nationalGovernorates = [
-    {key:'muthanna',nameKr:'무탄나',nameAr:'المثنى',city:'사마와',usd:507,count:170,change:-4.52,population:1043087,coords:[31.3182,45.2805]},
-    {key:'duhok',nameKr:'두호크',nameAr:'دهوك',city:'두호크',usd:667,count:2,change:0,population:1599871,coords:[36.8663,42.9978]},
-    {key:'basra',nameKr:'바스라',nameAr:'بصرة',city:'바스라',usd:1201,count:280,change:-20.53,population:3664168,coords:[30.5085,47.7804]},
-    {key:'karbala',nameKr:'카르발라',nameAr:'كربلاء',city:'카르발라',usd:1131,count:122,change:-20.38,population:1754065,coords:[32.6160,44.0249]},
-    {key:'diwaniyah',nameKr:'디와니야',nameAr:'الديوانية',city:'디와니야',usd:500,count:145,change:-13.84,population:1477310,coords:[31.9929,44.9255]},
-    {key:'erbil',nameKr:'에르빌',nameAr:'اربيل',city:'에르빌',usd:795,count:1308,change:-1.18,population:2517534,coords:[36.1911,44.0092]},
-    {key:'babel',nameKr:'바빌',nameAr:'بابل',city:'힐라',usd:638,count:70,change:-15.67,population:2482324,coords:[32.4637,44.4200]},
-    {key:'wasit',nameKr:'와시트',nameAr:'واسط',city:'쿠트',usd:550,count:81,change:3.01,population:1643406,coords:[32.5128,45.8182]},
-    {key:'nineveh',nameKr:'니나와',nameAr:'نينوى',city:'모술',usd:931,count:411,change:5.22,population:4261980,coords:[36.3350,43.1189]},
-    {key:'diyala',nameKr:'디얄라',nameAr:'ديالى',city:'바쿠바',usd:380,count:57,change:-7.64,population:1934504,coords:[33.7481,44.6330]},
-    {key:'salahaddin',nameKr:'살라흐 앗 딘',nameAr:'صلاح الدين',city:'티크리트',usd:513,count:242,change:-4.68,population:1774542,coords:[34.5970,43.6760]},
-    {key:'sulaymaniyah',nameKr:'술라이마니야',nameAr:'السليمانية',city:'술라이마니야',usd:742,count:33,change:-12.37,population:2401724,coords:[35.5613,45.4306]},
-    {key:'anbar',nameKr:'안바르',nameAr:'الانبار',city:'라마디',usd:600,count:587,change:-11.63,population:2004418,coords:[33.4250,43.2990]},
-    {key:'kirkuk',nameKr:'키르쿠크',nameAr:'كركوك',city:'키르쿠크',usd:585,count:239,change:-7.74,population:2034627,coords:[35.4681,44.3922]},
-    {key:'dhi_qar',nameKr:'디카르',nameAr:'ذي قار',city:'나시리야',usd:874,count:195,change:-7.72,population:2499468,coords:[31.0439,46.2573]},
-    {key:'najaf',nameKr:'나자프',nameAr:'النجف',city:'나자프',usd:1003,count:115,change:6.40,population:1950833,coords:[31.9996,44.3267]},
-    {key:'maysan',nameKr:'마이산',nameAr:'ميسان',city:'아마라',usd:609,count:45,change:0,population:1294503,coords:[31.8356,47.1448]},
-    {key:'baghdad',nameKr:'바그다드',nameAr:'بغداد',city:'바그다드',usd:1820,count:389,change:-29.70,population:9780429,coords:[33.3152,44.3661]}
+    {key:'muthanna',nameKr:'무탄나',nameAr:'المثنى',city:'사마와',usd:507,count:170,change:-4.52,population:1043087,avgHouseholdSize:6.68,housingPer1000:155,coords:[31.3182,45.2805]},
+    {key:'duhok',nameKr:'두호크',nameAr:'دهوك',city:'두호크',usd:667,count:2,change:0,population:1599871,avgHouseholdSize:6.06,housingPer1000:171,coords:[36.8663,42.9978]},
+    {key:'basra',nameKr:'바스라',nameAr:'بصرة',city:'바스라',usd:1201,count:280,change:-20.53,population:3664168,avgHouseholdSize:6.2,housingPer1000:167,coords:[30.5085,47.7804]},
+    {key:'karbala',nameKr:'카르발라',nameAr:'كربلاء',city:'카르발라',usd:1131,count:122,change:-20.38,population:1754065,avgHouseholdSize:5.71,housingPer1000:181,coords:[32.6160,44.0249]},
+    {key:'diwaniyah',nameKr:'디와니야',nameAr:'الديوانية',city:'디와니야',usd:500,count:145,change:-13.84,population:1477310,avgHouseholdSize:6.19,housingPer1000:167,coords:[31.9929,44.9255]},
+    {key:'erbil',nameKr:'에르빌',nameAr:'اربيل',city:'에르빌',usd:795,count:1308,change:-1.18,population:2517534,avgHouseholdSize:4.67,housingPer1000:222,coords:[36.1911,44.0092]},
+    {key:'babel',nameKr:'바빌',nameAr:'بابل',city:'힐라',usd:638,count:70,change:-15.67,population:2482324,avgHouseholdSize:5.95,housingPer1000:174,coords:[32.4637,44.4200]},
+    {key:'wasit',nameKr:'와시트',nameAr:'واسط',city:'쿠트',usd:550,count:81,change:3.01,population:1643406,avgHouseholdSize:6.22,housingPer1000:166,coords:[32.5128,45.8182]},
+    {key:'nineveh',nameKr:'니나와',nameAr:'نينوى',city:'모술',usd:931,count:411,change:5.22,population:4261980,avgHouseholdSize:6.46,housingPer1000:160,coords:[36.3350,43.1189]},
+    {key:'diyala',nameKr:'디얄라',nameAr:'ديالى',city:'바쿠바',usd:380,count:57,change:-7.64,population:1934504,avgHouseholdSize:5.83,housingPer1000:178,coords:[33.7481,44.6330]},
+    {key:'salahaddin',nameKr:'살라흐 앗 딘',nameAr:'صلاح الدين',city:'티크리트',usd:513,count:242,change:-4.68,population:1774542,avgHouseholdSize:6.43,housingPer1000:161,coords:[34.5970,43.6760]},
+    {key:'sulaymaniyah',nameKr:'술라이마니야',nameAr:'السليمانية',city:'술라이마니야',usd:742,count:33,change:-12.37,population:2401724,avgHouseholdSize:4.25,housingPer1000:244,coords:[35.5613,45.4306]},
+    {key:'anbar',nameKr:'안바르',nameAr:'الانبار',city:'라마디',usd:600,count:587,change:-11.63,population:2004418,avgHouseholdSize:6.75,housingPer1000:153,coords:[33.4250,43.2990]},
+    {key:'kirkuk',nameKr:'키르쿠크',nameAr:'كركوك',city:'키르쿠크',usd:585,count:239,change:-7.74,population:2034627,avgHouseholdSize:5.15,housingPer1000:201,coords:[35.4681,44.3922]},
+    {key:'dhi_qar',nameKr:'디카르',nameAr:'ذي قار',city:'나시리야',usd:874,count:195,change:-7.72,population:2499468,avgHouseholdSize:6.59,housingPer1000:157,coords:[31.0439,46.2573]},
+    {key:'najaf',nameKr:'나자프',nameAr:'النجف',city:'나자프',usd:1003,count:115,change:6.40,population:1950833,avgHouseholdSize:5.68,housingPer1000:182,coords:[31.9996,44.3267]},
+    {key:'maysan',nameKr:'마이산',nameAr:'ميسان',city:'아마라',usd:609,count:45,change:0,population:1294503,avgHouseholdSize:6.58,housingPer1000:157,coords:[31.8356,47.1448]},
+    {key:'baghdad',nameKr:'바그다드',nameAr:'بغداد',city:'바그다드',usd:1820,count:389,change:-29.70,population:9780429,avgHouseholdSize:5.54,housingPer1000:187,coords:[33.3152,44.3661]}
   ];
 
   const listEl = document.getElementById('district-list');
@@ -1032,7 +1035,7 @@
         const row=document.createElement('div'); row.className='district-row'; row.dataset.key=d.key;
         const primary=currencyMode==='usd'?`$${d.usd.toLocaleString()}`:`${Math.round(d.usd*RATE).toLocaleString()} IQD`;
         const secondary=currencyMode==='usd'?`${Math.round(d.usd*RATE).toLocaleString()} IQD`:`$${d.usd.toLocaleString()}`;
-        row.innerHTML=`<div class="rank">${String(i+1).padStart(2,'0')}</div><div class="district-info"><span class="name-kr">${d.nameKr}</span><span class="name-en">${d.nameAr}</span><div class="meta-line">${compactPopulation(d.population)} · 표본 ${d.count.toLocaleString()}건 · 전월 대비 변동 ${d.change>0?'+':''}${d.change.toFixed(2)}%</div></div><div class="district-price"><div class="usd">${primary}</div><div class="iqd">${secondary}</div></div>`;
+        row.innerHTML=`<div class="rank">${String(i+1).padStart(2,'0')}</div><div class="district-info"><span class="name-kr">${d.nameKr}(${populationLabel(d.population)})</span><span class="name-en">${d.nameAr}</span><div class="meta-line">평균 가구원수 ${d.avgHouseholdSize.toFixed(2)}명 · 천인당 주택수 ${d.housingPer1000.toLocaleString()}호(추정)</div></div><div class="district-price"><div class="usd">${primary}</div><div class="iqd">${secondary}</div></div>`;
         row.addEventListener('click',()=>selectGovernorate(d.key)); listEl.appendChild(row);
       });
       return;
