@@ -20,7 +20,7 @@ jobs:
       - name: Fetch Baghdad facilities from OpenStreetMap
         run: |
           python - <<'PY'
-          import datetime, json, urllib.parse, urllib.request
+          import datetime, json, os, shutil, time, urllib.parse, urllib.request
           query = r'''[out:json][timeout:60];(
             node["amenity"~"school|university|college|hospital|clinic|doctors"](33.00,44.20,33.65,44.90);
             way["amenity"~"school|university|college|hospital|clinic|doctors"](33.00,44.20,33.65,44.90);
@@ -30,18 +30,28 @@ jobs:
           endpoints = [
               "https://overpass-api.de/api/interpreter",
               "https://overpass.kumi.systems/api/interpreter",
+              "https://overpass.private.coffee/api/interpreter",
           ]
           data = None
-          for endpoint in endpoints:
-              try:
-                  body = urllib.parse.urlencode({"data": query}).encode()
-                  request = urllib.request.Request(endpoint, data=body, headers={"Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json", "User-Agent": "sultjung-Sise-facility-updater/1.0"})
-                  with urllib.request.urlopen(request, timeout=75) as response:
-                      data = json.load(response)
+          for attempt in range(1, 4):
+              for endpoint in endpoints:
+                  try:
+                      body = urllib.parse.urlencode({"data": query}).encode()
+                      request = urllib.request.Request(endpoint, data=body, headers={"Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json", "User-Agent": "sultjung-Sise-facility-updater/1.0"})
+                      with urllib.request.urlopen(request, timeout=210) as response:
+                          data = json.load(response)
+                      if data.get("elements") is not None:
+                          break
+                  except Exception as error:
+                      print(f"Attempt {attempt}: {endpoint} failed: {error}")
+              if data is not None:
                   break
-              except Exception as error:
-                  print(f"{endpoint} failed: {error}")
+              time.sleep(5)
           if data is None:
+              if os.path.exists("data/facilities.json"):
+                  shutil.copyfile("data/facilities.json", "/tmp/facilities.json")
+                  print("Overpass unavailable; keeping the existing facility cache.")
+                  raise SystemExit(0)
               raise SystemExit("No Overpass endpoint returned facility data")
           payload = {
               "version": 1,
