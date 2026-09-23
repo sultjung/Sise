@@ -1747,11 +1747,10 @@
     middle:{label:'중학교',color:'#0F9D8A'},
     high:{label:'고등학교',color:'#7C3AED'},
     university:{label:'대학교',color:'#1E3A5F'},
-    unknown:{label:'학교(구분 미상)',color:'#64748B'},
     hospital:{label:'병원',color:'#16A34A'}
   };
   const educationLayers=Object.fromEntries(Object.keys(educationTypes).map(type=>[type,L.layerGroup()]));
-  const educationEnabled={primary:false,middle:false,high:false,university:false,unknown:false,hospital:false};
+  const educationEnabled={primary:false,middle:false,high:false,university:false,hospital:false};
   let educationLoadedMode=null;
   let educationLoadedBounds=null;
   let educationLoading=false;
@@ -1767,18 +1766,17 @@
     if(/ابتدائية|ابتدائي|primary|elementary|basic/.test((name+' '+level).toLowerCase())) return 'primary';
     if(/متوسطة|متوسط|intermediate|middle/.test((name+' '+level).toLowerCase())) return 'middle';
     if(/اعدادية|إعدادية|ثانوية|ثانوي|secondary|high school|preparatory/.test((name+' '+level).toLowerCase())) return 'high';
-    if(amenity==='school'||tags['building']==='school'||tags['school:level']) return 'unknown';
     return null;
   }
   function escapeEducationText(value){
     return String(value||'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   }
   function educationName(tags={},type){
-    const english=tags['name:en']||tags['official_name:en']||tags.name_en;
+    const english=String(tags['name:en']||tags['official_name:en']||tags.name_en||'').trim();
     const raw=String(tags.name||'').trim();
-    const latinRaw=raw&&!/[\\u0600-\\u06FF]/.test(raw)?raw:'';
-    const fallback={primary:'Primary School',middle:'Middle School',high:'High School',university:'University',unknown:'School (level unknown)',hospital:'Hospital'};
-    return String(english||latinRaw||'').trim()||fallback[type]||'Education facility';
+    const latinRaw=raw.replace(/[^\\x00-\\x7F]/g,' ').replace(/\\s+/g,' ').trim();
+    const fallback={primary:'Primary School',middle:'Middle School',high:'High School',university:'University',hospital:'Hospital'};
+    return english||latinRaw||fallback[type]||'Education Facility';
   }
   function clearEducationLayers(){
     Object.values(educationLayers).forEach(layer=>layer.clearLayers());
@@ -1796,12 +1794,31 @@
     const south=bounds.getSouth(),west=bounds.getWest(),north=bounds.getNorth(),east=bounds.getEast();
     const box=`${south},${west},${north},${east}`;
     const clauses=[];
-    if(types.some(type=>['primary','middle','high','unknown'].includes(type))){
+    if(types.some(type=>['primary','middle','high'].includes(type))){
       clauses.push(`node["amenity"="school"](${box});`,`way["amenity"="school"](${box});`,`node["school:level"](${box});`,`way["school:level"](${box});`);
     }
     if(types.includes('university')) clauses.push(`node["amenity"~"university|college"](${box});`,`way["amenity"~"university|college"](${box});`);
     if(types.includes('hospital')) clauses.push(`node["amenity"~"hospital|clinic|doctors"](${box});`,`way["amenity"~"hospital|clinic|doctors"](${box});`);
     return `[out:json][timeout:8];(${clauses.join('')});out center tags qt;`;
+  }
+
+  const EDUCATION_CACHE_KEY='sise-education-cache-v1';
+  function readEducationCache(){
+    try{return JSON.parse(localStorage.getItem(EDUCATION_CACHE_KEY)||'{}');}catch(error){return {};}
+  }
+  function cachedEducationElements(mode,bounds,types){
+    const entry=readEducationCache()[mode];
+    if(!entry||!Array.isArray(entry.elements)||!Array.isArray(entry.bounds)||!Array.isArray(entry.types)) return null;
+    if(!types.every(type=>entry.types.includes(type))) return null;
+    const cachedBounds=L.latLngBounds([[entry.bounds[0],entry.bounds[1]],[entry.bounds[2],entry.bounds[3]]]);
+    return cachedBounds.contains(bounds)?entry.elements:null;
+  }
+  function saveEducationCache(mode,bounds,types,elements){
+    try{
+      const cache=readEducationCache();
+      cache[mode]={savedAt:Date.now(),types,bounds:[bounds.getSouth(),bounds.getWest(),bounds.getNorth(),bounds.getEast()],elements};
+      localStorage.setItem(EDUCATION_CACHE_KEY,JSON.stringify(cache));
+    }catch(error){ /* storage quota or private mode */ }
   }
 
   async function loadEducationForCurrentView(){
@@ -1815,21 +1832,26 @@
     educationError='';
     updateLegend();
     try{
-      const query=educationQuery(bounds,requestedTypes);
-      const endpoints=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
-      let response=null;
-      for(const endpoint of endpoints){
-        try{
-          const controller=new AbortController();
-          const timeout=setTimeout(()=>controller.abort(),8000);
+      let elements=cachedEducationElements(activeMode,bounds,requestedTypes);
+      if(!elements){
+        const query=educationQuery(bounds,requestedTypes);
+        const endpoints=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
+        let response=null;
+        for(const endpoint of endpoints){
           try{
-            const candidate=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:'data='+encodeURIComponent(query),cache:'no-store',signal:controller.signal});
-            if(candidate.ok){response=candidate;break;}
-          }finally{clearTimeout(timeout);}
-        }catch(error){ /* try next endpoint */ }
+            const controller=new AbortController();
+            const timeout=setTimeout(()=>controller.abort(),8000);
+            try{
+              const candidate=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:'data='+encodeURIComponent(query),cache:'no-store',signal:controller.signal});
+              if(candidate.ok){response=candidate;break;}
+            }finally{clearTimeout(timeout);}
+          }catch(error){ /* try next endpoint */ }
+        }
+        if(!response) throw new Error('facility data unavailable');
+        const data=await response.json();
+        elements=data.elements||[];
+        saveEducationCache(activeMode,bounds,requestedTypes,elements);
       }
-      if(!response) throw new Error('facility data unavailable');
-      const data=await response.json();
       clearEducationLayers();
       const elements=data.elements||[];
       const parentUniversities=elements.map(element=>{
