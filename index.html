@@ -1763,7 +1763,8 @@
   }
   function educationName(tags={},type){
     const english=tags['name:en']||tags['official_name:en']||tags.name_en;
-    return String(english||'').trim()||educationTypes[type]?.label||'Education facility';
+    const fallback={primary:'Primary School',middle:'Middle School',high:'High School',university:'University'};
+    return String(english||'').trim()||fallback[type]||'Education facility';
   }
 
   function clearEducationLayers(){
