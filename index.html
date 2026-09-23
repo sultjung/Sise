@@ -124,6 +124,7 @@
   .rank{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--hw-ink-soft); padding-top:2px;}
   .district-info .name-kr{ font-size:13px; font-weight:700; }
   .district-info .name-en{ font-size:10.2px; color:var(--hw-ink-soft); font-family:'IBM Plex Mono',monospace; margin-left:6px; }
+  .district-info .population-label{ font-size:12px; font-weight:400; color:var(--hw-ink-soft); margin-left:2px; }
   .district-info .complex{ font-size:11px; color:var(--hw-orange); margin-top:3px; font-weight:600; }
   .property-note{ margin-top:3px; color:#8B6A4C; font-size:9.4px; font-weight:650; letter-spacing:-.1px; }
   .property-note::before{ content:'※ '; color:var(--hw-orange); }
@@ -1035,7 +1036,7 @@
         const row=document.createElement('div'); row.className='district-row'; row.dataset.key=d.key;
         const primary=currencyMode==='usd'?`$${d.usd.toLocaleString()}`:`${Math.round(d.usd*RATE).toLocaleString()} IQD`;
         const secondary=currencyMode==='usd'?`${Math.round(d.usd*RATE).toLocaleString()} IQD`:`$${d.usd.toLocaleString()}`;
-        row.innerHTML=`<div class="rank">${String(i+1).padStart(2,'0')}</div><div class="district-info"><span class="name-kr">${d.nameKr}(${populationLabel(d.population)})</span><span class="name-en">${d.nameAr}</span><div class="meta-line">평균 가구원수 ${d.avgHouseholdSize.toFixed(2)}명 · 천인당 주택수 ${d.housingPer1000.toLocaleString()}호(추정)</div></div><div class="district-price"><div class="usd">${primary}</div><div class="iqd">${secondary}</div></div>`;
+        row.innerHTML=`<div class="rank">${String(i+1).padStart(2,'0')}</div><div class="district-info"><span class="name-kr">${d.nameKr}<span class="population-label">(${populationLabel(d.population)})</span></span><span class="name-en">${d.nameAr}</span><div class="meta-line">평균 가구원수 ${d.avgHouseholdSize.toFixed(2)}명 · 천인당 주택수 ${d.housingPer1000.toLocaleString()}호(추정)</div></div><div class="district-price"><div class="usd">${primary}</div><div class="iqd">${secondary}</div></div>`;
         row.addEventListener('click',()=>selectGovernorate(d.key)); listEl.appendChild(row);
       });
       return;
