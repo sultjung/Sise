@@ -58,5 +58,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git rebase origin/main
           git add data/facilities.json
-          git diff --cached --quiet || (git commit -m "Update facility map data" && git push)
+          git diff --cached --quiet || (git commit -m "Update facility map data" && git push origin HEAD:main)
