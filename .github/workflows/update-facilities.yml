@@ -1,0 +1,61 @@
+name: Update facility map data
+
+on:
+  push:
+    paths:
+      - ".github/workflows/update-facilities.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "17 2 * * 1"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch Baghdad facilities from OpenStreetMap
+        run: |
+          python - <<'PY'
+          import datetime, json, urllib.parse, urllib.request
+          query = r'''[out:json][timeout:60];(
+            node["amenity"~"school|university|college|hospital|clinic|doctors"](33.00,44.20,33.65,44.90);
+            way["amenity"~"school|university|college|hospital|clinic|doctors"](33.00,44.20,33.65,44.90);
+            node["school:level"](33.00,44.20,33.65,44.90);
+            way["school:level"](33.00,44.20,33.65,44.90);
+          );out center tags qt;'''
+          endpoints = [
+              "https://overpass-api.de/api/interpreter",
+              "https://overpass.kumi.systems/api/interpreter",
+          ]
+          data = None
+          for endpoint in endpoints:
+              try:
+                  body = urllib.parse.urlencode({"data": query}).encode()
+                  request = urllib.request.Request(endpoint, data=body, headers={"Content-Type": "application/x-www-form-urlencoded"})
+                  with urllib.request.urlopen(request, timeout=75) as response:
+                      data = json.load(response)
+                  break
+              except Exception as error:
+                  print(f"{endpoint} failed: {error}")
+          if data is None:
+              raise SystemExit("No Overpass endpoint returned facility data")
+          payload = {
+              "version": 1,
+              "source": "OpenStreetMap Overpass API",
+              "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              "bbox": [33.00, 44.20, 33.65, 44.90],
+              "elements": data.get("elements", [])
+          }
+          with open("data/facilities.json", "w", encoding="utf-8") as file:
+              json.dump(payload, file, ensure_ascii=False, separators=(",", ":"))
+          print(f"Saved {len(payload['elements'])} facilities")
+          PY
+      - name: Commit updated facility data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/facilities.json
+          git diff --cached --quiet || (git commit -m "Update facility map data" && git push)
