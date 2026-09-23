@@ -1787,19 +1787,17 @@
   function educationQuery(bounds){
     const south=bounds.getSouth(),west=bounds.getWest(),north=bounds.getNorth(),east=bounds.getEast();
     const box=`${south},${west},${north},${east}`;
-    return `[out:json][timeout:25];(
+    return `[out:json][timeout:8];(
       node["amenity"~"school|university|college|hospital|clinic|doctors"](${box});
       way["amenity"~"school|university|college|hospital|clinic|doctors"](${box});
-      relation["amenity"~"school|university|college|hospital|clinic|doctors"](${box});
       node["school:level"](${box});
       way["school:level"](${box});
-      way["building"="school"](${box});
-    );out center tags;`;
+    );out center tags qt;`;
   }
 
   async function loadEducationForCurrentView(){
     if(activeMode==='national'||educationLoading) return;
-    const bounds=map.getBounds().pad(.08);
+    const bounds=map.getBounds();
     if(!educationError&&educationLoadedMode===activeMode&&educationLoadedBounds&&educationLoadedBounds.contains(bounds)) return;
     educationLoading=true;
     educationError='';
@@ -1810,8 +1808,12 @@
       let response=null;
       for(const endpoint of endpoints){
         try{
-          const candidate=await fetch(endpoint+query,{cache:'no-store'});
-          if(candidate.ok){response=candidate;break;}
+          const controller=new AbortController();
+          const timeout=setTimeout(()=>controller.abort(),8000);
+          try{
+            const candidate=await fetch(endpoint+query,{cache:'no-store',signal:controller.signal});
+            if(candidate.ok){response=candidate;break;}
+          }finally{clearTimeout(timeout);}
         }catch(error){ /* try next endpoint */ }
       }
       if(!response) throw new Error('facility data unavailable');
