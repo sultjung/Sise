@@ -1853,7 +1853,6 @@
         saveEducationCache(activeMode,bounds,requestedTypes,elements);
       }
       clearEducationLayers();
-      const elements=data.elements||[];
       const parentUniversities=elements.map(element=>{
         const tags=element.tags||{},type=classifyEducation(tags);
         const name=educationName(tags,type);
