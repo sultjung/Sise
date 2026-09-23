@@ -171,7 +171,8 @@
   .region-label{ min-width:78px; font-family:'Pretendard',sans-serif; text-align:center; background:rgba(255,255,255,.96); border:1px solid var(--pin-color); border-radius:6px; padding:5px 8px; box-shadow:0 1px 5px rgba(0,0,0,.2); white-space:nowrap; line-height:1.15; transition:.15s; }
   .region-label .name{ display:block; font-weight:750; font-size:10.5px; letter-spacing:-.1px; color:#232428; }
   .region-callout.national .region-label{ min-width:104px; width:max-content; padding:6px 8px; }
-  .region-callout.national .region-label .name{ font-size:16px; font-weight:850; letter-spacing:-.45px; line-height:1.08; }
+  .region-callout.national .region-label .name{ display:flex; align-items:baseline; justify-content:center; gap:3px; font-size:16px; font-weight:850; letter-spacing:-.45px; line-height:1.08; }
+  .region-callout.national .region-label .name small{ font-size:9.5px; font-weight:500; letter-spacing:-.2px; color:var(--hw-ink-soft); }
     .region-callout.national .region-label .price{ margin-top:4px; font-size:14.5px; }
   .region-label .name small{ font-size:8.7px; font-weight:600; color:var(--hw-ink-soft); }
   .region-label .price{ display:block; margin-top:3px; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:14.5px; line-height:1.2; color:#9E3500; }
@@ -1478,8 +1479,8 @@
     const halo=L.polyline([d.coords,[d.coords[0]+.005,d.coords[1]+.005]],{color:'#fff',weight:5.5,opacity:.88,interactive:false,className:'region-leader-halo'}).addTo(nationalLayerGroup);
     const leader=L.polyline([d.coords,[d.coords[0]+.005,d.coords[1]+.005]],{color:'#374151',weight:2.2,opacity:.94,interactive:false,className:'region-leader'}).addTo(nationalLayerGroup);
     const anchor=L.circleMarker(d.coords,{radius:4.5,color:'#374151',weight:2.3,fillColor:'#fff',fillOpacity:1,interactive:true}).addTo(nationalLayerGroup);
-    const icon=L.divIcon({className:'price-callout-icon',html:`<div class="region-callout national" id="lbl-national-${d.key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${d.nameKr}</span><span class="callout-prices"><span class="price">${nationalCalloutPrice(d)}</span></span></div></div>`,iconSize:[1,1],iconAnchor:[0,0]});
-    const marker=L.marker(d.coords,{icon,keyboard:true,draggable:true,title:`${d.nameKr} · ${nationalCalloutPrice(d)}/m²`}).addTo(nationalLayerGroup);
+    const icon=L.divIcon({className:'price-callout-icon',html:`<div class="region-callout national" id="lbl-national-${d.key}" style="--pin-color:${color}"><div class="region-label"><span class="name">${d.nameKr}<small>· ${populationLabel(d.population)}</small></span><span class="callout-prices"><span class="price">${nationalCalloutPrice(d)}</span></span></div></div>`,iconSize:[1,1],iconAnchor:[0,0]});
+    const marker=L.marker(d.coords,{icon,keyboard:true,draggable:true,title:`${d.nameKr} · ${populationLabel(d.population)} · ${nationalCalloutPrice(d)}/m²`}).addTo(nationalLayerGroup);
     if(marker.dragging) marker.dragging.disable();
     const select=()=>selectGovernorate(d.key);
     marker.on('click',select); anchor.on('click',select);
