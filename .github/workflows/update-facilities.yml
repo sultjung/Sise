@@ -1,4 +1,5 @@
 name: Update facility map data
+# Facility data is refreshed automatically.
 
 on:
   push:
