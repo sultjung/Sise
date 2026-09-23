@@ -1747,10 +1747,11 @@
     middle:{label:'중학교',color:'#0F9D8A'},
     high:{label:'고등학교',color:'#7C3AED'},
     university:{label:'대학교',color:'#1E3A5F'},
+    unknown:{label:'School',color:'#64748B'},
     hospital:{label:'병원',color:'#16A34A'}
   };
   const educationLayers=Object.fromEntries(Object.keys(educationTypes).map(type=>[type,L.layerGroup()]));
-  const educationEnabled={primary:false,middle:false,high:false,university:false,hospital:false};
+  const educationEnabled={primary:false,middle:false,high:false,university:false,unknown:false,hospital:false};
   let educationLoadedMode=null;
   let educationLoadedBounds=null;
   let educationLoading=false;
@@ -1766,17 +1767,32 @@
     if(/ابتدائية|ابتدائي|primary|elementary|basic/.test((name+' '+level).toLowerCase())) return 'primary';
     if(/متوسطة|متوسط|intermediate|middle/.test((name+' '+level).toLowerCase())) return 'middle';
     if(/اعدادية|إعدادية|ثانوية|ثانوي|secondary|high school|preparatory/.test((name+' '+level).toLowerCase())) return 'high';
+    if(amenity==='school'||tags['building']==='school'||tags['school:level']) return 'unknown';
     return null;
+  }
+  function educationIconSvg(type,mode='map'){
+    const size=mode==='legend'?12:9;
+    if(type==='hospital') return `<svg class="education-svg hospital" width="${size}" height="${size}" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#16A34A"/><path d="M7 3h2v4h4v2H9v4H7V9H3V7h4z" fill="#fff"/></svg>`;
+    if(type==='university') return `<svg class="education-svg university" width="${size}" height="${size}" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 15 5 8 8 1 5zM3 7v4l5 3 5-3V7L8 10z" fill="#1E3A5F"/><path d="M2 14h12" stroke="#1E3A5F" stroke-width="2"/></svg>`;
+    const color=educationTypes[type]?.color||'#64748B';
+    return `<svg class="education-svg school" width="${size}" height="${size}" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 7 8 1l7 6v8H1z" fill="${color}"/><path d="M5 9h2v6H5zm4 0h2v6H9zM3 7h10v2H3z" fill="#fff"/></svg>`;
   }
   function escapeEducationText(value){
     return String(value||'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   }
+  function arabicToLatin(value){
+    const map={ا:'a',أ:'a',إ:'i',آ:'a',ب:'b',ت:'t',ث:'th',ج:'j',ح:'h',خ:'kh',د:'d',ذ:'dh',ر:'r',ز:'z',س:'s',ش:'sh',ص:'s',ض:'d',ط:'t',ظ:'z',ع:'a',غ:'gh',ف:'f',ق:'q',ك:'k',ل:'l',م:'m',ن:'n',ه:'h',و:'w',ي:'y',ى:'a',ة:'a',ء:'',ؤ:'w',ئ:'y',ﻻ:'la'};
+    const terms=[['المدرسة','School'],['مدرسة','School'],['جامعة','University'],['كلية','College'],['مستشفى','Hospital'],['مستوصف','Clinic'],['ابتدائية','Primary School'],['متوسطة','Middle School'],['إعدادية','High School'],['اعدادية','High School'],['ثانوية','High School']];
+    let text=String(value||'').trim();
+    terms.forEach(([from,to])=>{text=text.replaceAll(from,' '+to+' ');});
+    return text.split('').map(char=>map[char]??char).join('').replace(/[^A-Za-z0-9&'().,\-/ ]/g,' ').replace(/\s+/g,' ').trim();
+  }
   function educationName(tags={},type){
     const english=String(tags['name:en']||tags['official_name:en']||tags.name_en||'').trim();
     const raw=String(tags.name||'').trim();
-    const latinRaw=raw.replace(/[^\\x00-\\x7F]/g,' ').replace(/\\s+/g,' ').trim();
-    const fallback={primary:'Primary School',middle:'Middle School',high:'High School',university:'University',hospital:'Hospital'};
-    return english||latinRaw||fallback[type]||'Education Facility';
+    const latinRaw=raw&&!/[\\u0600-\\u06FF]/.test(raw)?raw:'';
+    const fallback={primary:'Primary School',middle:'Middle School',high:'High School',university:'University',unknown:'School',hospital:'Hospital'};
+    return english||latinRaw||arabicToLatin(raw)||fallback[type]||'Education Facility';
   }
   function clearEducationLayers(){
     Object.values(educationLayers).forEach(layer=>layer.clearLayers());
@@ -1784,7 +1800,8 @@
 
   function setEducationLayerVisibility(){
     Object.entries(educationLayers).forEach(([type,layer])=>{
-      const visible=activeMode!=='national'&&educationEnabled[type];
+      const schoolEnabled=educationEnabled.primary||educationEnabled.middle||educationEnabled.high;
+      const visible=activeMode!=='national'&&(educationEnabled[type]||(type==='unknown'&&schoolEnabled));
       if(visible){if(!map.hasLayer(layer)) layer.addTo(map);}
       else if(map.hasLayer(layer)) map.removeLayer(layer);
     });
@@ -1873,7 +1890,7 @@
         seen.add(key);
         const marker=L.marker([lat,lng],{pane:'educationPane',icon:L.divIcon({
           className:'facility-marker',
-          html:type==='hospital'?'<span class="facility-map-symbol hospital"></span>':type==='university'?'<span class="facility-map-symbol university"></span>':`<span class="facility-map-symbol school ${type}"></span>`,
+          html:educationIconSvg(type,'map'),
           iconSize:[14,14],iconAnchor:[7,7]
         })});
         marker.bindTooltip(displayName,{direction:'top',offset:[0,-4],opacity:.96});
@@ -1906,7 +1923,7 @@
 
   function educationControlsHtml(){
     if(activeMode==='national') return '';
-    const buttons=Object.entries(educationTypes).map(([type,item])=>`<button type="button" class="education-toggle${educationEnabled[type]?' active':''}" data-education-type="${type}" aria-pressed="${educationEnabled[type]}"><span class="education-symbol ${type}"></span>${item.label}</button>`).join('');
+    const buttons=Object.entries(educationTypes).filter(([type])=>type!=='unknown').map(([type,item])=>`<button type="button" class="education-toggle${educationEnabled[type]?' active':''}" data-education-type="${type}" aria-pressed="${educationEnabled[type]}">${educationIconSvg(type,'legend')}${item.label}</button>`).join('');
     return `<div class="education-controls"><strong>학교·병원 표시</strong>${buttons}${educationLoading?'<span class="education-loading">학교·병원 위치 불러오는 중…</span>':educationError?`<span class="education-loading">${educationError}</span>`:'<span class="education-note">아이콘을 클릭하면 지도에 표시됩니다</span>'}</div>`;
   }
 
