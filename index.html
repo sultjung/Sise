@@ -200,8 +200,8 @@
   .education-toggle:hover,.education-toggle.active{background:var(--hw-orange-light);color:var(--hw-ink)}
   .education-toggle[aria-pressed="true"]{font-weight:750;color:var(--hw-ink)}
   .education-symbol{display:inline-block;width:9px;height:9px;border-radius:50%;border:1px solid rgba(35,36,40,.32);flex:0 0 auto}
-  .education-symbol.primary{background:#3B82F6}.education-symbol.middle{background:#16A34A}.education-symbol.high{background:#9333EA}
-  .education-symbol.university{width:9px;height:9px;border-radius:2px;background:#1E3A8A;transform:rotate(45deg);margin:0 1px}
+  .education-symbol.primary{background:#2563EB}.education-symbol.middle{background:#0F9D8A}.education-symbol.high{background:#7C3AED}.education-symbol.unknown{background:#64748B}
+  .education-symbol.university{width:8px;height:8px;border-radius:2px;background:#1E3A5F;transform:rotate(45deg);margin:0 1px}
   .education-note{display:block;margin-top:4px;color:var(--hw-ink-soft);font-size:9px;line-height:1.35}
   .education-popup{min-width:125px;line-height:1.35}
   .education-popup b{display:block;font-size:12px;color:var(--hw-ink)}
@@ -1736,10 +1736,11 @@
   legend.addTo(map);
 
   const educationTypes={
-    primary:{label:'초등학교',color:'#3B82F6'},
-    middle:{label:'중학교',color:'#16A34A'},
-    high:{label:'고등학교',color:'#9333EA'},
-    university:{label:'대학교',color:'#1E3A8A'}
+    primary:{label:'초등학교',color:'#2563EB'},
+    middle:{label:'중학교',color:'#0F9D8A'},
+    high:{label:'고등학교',color:'#7C3AED'},
+    university:{label:'대학교',color:'#1E3A5F'},
+    unknown:{label:'학교(구분 미상)',color:'#64748B'}
   };
   const educationLayers=Object.fromEntries(Object.keys(educationTypes).map(type=>[type,L.layerGroup()]));
   const educationEnabled={primary:false,middle:false,high:false,university:false};
@@ -1752,21 +1753,22 @@
     const amenity=String(tags.amenity||'').toLowerCase();
     const level=String(tags['school:level']||tags.education||'').toLowerCase();
     if(['university','college'].includes(amenity)||/جامعة|كلية|university|college/.test(name.toLowerCase())) return 'university';
-    if(/ابتدائية|ابتدائي|primary|elementary/.test((name+' '+level).toLowerCase())) return 'primary';
+    if(/ابتدائية|ابتدائي|primary|elementary|basic/.test((name+' '+level).toLowerCase())) return 'primary';
     if(/متوسطة|متوسط|intermediate|middle/.test((name+' '+level).toLowerCase())) return 'middle';
-    if(/اعدادية|إعدادية|ثانوية|ثانوي|secondary|high school/.test((name+' '+level).toLowerCase())) return 'high';
+    if(/اعدادية|إعدادية|ثانوية|ثانوي|secondary|high school|preparatory/.test((name+' '+level).toLowerCase())) return 'high';
+    if(amenity==='school'||tags['building']==='school'||tags['school:level']) return 'unknown';
     return null;
   }
-
   function escapeEducationText(value){
     return String(value||'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   }
   function educationName(tags={},type){
     const english=tags['name:en']||tags['official_name:en']||tags.name_en;
-    const fallback={primary:'Primary School',middle:'Middle School',high:'High School',university:'University'};
-    return String(english||'').trim()||fallback[type]||'Education facility';
+    const raw=String(tags.name||'').trim();
+    const latinRaw=raw&&!/[\\u0600-\\u06FF]/.test(raw)?raw:'';
+    const fallback={primary:'Primary School',middle:'Middle School',high:'High School',university:'University',unknown:'School (level unknown)'};
+    return String(english||latinRaw||'').trim()||fallback[type]||'Education facility';
   }
-
   function clearEducationLayers(){
     Object.values(educationLayers).forEach(layer=>layer.clearLayers());
   }
@@ -1786,6 +1788,9 @@
       node["amenity"~"school|university|college"](${box});
       way["amenity"~"school|university|college"](${box});
       relation["amenity"~"school|university|college"](${box});
+      node["school:level"](${box});
+      way["school:level"](${box});
+      way["building"="school"](${box});
     );out center tags;`;
   }
 
@@ -1801,18 +1806,30 @@
       if(!response.ok) throw new Error('education data unavailable');
       const data=await response.json();
       clearEducationLayers();
-      (data.elements||[]).forEach(element=>{
-        const tags=element.tags||{};
-        const type=classifyEducation(tags);
+      const elements=data.elements||[];
+      const parentUniversities=elements.map(element=>{
+        const tags=element.tags||{},type=classifyEducation(tags);
+        const name=educationName(tags,type);
+        const lat=Number(element.lat??element.center?.lat),lng=Number(element.lon??element.center?.lon);
+        return {type,name,lat,lng};
+      }).filter(item=>item.type==='university'&&/university|جامعة/.test(item.name.toLowerCase())&&!/college|faculty|department/.test(item.name.toLowerCase()));
+      const seen=new Set();
+      elements.forEach(element=>{
+        const tags=element.tags||{},type=classifyEducation(tags);
         if(!type) return;
         const lat=Number(element.lat??element.center?.lat),lng=Number(element.lon??element.center?.lon);
         if(!Number.isFinite(lat)||!Number.isFinite(lng)) return;
-        const marker=type==='university'
-          ? L.marker([lat,lng],{pane:'educationPane',icon:L.divIcon({className:'education-marker',html:'<span class="education-symbol university"></span>',iconSize:[11,11],iconAnchor:[5.5,5.5]})})
-          : L.circleMarker([lat,lng],{pane:'educationPane',radius:4,color:educationTypes[type].color,weight:1,fillColor:educationTypes[type].color,fillOpacity:.9});
         const displayName=educationName(tags,type);
+        const normalizedName=displayName.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+        const key=`${type}|${normalizedName||element.id}`;
+        if(seen.has(key)) return;
+        if(type==='university'&&/college|faculty|department/.test(displayName.toLowerCase())&&parentUniversities.some(parent=>Math.abs(parent.lat-lat)<.06&&Math.abs(parent.lng-lng)<.08)) return;
+        seen.add(key);
+        const marker=type==='university'
+          ? L.marker([lat,lng],{pane:'educationPane',icon:L.divIcon({className:'education-marker',html:'<span class="education-symbol university"></span>',iconSize:[9,9],iconAnchor:[4.5,4.5]})})
+          : L.circleMarker([lat,lng],{pane:'educationPane',radius:3,color:educationTypes[type].color,weight:1,fillColor:educationTypes[type].color,fillOpacity:.92});
         marker.bindTooltip(displayName,{direction:'top',offset:[0,-4],opacity:.96});
-        marker.bindPopup(`<div class="education-popup"><b>${escapeEducationText(displayName)}</b><span>${educationTypes[type].label}</span></div>`,{closeButton:true,autoPan:false});
+        marker.bindPopup(`<div class="education-popup"><b>${escapeEducationText(displayName)}</b><span>${type==='unknown'?'School (level unknown)':educationTypes[type].label}</span></div>`,{closeButton:true,autoPan:false});
         marker.on('click',event=>L.DomEvent.stopPropagation(event));
         marker.addTo(educationLayers[type]);
       });
