@@ -3,8 +3,8 @@ name: Update facility map data
 
 on:
   push:
-    paths:
-      - ".github/workflows/update-facilities.yml"
+    paths-ignore:
+      - "data/facilities.json"
   workflow_dispatch:
   schedule:
     - cron: "17 2 * * 1"
