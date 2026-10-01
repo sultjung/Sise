@@ -495,6 +495,7 @@
   let trendHistory = [];
   let regionHistory = [];
   let governorateHistory = null;
+  const baghdadRegionalHistory = { periods: [{"key":"2024-q1","label":"2024년 1분기","source_file":"2024-05.pdf","values":{"baghdad":{"avg_price_per_m2_iqd":3240000,"change_percent":0,"min_price_per_m2_iqd":780000,"max_price_per_m2_iqd":5700000,"sample_count":438}}},{"key":"2024-q2","label":"2024년 2분기","source_file":"2024-09.pdf","values":{"baghdad":{"avg_price_per_m2_iqd":3295500,"change_percent":1.1,"min_price_per_m2_iqd":800000,"max_price_per_m2_iqd":5791000,"sample_count":771}}},{"key":"2024-q3","label":"2024년 3분기","source_file":"2025-01.pdf","values":{"baghdad":{"avg_price_per_m2_iqd":3366000,"change_percent":10.08,"min_price_per_m2_iqd":982000,"max_price_per_m2_iqd":5750000,"sample_count":344}}},{"key":"2025-q1","label":"2025년 1분기","source_file":"2025-05.pdf","values":{"baghdad":{"avg_price_per_m2_iqd":3090000,"change_percent":-9.02,"min_price_per_m2_iqd":700000,"max_price_per_m2_iqd":5480000,"sample_count":398}}},{"key":"2025-q2","label":"2025년 2분기","source_file":"2025-09.pdf","values":{"baghdad":{"avg_price_per_m2_iqd":3000000,"change_percent":-21.23,"min_price_per_m2_iqd":667000,"max_price_per_m2_iqd":5333000,"sample_count":375}}},{"key":"2026-q1","label":"2026년 1분기","source_file":"2026-01.pdf","values":{"baghdad":{"avg_price_per_m2_iqd":3625000,"change_percent":35.89,"min_price_per_m2_iqd":1000000,"max_price_per_m2_iqd":6250000,"sample_count":356}}},{"key":"2026-q2","label":"2026년 2분기","source_file":"2026-05.pdf","values":{"baghdad":{"avg_price_per_m2_iqd":3700500,"change_percent":10.45,"min_price_per_m2_iqd":1115000,"max_price_per_m2_iqd":6286000,"sample_count":471}}},{"key":"2026-q3","label":"2026년 3분기","source_file":"2026-09.pdf","values":{"baghdad":{"avg_price_per_m2_iqd":2729500,"change_percent":-29.72,"min_price_per_m2_iqd":459000,"max_price_per_m2_iqd":5000000,"sample_count":386}}}] };
   let selectedHistoryKey = 'all';
   let ibaitySnapshot = null;
   let selectedTrendKey = 'all';
@@ -1233,7 +1234,7 @@
   function renderHistoryTrend(kind){
     const controls=document.getElementById('trend-controls'),holder=document.getElementById('trend-chart'),table=document.getElementById('comparison-table'),meta=document.getElementById('trend-meta');
     const national=kind==='national';
-    const regionPeriods=governorateHistory?.periods||[];
+    const regionPeriods=governorateHistory?.periods?.some(period=>Number.isFinite(period.values?.baghdad?.avg_price_per_m2_iqd))?governorateHistory.periods:baghdadRegionalHistory.periods;
     const periods=national?(governorateHistory?.periods||[]):regionPeriods;
     const entries=national?nationalGovernorates.map(d=>({key:d.key,name:d.nameKr})): [{key:'baghdad',name:'바그다드'}];
     document.getElementById('trend-section-title').textContent=national?'이라크 전체 주별 시세 변화':'바그다드 지역별 시세 변화';
@@ -2442,7 +2443,7 @@
       districtGroups[district].sampleCount+=row.listingCount;
     });
     const districtHeaders=['보고 기간','대상','주거용 평균(IQD/m²)','주거용 평균(USD/m²)','최저(IQD/m²)','최고(IQD/m²)','표본 수(건)','출처/산출 기준'];
-    const areaHistory=governorateHistory?.periods||[];
+    const areaHistory=governorateHistory?.periods?.some(period=>Number.isFinite(period.values?.baghdad?.avg_price_per_m2_iqd))?governorateHistory.periods:baghdadRegionalHistory.periods;
     const districtRows=areaHistory.map(period=>{
       const value=period.values?.baghdad;
       return [excelValue(period.label), '바그다드 전체', excelValue(value?.avg_price_per_m2_iqd), excelValue(Number.isFinite(value?.avg_price_per_m2_iqd)?Math.round(value.avg_price_per_m2_iqd/RATE):null), excelValue(value?.min_price_per_m2_iqd), excelValue(value?.max_price_per_m2_iqd), excelValue(value?.sample_count), 'Ibaity 공개 주거용 통계 보고서 평균 · 아파트/주택 혼합 가능 · 실거래가 아님'];
@@ -2472,7 +2473,7 @@
       });
     const quarterlySheet=XLSX.utils.aoa_to_sheet([quarterlyHeaders,...quarterlyRows]);
     applyExcelSheetStyle(quarterlySheet,0,[24,20,16,20,16,20,16,20,16,34],{1:'#,##0',3:'#,##0',5:'#,##0',7:'#,##0'});
-    const regionalPeriods=governorateHistory?.periods||[];
+    const regionalPeriods=governorateHistory?.periods?.some(period=>Number.isFinite(period.values?.baghdad?.avg_price_per_m2_iqd))?governorateHistory.periods:baghdadRegionalHistory.periods;
     const regionTrendHeaders=['보고 기간','대상','평균(IQD/m²)','평균(USD/m²)','최저(IQD/m²)','최고(IQD/m²)','표본 수(건)','전기 대비(%)','출처/비고'];
     const regionTrendRows=regionalPeriods.map(period=>{
       const value=period.values?.baghdad;
