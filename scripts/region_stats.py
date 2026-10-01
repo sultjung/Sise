@@ -25,6 +25,16 @@ REGION_GROUPS = {
     "newbaghdad": ("D58DG8",),
     "zayouna": ("2E44F6",),
 }
+REGION_SUBDISTRICTS = {
+    "mansour": ("mansour",),
+    "yarmouk": ("yarmouk",),
+    "kadhimiya": ("kadhimiya",),
+    "newbaghdad": ("baghdad al-jadeeda",),
+    "amiriya": ("ameria",),
+    "saydiya": ("saidiya",),
+    "jihad": ("jihad",),
+    "bismayah": ("pasmaya",),
+}
 ALL_REGION_KEYS = (
     "mansour", "jadriya", "harthiya", "karrada", "yarmouk",
     "kadhimiya", "zayouna", "newbaghdad", "amiriya", "saydiya",
@@ -55,7 +65,11 @@ def summarize_region(records: list[dict[str, Any]]) -> dict[str, dict[str, Any]]
         for row in eligible:
             key = str(row.get("complex_key") or "")
             complex_id = str(row.get("complex_id") or "")
-            group = key if key in groups else complex_id if complex_id in groups else None
+            subdistrict = str(row.get("subdistrict_ar") or "").strip().lower()
+            if key in groups or complex_id in groups or subdistrict in REGION_SUBDISTRICTS.get(region, ()):
+                group = key or complex_id or str(row.get("id"))
+            else:
+                group = None
             if group:
                 by_group.setdefault(group, []).append(row)
         rows = [row for group_rows in by_group.values() for row in group_rows]
@@ -96,12 +110,15 @@ def append_region_history(snapshot: dict[str, Any]) -> None:
     except (FileNotFoundError, json.JSONDecodeError):
         history = []
     previous = next((row for row in history if str(row.get("date", "")).startswith(observed_at[:7]) and row.get("status") == "verified_snapshot"), None)
+    if previous and previous.get("method_version") != "district-subdistrict-v2":
+        previous = None
     history = [row for row in history if not str(row.get("date", "")).startswith(observed_at[:7])]
     history.append({
         "date": observed_at,
         "status": "verified_snapshot",
+        "method_version": "district-subdistrict-v2",
         "source": "ibaity.com 승인 활성 매매 아파트",
-        "method": "지역 내 단지별 매물 m² 단가 중앙값의 중앙값; 조건부 가격 제외; 표본 수 병기",
+        "method": "지역명 또는 위치가 확인된 단지의 매물 m² 단가 중앙값의 중앙값; 조건부 가격 제외; 표본 수 병기",
         "by_region": snapshot["by_region"],
         "by_quarter": {**snapshot["by_region_quarter"], **(previous or {}).get("by_quarter", {})},
     })
