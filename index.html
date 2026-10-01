@@ -1195,9 +1195,11 @@
     ];
     return periods.map(period=>{
       if(period.key==='2025'){
-        const snapshots=trendHistory.filter(row=>row.status==='verified_snapshot'&&String(row.date||'').startsWith('2025-')&&period.months.includes(Number(String(row.date||'').slice(5,7))));
-        const points=snapshots.map(row=>row.by_complex?.[complexKey]).filter(point=>point&&Number.isFinite(Number(point.price_per_m2_iqd))&&Number(point.sample_count)>0);
-        return {period:period.key,label:period.label,value:points.length?median(points.map(point=>Number(point.price_per_m2_iqd))):null,sample:points.reduce((sum,point)=>sum+Number(point.sample_count||0),0)};
+        const snapshots=trendHistory
+          .filter(row=>row.status==='verified_snapshot'&&String(row.date||'')>='2026-01-01'&&row.by_year?.['2025'])
+          .sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+        const point=snapshots[0]?.by_year?.['2025']?.[complexKey];
+        return {period:period.key,label:period.label,value:point&&Number(point.sample_count)>0?Number(point.price_per_m2_iqd):null,sample:Number(point?.sample_count||0)};
       }
       const quarterEnd={"2026-q1":"2026-04-01","2026-q2":"2026-07-01","2026-q3":"2026-10-01"}[period.key];
       const snapshots=trendHistory

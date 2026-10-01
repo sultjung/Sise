@@ -250,9 +250,10 @@ def listing_is_recent(created_at: Any, cutoff: dt.datetime) -> bool:
 
 
 def append_monthly_history(snapshot: dict[str, Any]) -> None:
-    """Persist a monthly complex-price snapshot from the same Ibaity ledger."""
+    """Persist monthly prices and freeze observed historical registration cohorts."""
     observed_at = snapshot["updated_at"]
     month_key = observed_at[:7]
+    observed_date = dt.date.fromisoformat(observed_at)
     try:
         history = json.loads(HISTORY_PATH.read_text(encoding="utf-8"))
         if not isinstance(history, list):
@@ -260,21 +261,16 @@ def append_monthly_history(snapshot: dict[str, Any]) -> None:
     except (FileNotFoundError, json.JSONDecodeError):
         history = []
 
-    # Do not keep multiple scheduled/manual runs as separate monthly points.
+    # Keep one verified run per month; completed-period values are selected
+    # from the earliest subsequent snapshot and therefore remain stable later.
     history = [row for row in history if not str(row.get("date", "")).startswith(month_key)]
     cutoff = dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=CURRENT_WINDOW_DAYS)
     monthly: dict[str, Any] = {}
-    observed_month = dt.date.fromisoformat(observed_at)
-    current_quarter_start_month = ((observed_month.month - 1) // 3) * 3 + 1
-    quarter_start_month = current_quarter_start_month - 3
-    quarter_year = observed_month.year
-    if quarter_start_month < 1:
-        quarter_start_month += 12
-        quarter_year -= 1
-    quarter_start = dt.date(quarter_year, quarter_start_month, 1)
-    quarter_key = f"{quarter_year}-q{((quarter_start_month - 1) // 3) + 1}"
-    quarterly: dict[str, Any] = {}
-    for key in sorted({str(row.get("complex_key")) for row in snapshot["listings"] if row.get("complex_key")}):
+    quarter_values: dict[str, dict[str, list[int]]] = {}
+    year_values: dict[str, dict[str, list[int]]] = {}
+    keys = sorted({str(row.get("complex_key")) for row in snapshot["listings"] if row.get("complex_key")})
+
+    for key in keys:
         eligible = [
             row for row in snapshot["listings"]
             if row.get("complex_key") == key and row.get("price_eligible", True)
@@ -283,37 +279,80 @@ def append_monthly_history(snapshot: dict[str, Any]) -> None:
             eligible = [row for row in eligible if int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) >= DAR_ALSALAM_CASH_MIN_UNIT_IQD]
         if key == "bismayah_complex":
             eligible = [row for row in eligible if int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) >= BISMAYAH_CASH_MIN_UNIT_IQD]
-        recent_items = [row for row in eligible if row.get("created_at") and listing_is_recent(row.get("created_at"), cutoff)]
-        recent_values = [int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) for row in recent_items]
+
+        recent_values = [
+            int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0)
+            for row in eligible
+            if row.get("created_at") and listing_is_recent(row.get("created_at"), cutoff)
+        ]
         recent_values = [value for value in recent_values if value > 0]
         monthly[key] = {
             "price_per_m2_iqd": round(statistics.median(recent_values)) if recent_values else None,
             "sample_count": len(recent_values),
         }
 
-        quarter_items = [
-            row for row in eligible
-            if row.get("created_at") and quarter_start.isoformat() <= str(row["created_at"])[:10] < observed_at
-        ]
-        quarter_values = [int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) for row in quarter_items]
-        quarter_values = [value for value in quarter_values if value > 0]
-        quarterly[key] = {
-            "price_per_m2_iqd": round(statistics.median(quarter_values)) if quarter_values else None,
-            "sample_count": len(quarter_values),
+        for row in eligible:
+            created = str(row.get("created_at") or "")[:10]
+            if len(created) != 10 or created >= observed_at:
+                continue
+            try:
+                created_date = dt.date.fromisoformat(created)
+            except ValueError:
+                continue
+            value = int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0)
+            if value <= 0:
+                continue
+            quarter = (created_date.month - 1) // 3 + 1
+            quarter_key = f"{created_date.year}-q{quarter}"
+            next_quarter_month = quarter * 3 + 1
+            quarter_end_year = created_date.year + (1 if next_quarter_month > 12 else 0)
+            quarter_end_month = next_quarter_month - 12 if next_quarter_month > 12 else next_quarter_month
+            quarter_end = dt.date(quarter_end_year, quarter_end_month, 1)
+            if quarter_end <= observed_date:
+                quarter_values.setdefault(quarter_key, {}).setdefault(key, []).append(value)
+            if created_date.year < observed_date.year:
+                year_values.setdefault(str(created_date.year), {}).setdefault(key, []).append(value)
+
+    by_quarter = {
+        period: {
+            key: {
+                "price_per_m2_iqd": round(statistics.median(values)),
+                "sample_count": len(values),
+            }
+            for key, values in groups.items()
         }
+        for period, groups in quarter_values.items()
+    }
+    by_year = {
+        year: {
+            key: {
+                "price_per_m2_iqd": round(statistics.median(values)),
+                "sample_count": len(values),
+            }
+            for key, values in groups.items()
+        }
+        for year, groups in year_values.items()
+    }
+
+    current_quarter_start = ((observed_date.month - 1) // 3) * 3 + 1
+    previous_quarter_month = current_quarter_start - 3
+    previous_quarter_year = observed_date.year
+    if previous_quarter_month < 1:
+        previous_quarter_month += 12
+        previous_quarter_year -= 1
+    closed_quarter = f"{previous_quarter_year}-q{((previous_quarter_month - 1) // 3) + 1}"
     history.append({
         "date": observed_at,
         "status": "verified_snapshot",
         "source": "ibaity.com 승인 활성 매매 아파트 공개 client API",
-        "method": f"수집일 기준 최근 {CURRENT_WINDOW_DAYS}일 등록 매물의 단지별 m²당 호가 중앙값; 표본 수 병기",
+        "method": f"현재 활성 원장에서 최근 {CURRENT_WINDOW_DAYS}일 단지별 중앙값 및 등록일 기준 과거 연·분기 코호트를 산출; 표본 수 병기",
         "by_complex": monthly,
-        "closed_quarter": quarter_key,
-        "by_quarter": {quarter_key: quarterly},
+        "closed_quarter": closed_quarter,
+        "by_quarter": by_quarter,
+        "by_year": by_year,
     })
     history.sort(key=lambda row: str(row.get("date", "")))
     HISTORY_PATH.write_text(json.dumps(history, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-
 
 def main() -> int:
     observed_at = dt.datetime.now(dt.timezone.utc).date().isoformat()
