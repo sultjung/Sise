@@ -2,13 +2,14 @@
   {
     "date": "2026-10-01",
     "status": "verified_snapshot",
+    "method_version": "district-subdistrict-v2",
     "source": "ibaity.com 승인 활성 매매 아파트",
-    "method": "지역 내 단지별 매물 m² 단가 중앙값의 중앙값; 조건부 가격 제외; 표본 수 병기",
+    "method": "지역명 또는 위치가 확인된 단지의 매물 m² 단가 중앙값의 중앙값; 조건부 가격 제외; 표본 수 병기",
     "by_region": {
       "mansour": {
-        "price_per_m2_iqd": 2093610,
-        "sample_count": 39,
-        "complex_count": 4,
+        "price_per_m2_iqd": 2232143,
+        "sample_count": 41,
+        "complex_count": 5,
         "min_price_per_m2_iqd": 1350000,
         "max_price_per_m2_iqd": 3229167,
         "listing_ids": [
@@ -48,6 +49,8 @@
           "DC21CG",
           "HB83CE",
           "GD2JI6",
+          "DCIA2G",
+          "GDI9F6",
           "86D1F7",
           "HBG7JE",
           "CFC64D"
@@ -88,13 +91,14 @@
         ]
       },
       "kadhimiya": {
-        "price_per_m2_iqd": 2550000,
-        "sample_count": 1,
-        "complex_count": 1,
-        "min_price_per_m2_iqd": 2550000,
+        "price_per_m2_iqd": 2475000,
+        "sample_count": 2,
+        "complex_count": 2,
+        "min_price_per_m2_iqd": 2400000,
         "max_price_per_m2_iqd": 2550000,
         "listing_ids": [
-          "IF9G4C"
+          "IF9G4C",
+          "B70A4H"
         ]
       },
       "zayouna": {
@@ -423,22 +427,34 @@
           "listing_ids": []
         },
         "yarmouk": {
-          "price_per_m2_iqd": 2928571,
-          "sample_count": 1,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 2928571,
+          "price_per_m2_iqd": 2522568,
+          "sample_count": 8,
+          "complex_count": 2,
+          "min_price_per_m2_iqd": 1818182,
           "max_price_per_m2_iqd": 2928571,
           "listing_ids": [
+            "62HF68",
+            "7IAC20",
+            "I3663C",
+            "4ACCE2",
+            "D9773G",
+            "7IH2D0",
+            "I3DBIC",
             "I5212C"
           ]
         },
         "kadhimiya": {
-          "price_per_m2_iqd": 2550000,
-          "sample_count": 1,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 2550000,
+          "price_per_m2_iqd": 2120386,
+          "sample_count": 6,
+          "complex_count": 4,
+          "min_price_per_m2_iqd": 1520000,
           "max_price_per_m2_iqd": 2550000,
           "listing_ids": [
+            "I5445C",
+            "DJE74G",
+            "G9FDI6",
+            "8489A7",
+            "BI659H",
             "GJ4HB6"
           ]
         },
@@ -461,16 +477,17 @@
           "listing_ids": []
         },
         "amiriya": {
-          "price_per_m2_iqd": 1488158,
-          "sample_count": 4,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 1421053,
+          "price_per_m2_iqd": 1360746,
+          "sample_count": 5,
+          "complex_count": 2,
+          "min_price_per_m2_iqd": 1233333,
           "max_price_per_m2_iqd": 1527778,
           "listing_ids": [
             "62H2G8",
             "2A346F",
             "7FA3J0",
-            "HC899E"
+            "HC899E",
+            "7FC260"
           ]
         },
         "saydiya": {
@@ -559,12 +576,17 @@
           "listing_ids": []
         },
         "yarmouk": {
-          "price_per_m2_iqd": null,
-          "sample_count": 0,
-          "complex_count": 0,
-          "min_price_per_m2_iqd": null,
-          "max_price_per_m2_iqd": null,
-          "listing_ids": []
+          "price_per_m2_iqd": 1946428,
+          "sample_count": 4,
+          "complex_count": 1,
+          "min_price_per_m2_iqd": 1886503,
+          "max_price_per_m2_iqd": 2153846,
+          "listing_ids": [
+            "45CBF2",
+            "GF0196",
+            "H6A8DE",
+            "I3F9AC"
+          ]
         },
         "kadhimiya": {
           "price_per_m2_iqd": 2600000,
@@ -594,25 +616,28 @@
           "listing_ids": []
         },
         "amiriya": {
-          "price_per_m2_iqd": 1513889,
-          "sample_count": 4,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 1472222,
+          "price_per_m2_iqd": 1192724,
+          "sample_count": 5,
+          "complex_count": 2,
+          "min_price_per_m2_iqd": 871560,
           "max_price_per_m2_iqd": 1527778,
           "listing_ids": [
             "B61F2H",
             "BD0G8H",
             "HGB6GE",
-            "62GFE8"
+            "62GFE8",
+            "D4D30G"
           ]
         },
         "saydiya": {
-          "price_per_m2_iqd": null,
-          "sample_count": 0,
-          "complex_count": 0,
-          "min_price_per_m2_iqd": null,
-          "max_price_per_m2_iqd": null,
-          "listing_ids": []
+          "price_per_m2_iqd": 1986301,
+          "sample_count": 1,
+          "complex_count": 1,
+          "min_price_per_m2_iqd": 1986301,
+          "max_price_per_m2_iqd": 1986301,
+          "listing_ids": [
+            "D27J5G"
+          ]
         },
         "jihad": {
           "price_per_m2_iqd": 1787879,
@@ -717,12 +742,14 @@
           "listing_ids": []
         },
         "saydiya": {
-          "price_per_m2_iqd": null,
-          "sample_count": 0,
-          "complex_count": 0,
-          "min_price_per_m2_iqd": null,
-          "max_price_per_m2_iqd": null,
-          "listing_ids": []
+          "price_per_m2_iqd": 1369863,
+          "sample_count": 1,
+          "complex_count": 1,
+          "min_price_per_m2_iqd": 1369863,
+          "max_price_per_m2_iqd": 1369863,
+          "listing_ids": [
+            "8GEDI7"
+          ]
         },
         "jihad": {
           "price_per_m2_iqd": 1806283,
@@ -757,9 +784,9 @@
       },
       "2026-q3": {
         "mansour": {
-          "price_per_m2_iqd": 2093610,
-          "sample_count": 39,
-          "complex_count": 4,
+          "price_per_m2_iqd": 2232143,
+          "sample_count": 41,
+          "complex_count": 5,
           "min_price_per_m2_iqd": 1350000,
           "max_price_per_m2_iqd": 3229167,
           "listing_ids": [
@@ -799,6 +826,8 @@
             "DC21CG",
             "HB83CE",
             "GD2JI6",
+            "DCIA2G",
+            "GDI9F6",
             "86D1F7",
             "HBG7JE",
             "CFC64D"
@@ -839,13 +868,14 @@
           ]
         },
         "kadhimiya": {
-          "price_per_m2_iqd": 2550000,
-          "sample_count": 1,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 2550000,
+          "price_per_m2_iqd": 2475000,
+          "sample_count": 2,
+          "complex_count": 2,
+          "min_price_per_m2_iqd": 2400000,
           "max_price_per_m2_iqd": 2550000,
           "listing_ids": [
-            "IF9G4C"
+            "IF9G4C",
+            "B70A4H"
           ]
         },
         "zayouna": {
