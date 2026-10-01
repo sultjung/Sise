@@ -28,6 +28,7 @@ REQUEST_DELAY_SEC = 0.35
 TIMEOUT_SEC = 30
 CURRENT_WINDOW_DAYS = 90
 OUT_PATH = Path(__file__).resolve().parent.parent / "data" / "ibaity-latest.json"
+HISTORY_PATH = Path(__file__).resolve().parent.parent / "data" / "complex-history.json"
 
 # Confirmed financing/upfront-payment listing.  Its visible API price is only
 # the deposit, so it must stay in the raw source list but never enter price
@@ -238,6 +239,61 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
     return result
 
 
+def listing_is_recent(created_at: Any, cutoff: dt.datetime) -> bool:
+    try:
+        parsed = dt.datetime.fromisoformat(str(created_at).replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=dt.timezone.utc)
+        return parsed >= cutoff
+    except (TypeError, ValueError):
+        return False
+
+
+def append_monthly_history(snapshot: dict[str, Any]) -> None:
+    """Persist a monthly complex-price snapshot from the same Ibaity ledger."""
+    observed_at = snapshot["updated_at"]
+    month_key = observed_at[:7]
+    try:
+        history = json.loads(HISTORY_PATH.read_text(encoding="utf-8"))
+        if not isinstance(history, list):
+            history = []
+    except (FileNotFoundError, json.JSONDecodeError):
+        history = []
+
+    # Do not keep multiple scheduled/manual runs as separate monthly points.
+    history = [row for row in history if not str(row.get("date", "")).startswith(month_key)]
+    cutoff = dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=CURRENT_WINDOW_DAYS)
+    monthly: dict[str, Any] = {}
+    for key in sorted({str(row.get("complex_key")) for row in snapshot["listings"] if row.get("complex_key")}):
+        items = [
+            row for row in snapshot["listings"]
+            if row.get("complex_key") == key
+            and row.get("price_eligible", True)
+            and row.get("created_at")
+            and listing_is_recent(row.get("created_at"), cutoff)
+        ]
+        if key == "dar_alsalam":
+            items = [row for row in items if int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) >= DAR_ALSALAM_CASH_MIN_UNIT_IQD]
+        if key == "bismayah_complex":
+            items = [row for row in items if int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) >= BISMAYAH_CASH_MIN_UNIT_IQD]
+        values = [int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) for row in items]
+        values = [value for value in values if value > 0]
+        monthly[key] = {
+            "price_per_m2_iqd": round(statistics.median(values)) if values else None,
+            "sample_count": len(values),
+        }
+    history.append({
+        "date": observed_at,
+        "status": "verified_snapshot",
+        "source": "ibaity.com 승인 활성 매매 아파트 공개 client API",
+        "method": f"수집일 기준 최근 {CURRENT_WINDOW_DAYS}일 등록 매물의 단지별 m²당 호가 중앙값; 표본 수 병기",
+        "by_complex": monthly,
+    })
+    history.sort(key=lambda row: str(row.get("date", "")))
+    HISTORY_PATH.write_text(json.dumps(history, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+
 def main() -> int:
     observed_at = dt.datetime.now(dt.timezone.utc).date().isoformat()
     try:
@@ -261,7 +317,9 @@ def main() -> int:
         "listings": records,
     }
     OUT_PATH.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
+    append_monthly_history(output)
     print(f"[OK] {len(records)} valid listings from {pages} pages → {OUT_PATH}")
+    print(f"[OK] Monthly complex history appended for {observed_at} → {HISTORY_PATH}")
     return 0
 
 

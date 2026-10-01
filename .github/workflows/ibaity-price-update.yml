@@ -1,4 +1,4 @@
-name: Ibaity apartment-price update
+name: Monthly Ibaity apartment-price update
 
 on:
   workflow_dispatch:
@@ -7,15 +7,15 @@ on:
       - "scripts/scrape_ibaity.py"
       - ".github/workflows/ibaity-price-update.yml"
   schedule:
-    # Monthly on the 1st at 03:20 UTC (12:20 KST).
-    - cron: "20 3 1 * *"
+    # Monthly on the 1st at 00:30 UTC (09:30 KST).
+    - cron: "30 0 1 * *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: ibaity-price-update
-  cancel-in-progress: true
+  group: sise-price-update
+  cancel-in-progress: false
 
 jobs:
   collect:
@@ -31,7 +31,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/ibaity-latest.json
+          git add data/ibaity-latest.json data/complex-history.json
           git diff --cached --quiet || git commit -m "chore: update ibaity apartment listings"
           git pull --rebase origin main
           git push
