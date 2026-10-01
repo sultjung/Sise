@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "scripts/scrape_ibaity.py"
+      - "data/governorate-history.json"
       - ".github/workflows/ibaity-price-update.yml"
   schedule:
     # Monthly on the 1st at 00:30 UTC (09:30 KST).

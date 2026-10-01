@@ -1233,48 +1233,60 @@
   function renderHistoryTrend(kind){
     const controls=document.getElementById('trend-controls'),holder=document.getElementById('trend-chart'),table=document.getElementById('comparison-table'),meta=document.getElementById('trend-meta');
     const national=kind==='national';
-    document.getElementById('trend-section-title').textContent=national?'이라크 전체 주별 시세 변화':'지역별 시세 변화';
-    document.getElementById('trend-section-sub').textContent=national?'GOVERNORATE PRICE TREND':'DISTRICT PRICE TREND';
-    const periods=national?(governorateHistory?.periods||[]):(regionHistory||[]).map(row=>({label:row.date,row}));
-    const entries=national?nationalGovernorates.map(d=>({key:d.key,name:d.nameKr})):orderedRegionKeys.map(k=>({key:k,name:districts[k].nameKr}));
-    // Keep all 18 governorates visible even when the attached historical PDF
-    // does not contain a Baghdad row. Missing historical periods remain
-    // "미확인" instead of silently removing the governorate from the UI.
-    const available=national?entries:entries.filter(e=>periods.some(p=>{const v=p.row?.by_district?.[e.key];return Number.isFinite(v?.avg_price_per_m2_iqd);}));
-    if(!available.length){holder.innerHTML='<div class="trend-empty">첨부 자료에서 표시할 지역별 시세 이력이 없습니다.</div>';controls.innerHTML='';table.innerHTML='';return;}
-    if(selectedHistoryKey!=='all'&&!available.some(e=>e.key===selectedHistoryKey)) selectedHistoryKey='all';
-    const valueOf=(period,key)=>national?nationalHistoryValue(period,key):period.row?.by_district?.[key];
-    controls.innerHTML=`<div class="trend-toolbar"><div><button class="${selectedHistoryKey==='all'?'active':''}" data-history-key="all">전체 지역 비교</button>${available.map(e=>`<button class="${e.key===selectedHistoryKey?'active':''}" data-history-key="${e.key}">${e.name}</button>`).join('')}</div><div class="trend-type"><button class="${selectedTrendType==='bar'?'active':''}" data-trend-type="bar">막대</button><button class="${selectedTrendType==='line'?'active':''}" data-trend-type="line">선</button><button class="${selectedTrendCurrency==='usd'?'active':''}" data-trend-currency="usd">USD</button><button class="${selectedTrendCurrency==='iqd'?'active':''}" data-trend-currency="iqd">IQD</button></div></div>`;
-    controls.querySelectorAll('[data-history-key]').forEach(b=>b.addEventListener('click',()=>{selectedHistoryKey=b.dataset.historyKey;renderTrend();}));
-    controls.querySelectorAll('[data-trend-type]').forEach(b=>b.addEventListener('click',()=>{selectedTrendType=b.dataset.trendType;renderTrend();}));
-    controls.querySelectorAll('[data-trend-currency]').forEach(b=>b.addEventListener('click',()=>{selectedTrendCurrency=b.dataset.trendCurrency;renderTrend();}));
-    const selected=selectedHistoryKey==='all'?available[0]:available.find(e=>e.key===selectedHistoryKey);
-    const series=historyTrendPoints(selected.key,periods,valueOf);
-    const display=v=>selectedTrendCurrency==='usd'?v/RATE:v;
-    const allLatest=available.map(e=>{const p=historyTrendPoints(e.key,periods,valueOf);const last=[...p].reverse().find(x=>Number.isFinite(x.value));const fallback=nationalGovernorates.find(d=>d.key===e.key);return {...e,value:last?.value??(national&&fallback?Math.round(fallback.usd*RATE):null),sample:last?.sample||fallback?.count||0};}).filter(e=>Number.isFinite(e.value));
-    let points=selectedHistoryKey==='all'?allLatest.map(e=>({label:e.name,value:e.value,sample:e.sample})):series;
-    if(selectedHistoryKey!=='all'&&!points.some(p=>Number.isFinite(p.value))&&national){
-      const fallback=nationalGovernorates.find(d=>d.key===selectedHistoryKey);
-      if(fallback) points=[{label:'현재 지도값',value:Math.round(fallback.usd*RATE),sample:fallback.count}];
+    const regionPeriods=(governorateHistory?.periods||[]).map(period=>({
+      key:period.key,label:period.label,period,
+      value:period.values?.baghdad,
+    }));
+    const periods=national?(governorateHistory?.periods||[]):regionPeriods;
+    const entries=national?nationalGovernorates.map(d=>({key:d.key,name:d.nameKr})): [{key:'baghdad',name:'바그다드'}];
+    document.getElementById('trend-section-title').textContent=national?'이라크 전체 주별 시세 변화':'바그다드 지역별 시세 변화';
+    document.getElementById('trend-section-sub').textContent=national?'GOVERNORATE PRICE TREND':'BAGHDAD AREA PRICE TREND';
+    if(!periods.length){
+      holder.innerHTML='<div class="trend-empty">Ibaity 통계 이력을 불러오지 못했습니다.</div>';controls.innerHTML='';table.innerHTML='';return;
     }
-    const vals=points.filter(p=>Number.isFinite(p.value)).map(p=>display(p.value));
-    if(!vals.length){holder.innerHTML='<div class="trend-empty">선택한 지역의 시세 이력이 없습니다.</div>';return;}
-    const W=900,H=250,P=42,max=Math.max(...vals),min=Math.min(...vals),range=Math.max(max-min,max*.04,1);
-    const xy=points.map((p,i)=>{const value=Number.isFinite(p.value)?display(p.value):null;return {x:P+(W-P*2)*(points.length===1?.5:i/(points.length-1)),y:value===null?null:H-P-(value-min+range*.18)/(range*1.36)*(H-P*2),...p};});
-    const maxPointValue=Math.max(...points.filter(p=>Number.isFinite(p.value)).map(p=>p.value));
-    const barWidth=Math.min(42,Math.max(18,(W-P*2)/Math.max(points.length,1)*.62));
-    const bars=xy.map(p=>{if(!Number.isFinite(p.value))return `<text x="${p.x}" y="${H-P-10}" text-anchor="middle" font-size="10" fill="#9B9DA2">미확인</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label}</text>`;const d=display(p.value),h=Math.max(2,H-P-p.y),isHighest=national&&p.value===maxPointValue,fill=isHighest?'#FF8A3D':'#AEB3BB',labelColor=isHighest?'#9E3500':'#4B515A';return `<rect x="${p.x-barWidth/2}" y="${p.y}" width="${barWidth}" height="${h}" rx="5" fill="${fill}"><title>${p.label}: ${fmt(p.value)} IQD/m²</title></rect><text x="${p.x}" y="${p.y-8}" text-anchor="middle" font-size="10" font-weight="700" fill="${labelColor}">${selectedTrendCurrency==='usd'?'$'+fmt(Math.round(d)):fmt(Math.round(d))}</text><text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label}</text>`}).join('');
-    const segments=[];let segment='';xy.forEach(p=>{if(p.y===null){if(segment)segments.push(segment);segment='';return;}segment+=(segment?'L':'M')+`${p.x.toFixed(1)},${p.y.toFixed(1)} `;});if(segment)segments.push(segment);
-    const path=segments.join('');
-    const line=`${segments.map(d=>`<path d="${d}" fill="none" stroke="#D94800" stroke-width="3"/>`).join('')}${xy.map(p=>Number.isFinite(p.value)?`<circle cx="${p.x}" cy="${p.y}" r="5" fill="#D94800"><title>${p.label}: ${fmt(p.value)} IQD/m²</title></circle><text x="${p.x}" y="${p.y-10}" text-anchor="middle" font-size="10" font-weight="700" fill="#9E3500">${selectedTrendCurrency==='usd'?'$'+fmt(Math.round(display(p.value))):fmt(Math.round(display(p.value)))}</text>`:`<text x="${p.x}" y="${H-P-10}" text-anchor="middle" font-size="10" fill="#9B9DA2">미확인</text>`).join('')}${xy.map(p=>`<text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${p.label}</text>`).join('')}`;
-    holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${national?'이라크 주별':'바그다드 지역별'} 시세 변화"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${selectedHistoryKey==='all'?bars:(selectedTrendType==='bar'?bars:line)}</svg>`;
-    const historyUnit=selectedTrendCurrency==='usd'?'USD/m²':'IQD/m²';
-    const historyDisplay=value=>selectedTrendCurrency==='usd'?Math.round(value/RATE):value;
-    const rows=available.map(e=>{const pts=historyTrendPoints(e.key,periods,valueOf);const cells=pts.map(p=>Number.isFinite(p.value)?`${fmt(historyDisplay(p.value))}<small>표본 ${p.sample||0}건</small>`:'미확인').join('</td><td>');return `<tr><td>${e.name}</td><td>${cells}</td></tr>`;}).join('');
-    table.innerHTML=`<table class="comparison-table"><thead><tr><th>${national?'주':'지역'}</th>${periods.map(p=>`<th>${p.label}<br>${historyUnit}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
-    meta.textContent=national?`이라크 18개 주 · 첨부 Baity/Ibaity PDF 8개 기간 · 보고서 평균 가격 · 기간별 원자료가 없는 값은 미확인 · 환율 1 USD=${RATE.toLocaleString()} IQD`:`바그다드 지역별 · 공개 매물 평균값 이력 · 자료가 있는 기간만 표시`;
-    document.getElementById('trend-section-title').textContent=national?'이라크 전체 주별 시세 변화':'지역별 시세 변화';
-    document.getElementById('trend-section-sub').textContent=national?'GOVERNORATE PRICE TREND':'DISTRICT PRICE TREND';
+    const valueOf=(period,key)=>national?nationalHistoryValue(period,key):period.values?.baghdad;
+    if(selectedHistoryKey!=='all'&&(national?!nationalGovernorates.some(e=>e.key===selectedHistoryKey):selectedHistoryKey!=='baghdad')) selectedHistoryKey='all';
+    const available=entries;
+    controls.innerHTML=`<div class="trend-toolbar"><div><button class="${selectedHistoryKey==='all'?'active':''}" data-history-key="all">전체 비교</button>${available.map(e=>`<button class="${e.key===selectedHistoryKey?'active':''}" data-history-key="${e.key}">${e.name}</button>`).join('')}</div><div class="trend-type"><button class="${selectedTrendType==='bar'?'active':''}" data-trend-type="bar">막대</button><button class="${selectedTrendType==='line'?'active':''}" data-trend-type="line">선</button><button class="${selectedTrendCurrency==='usd'?'active':''}" data-trend-currency="usd">USD</button><button class="${selectedTrendCurrency==='iqd'?'active':''}" data-trend-currency="iqd">IQD</button></div></div>`;
+    controls.querySelectorAll('[data-history-key]').forEach(button=>button.addEventListener('click',()=>{selectedHistoryKey=button.dataset.historyKey;renderTrend();}));
+    controls.querySelectorAll('[data-trend-type]').forEach(button=>button.addEventListener('click',()=>{selectedTrendType=button.dataset.trendType;renderTrend();}));
+    controls.querySelectorAll('[data-trend-currency]').forEach(button=>button.addEventListener('click',()=>{selectedTrendCurrency=button.dataset.trendCurrency;renderTrend();}));
+    const entriesToPlot=selectedHistoryKey==='all'?available:available.filter(entry=>entry.key===selectedHistoryKey);
+    const points=periods.map(period=>{
+      const value=selectedHistoryKey==='all'?(national
+        ? Math.round(nationalGovernorates.reduce((sum,g)=>sum+(nationalHistoryValue(period,g.key)?.avg_price_per_m2_iqd||0),0)/Math.max(1,nationalGovernorates.filter(g=>nationalHistoryValue(period,g.key)?.avg_price_per_m2_iqd).length))
+        : period.values?.baghdad?.avg_price_per_m2_iqd)
+        : valueOf(period,selectedHistoryKey)?.avg_price_per_m2_iqd;
+      const source=selectedHistoryKey==='all'&&!national?period.values?.baghdad:valueOf(period,selectedHistoryKey);
+      return {label:period.label,value:Number.isFinite(value)?value:null,sample:Number(source?.sample_count||0)};
+    });
+    const usable=points.filter(point=>Number.isFinite(point.value));
+    if(!usable.length){holder.innerHTML='<div class="trend-empty">표시할 지역 보고서 시계열이 없습니다.</div>';controls.innerHTML='';table.innerHTML='';return;}
+    const display=value=>selectedTrendCurrency==='usd'?value/RATE:value;
+    const vals=usable.map(point=>display(point.value)),min=Math.min(...vals),max=Math.max(...vals),range=Math.max(max-min,max*.04,1);
+    const W=900,H=270,P=48;
+    const xy=points.map((point,index)=>{const y=Number.isFinite(point.value)?H-P-(display(point.value)-min+range*.16)/(range*1.32)*(H-P*2):null;return {...point,x:P+(W-P*2)*(points.length===1?.5:index/(points.length-1)),y};});
+    const barWidth=Math.min(58,Math.max(22,(W-P*2)/points.length*.58));
+    const bars=xy.map(point=>Number.isFinite(point.value)
+      ? `<rect x="${point.x-barWidth/2}" y="${point.y}" width="${barWidth}" height="${Math.max(2,H-P-point.y)}" rx="5" fill="#AEB3BB"><title>${point.label}: ${fmt(point.value)} IQD/m² · 표본 ${point.sample}</title></rect><text x="${point.x}" y="${point.y-8}" text-anchor="middle" font-size="10" font-weight="700" fill="#4B515A">${selectedTrendCurrency==='usd'?'$'+fmt(Math.round(display(point.value))):fmt(Math.round(point.value))}</text><text x="${point.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${point.label}</text>`
+      : `<text x="${point.x}" y="${H-P-10}" text-anchor="middle" font-size="10" fill="#9B9DA2">미확인</text><text x="${point.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${point.label}</text>`).join('');
+    const linePoints=xy.filter(point=>Number.isFinite(point.value));
+    const linePath=linePoints.map((point,index)=>`${index?'L':'M'}${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(' ');
+    const line='<path d="'+linePath+'" fill="none" stroke="#D94800" stroke-width="3"/>'+linePoints.map(point=>'<circle cx="'+point.x+'" cy="'+point.y+'" r="5" fill="#D94800"><title>'+point.label+': '+fmt(point.value)+' IQD/m² · 표본 '+point.sample+'</title></circle><text x="'+point.x+'" y="'+(point.y-10)+'" text-anchor="middle" font-size="10" font-weight="700" fill="#9E3500">'+(selectedTrendCurrency==='usd'?'$'+fmt(Math.round(display(point.value))):fmt(Math.round(point.value)))+'</text><text x="'+point.x+'" y="'+(H-12)+'" text-anchor="middle" font-size="10" fill="#6B6D72">'+point.label+'</text>').join('');
+    holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${national?'이라크 주별':'바그다드 보고서'} 시세 변화"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${selectedTrendType==='bar'?bars:line}</svg>`;
+    const unit=selectedTrendCurrency==='usd'?'USD/m²':'IQD/m²';
+    if(national){
+      const rows=available.map(entry=>{
+        const cells=periods.map(period=>{const v=nationalHistoryValue(period,entry.key);return v&&Number.isFinite(v.avg_price_per_m2_iqd)?`<td>${fmt(selectedTrendCurrency==='usd'?Math.round(v.avg_price_per_m2_iqd/RATE):v.avg_price_per_m2_iqd)}<small>표본 ${v.sample_count||0}건</small></td>`:'<td>미확인</td>';}).join('');
+        return `<tr><td>${entry.name}</td>${cells}</tr>`;
+      }).join('');
+      table.innerHTML=`<table class="comparison-table"><thead><tr><th>주</th>${periods.map(period=>`<th>${period.label}<br>${unit}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
+      meta.textContent=`이라크 18개 주 · Ibaity 보고서 평균 · 원자료 미수록 기간은 미확인 · 환율 1 USD=${RATE.toLocaleString()} IQD`;
+    }else{
+      const rows=points.map(point=>`<tr><td>바그다드</td><td>${point.label}</td><td>${Number.isFinite(point.value)?fmt(selectedTrendCurrency==='usd'?Math.round(point.value/RATE):point.value):'미확인'}<small>표본 ${point.sample||0}건</small></td></tr>`).join('');
+      table.innerHTML=`<table class="comparison-table"><thead><tr><th>지역</th><th>보고 기간</th><th>보고서 평균 ${unit}</th></tr></thead><tbody>${rows}</tbody></table>`;
+      meta.textContent='Ibaity 공개 주거용 통계 보고서 · 바그다드 전체(동네별 추정치 아님) · 아파트/주택 혼합 가능 · 보고서 표본 수 병기 · 실제 거래가가 아닌 매물 통계';
+    }
   }
   function renderTrend(){
     if(activeMode==='national') return renderHistoryTrend('national');
@@ -2432,15 +2444,14 @@
       if(Number.isFinite(row.unit)) districtGroups[district].units.push(row.unit);
       districtGroups[district].sampleCount+=row.listingCount;
     });
-    const districtHeaders=['해당 지역','표본 수(건)','지역 중위값(IQD/m²)','지역 중위값(USD/m²)','산출 기준'];
-    const districtRows=Object.entries(districtGroups)
-      .sort(([a],[b])=>a.localeCompare(b,'ko'))
-      .map(([district,group])=>{
-        const iqd=median(group.units);
-        return [excelValue(district),excelValue(group.sampleCount||null),excelValue(iqd),excelValue(Number.isFinite(iqd)?Math.round(iqd/RATE):null),'개별 매물 단가 중위값'];
-      });
+    const districtHeaders=['보고 기간','대상','주거용 평균(IQD/m²)','주거용 평균(USD/m²)','최저(IQD/m²)','최고(IQD/m²)','표본 수(건)','출처/산출 기준'];
+    const areaHistory=governorateHistory?.periods||[];
+    const districtRows=areaHistory.map(period=>{
+      const value=period.values?.baghdad;
+      return [excelValue(period.label), '바그다드 전체', excelValue(value?.avg_price_per_m2_iqd), excelValue(Number.isFinite(value?.avg_price_per_m2_iqd)?Math.round(value.avg_price_per_m2_iqd/RATE):null), excelValue(value?.min_price_per_m2_iqd), excelValue(value?.max_price_per_m2_iqd), excelValue(value?.sample_count), 'Ibaity 공개 주거용 통계 보고서 평균 · 아파트/주택 혼합 가능 · 실거래가 아님'];
+    });
     const districtSheet=XLSX.utils.aoa_to_sheet([districtHeaders,...districtRows]);
-    applyExcelSheetStyle(districtSheet,0,[24,16,24,24,28],{2:'#,##0',3:'#,##0'});
+    applyExcelSheetStyle(districtSheet,0,[20,22,22,22,18,18,14,66],{2:'#,##0',3:'#,##0',4:'#,##0',5:'#,##0'});
 
     // Keep the downloadable workbook on the same dated raw-ledger basis as
     // the on-screen quarterly comparison.  This makes it possible to audit
@@ -2456,8 +2467,7 @@
       .filter(key=>complexes[key])
       .sort((a,b)=>complexes[a].nameKr.localeCompare(complexes[b].nameKr,'ko'))
       .map(key=>{
-        const values=quarterlyPeriods.flatMap(period=>{
-          const index=quarterlyPeriods.indexOf(period);
+        const values=quarterlyPeriods.flatMap((period,index)=>{
           const point=quarterlyTrendPoints(key)[index];
           return [excelValue(point?.value),excelValue(point?.sample||null)];
         });
@@ -2465,11 +2475,20 @@
       });
     const quarterlySheet=XLSX.utils.aoa_to_sheet([quarterlyHeaders,...quarterlyRows]);
     applyExcelSheetStyle(quarterlySheet,0,[24,20,16,20,16,20,16,20,16,34],{1:'#,##0',3:'#,##0',5:'#,##0',7:'#,##0'});
+    const regionalPeriods=governorateHistory?.periods||[];
+    const regionTrendHeaders=['보고 기간','대상','평균(IQD/m²)','평균(USD/m²)','최저(IQD/m²)','최고(IQD/m²)','표본 수(건)','전기 대비(%)','출처/비고'];
+    const regionTrendRows=regionalPeriods.map(period=>{
+      const value=period.values?.baghdad;
+      return [excelValue(period.label),'바그다드 전체',excelValue(value?.avg_price_per_m2_iqd),excelValue(Number.isFinite(value?.avg_price_per_m2_iqd)?Math.round(value.avg_price_per_m2_iqd/RATE):null),excelValue(value?.min_price_per_m2_iqd),excelValue(value?.max_price_per_m2_iqd),excelValue(value?.sample_count),excelValue(value?.change_percent),'Ibaity 주거용 통계 보고서 평균 · 주택/아파트 혼합 가능 · 실거래가 아님'];
+    });
+    const regionTrendSheet=XLSX.utils.aoa_to_sheet([regionTrendHeaders,...regionTrendRows]);
+    applyExcelSheetStyle(regionTrendSheet,0,[20,20,18,18,18,18,14,16,68],{2:'#,##0',3:'#,##0',4:'#,##0',5:'#,##0',7:'0.00'});
     const workbook=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook,complexSheet,'단지별 리스트');
     XLSX.utils.book_append_sheet(workbook,regionSheet,'단지별 평단가');
-    XLSX.utils.book_append_sheet(workbook,districtSheet,'지역별 평균');
-    XLSX.utils.book_append_sheet(workbook,quarterlySheet,'분기별 중위값');
+    XLSX.utils.book_append_sheet(workbook,districtSheet,'Ibaity 주거용 시계열');
+    XLSX.utils.book_append_sheet(workbook,quarterlySheet,'단지별 분기 중위값');
+    XLSX.utils.book_append_sheet(workbook,regionTrendSheet,'지역 시세 그래프 원자료');
     const updatedAt=ibaitySnapshot?.updated_at||new Date().toISOString().slice(0,10);
     XLSX.writeFile(workbook,`sise-단지별-지역별-${updatedAt}.xlsx`);
   }
