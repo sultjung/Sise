@@ -22,6 +22,7 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
 from region_stats import summarize_region, region_quarters, append_region_history
+from sale_terms import classify_sale_terms
 
 API_BASE = "https://v3.ibaity.com/api/client/Realestate"
 PAGE_SIZE = 10
@@ -37,6 +38,8 @@ HISTORY_PATH = Path(__file__).resolve().parent.parent / "data" / "complex-histor
 # statistics until the full obligation is verified.
 FINANCING_EXCLUDED_IDS = {
     "H7H15E",
+    "86BCD7",  # Zohour Baghdad: Rashid Bank loan, 16 years remaining
+    "DC268G",  # Zohour Baghdad: down payment plus 73M IQD and monthly installments
     # Bismayah listings whose advertised amount is a guarantor-transfer,
     # assignment-fee, remaining-loan, or installment amount rather than a
     # fully settled cash sale price.
@@ -147,7 +150,15 @@ def clean_listing(item: dict[str, Any], observed_at: str) -> dict[str, Any] | No
     complex_key = COMPLEX_KEY_BY_AR.get(complex_info.get("name")) or COMPLEX_KEY_BY_PROVIDER_NAME.get(str(complex_info.get("name") or "").strip().lower())
     is_bismayah_conditional = complex_key == "bismayah_complex" and calculated < BISMAYAH_CASH_MIN_UNIT_IQD
     is_dar_alsalam_conditional = complex_key == "dar_alsalam" and calculated < DAR_ALSALAM_CASH_MIN_UNIT_IQD
-    is_excluded = listing_id in FINANCING_EXCLUDED_IDS or is_bismayah_conditional or is_dar_alsalam_conditional
+    sale_terms_status = classify_sale_terms(item.get("description"))
+    is_excluded = (listing_id in FINANCING_EXCLUDED_IDS or is_bismayah_conditional
+                   or is_dar_alsalam_conditional or sale_terms_status != "cash")
+    if listing_id in FINANCING_EXCLUDED_IDS or sale_terms_status == "finance":
+        exclusion_reason = "대출·잔여 할부·선납 등 조건부 거래 문구 확인"
+    elif is_bismayah_conditional or is_dar_alsalam_conditional:
+        exclusion_reason = "현금 완납 금액으로 보기 어려운 가격대"
+    else:
+        exclusion_reason = "원문에서 현금·완납 조건 미확인"
     return {
         "id": listing_id,
         "observed_at": observed_at,
@@ -170,8 +181,9 @@ def clean_listing(item: dict[str, Any], observed_at: str) -> dict[str, Any] | No
         "image": images[0] if images else item.get("image"),
         "source_url": detail_url(str(item.get("id") or "")),
         "source_api_url": api_url(1),
+        "sale_terms_status": sale_terms_status,
         "price_eligible": not is_excluded,
-        "price_exclusion_reason": ("선수금·분할납부·보증인 교체·대출 승계 조건 확인" if listing_id in FINANCING_EXCLUDED_IDS else "현금·완납 조건 확인 전 보수적 제외") if is_excluded else None,
+        "price_exclusion_reason": exclusion_reason if is_excluded else None,
     }
 
 
@@ -366,6 +378,10 @@ def main() -> int:
     if not records:
         print("[ERROR] no valid ibaity listings returned; existing snapshot preserved", file=sys.stderr)
         return 2
+    described = sum(row["sale_terms_status"] != "missing" for row in records)
+    if described < len(records) * 0.75:
+        print(f"[ERROR] Ibaity descriptions missing for {len(records)-described} of {len(records)} listings; previous snapshot preserved", file=sys.stderr)
+        return 2
     output = {
         "schema_version": "1.0",
         "updated_at": observed_at,
@@ -374,7 +390,8 @@ def main() -> int:
         "query": PARAMS,
         "pages_collected": pages,
         "listing_count": len(records),
-        "method": f"APPROVED, active SELL apartment listings; current median uses listings created in the last {CURRENT_WINDOW_DAYS} days; duplicate IDs removed",
+        "method": f"APPROVED, active SELL apartments; only descriptions explicitly stating cash or fully paid and without financing terms; recent {CURRENT_WINDOW_DAYS} days",
+        "sale_terms_counts": {status: sum(row["sale_terms_status"] == status for row in records) for status in ("cash", "finance", "unspecified", "missing")},
         "by_complex": summarize(records),
         "by_region": summarize_region([row for row in records if listing_is_recent(row.get("created_at"), dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=CURRENT_WINDOW_DAYS))]),
         "by_region_quarter": region_quarters(records, observed_at),

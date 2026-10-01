@@ -110,15 +110,15 @@ def append_region_history(snapshot: dict[str, Any]) -> None:
     except (FileNotFoundError, json.JSONDecodeError):
         history = []
     previous = next((row for row in history if str(row.get("date", "")).startswith(observed_at[:7]) and row.get("status") == "verified_snapshot"), None)
-    if previous and previous.get("method_version") != "district-subdistrict-v2":
+    if previous and previous.get("method_version") != "cash-description-v3":
         previous = None
     history = [row for row in history if not str(row.get("date", "")).startswith(observed_at[:7])]
     history.append({
         "date": observed_at,
         "status": "verified_snapshot",
-        "method_version": "district-subdistrict-v2",
+        "method_version": "cash-description-v3",
         "source": "ibaity.com 승인 활성 매매 아파트",
-        "method": "지역명 또는 위치가 확인된 단지의 매물 m² 단가 중앙값의 중앙값; 조건부 가격 제외; 표본 수 병기",
+        "method": "지역명 또는 위치가 확인된 단지의 매물 m² 단가 중앙값의 중앙값; 원문에서 현금·완납이 명시된 가격만 사용; 표본 수 병기",
         "by_region": snapshot["by_region"],
         "by_quarter": {**snapshot["by_region_quarter"], **(previous or {}).get("by_quarter", {})},
     })

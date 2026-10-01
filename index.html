@@ -328,7 +328,7 @@
 </div>
 
 <div class="disclaimer">
-  ※ <b>민간시장 값</b>은 등기된 실거래가가 아닌 공개 매물의 <b>호가 중앙값</b>입니다. 링크·총액·면적이 모두 재확인되기 전에는 가격 비교와 지역 순위에 반영하지 않습니다.
+  ※ <b>민간시장 값</b>은 등기된 실거래가가 아닌 공개 매물의 <b>호가 중앙값</b>입니다. 매물 원문에 현금·완납이 명시된 가격만 단지·지역 비교와 추이에 반영합니다. 결제조건 미기재·대출·할부 매물은 제외합니다.
 </div>
 
 <div class="page">
@@ -418,7 +418,7 @@
     </div>
 
   </div>
-  <div class="section-note" style="margin-top:8px;">공식 분양가는 2025년 등록자 대상 공표값입니다. 민간시장가는 원문 링크·총액·면적을 전수 재검증 중이며, 검증이 끝난 표본만 표시합니다. 실제 등기 거래금액은 공개 자료가 없어 ‘실거래가’로 표기하지 않습니다.</div>
+  <div class="section-note" style="margin-top:8px;">공식 분양가는 2025년 등록자 대상 공표값입니다. 민간시장가는 Ibaity 원문에 현금·완납이 명시된 표본만 표시합니다. 실제 등기 거래금액은 공개 자료가 없어 ‘실거래가’로 표기하지 않습니다.</div>
 
   <!-- DISTRICTS + MAP -->
   <div class="section-head">
@@ -2306,10 +2306,11 @@
       const eligibleValues=eligibleListings.map(listing=>Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd));
       const value=(key==='dar_alsalam'||key==='bismayah_complex') ? median(eligibleValues) : summary.median_price_per_m2_iqd;
       const sampleCount=(key==='dar_alsalam'||key==='bismayah_complex') ? eligibleValues.length : (summary.sample_count||0);
-      const isDual=d.sourceKind==='dual';
+      const isDual=key==='bismayah_complex';
       if(!Number.isFinite(value) || sampleCount<1){
         if(isDual){
           d.iqd=d.officialIqd;
+          d.sourceKind='official';
           d.sampleCount=0;
           d.checked=snapshot.updated_at; d.priceMethod='공식 분양가 기준 · 최근 ibaity 시장 표본 없음';
           d.sources=[];
@@ -2331,7 +2332,7 @@
         .slice(0,12)
         .map((listing,index)=>({label:`ibaity · ${listing.area_m2}m² / ${Number(listing.price_iqd).toLocaleString('en-US')} IQD`,url:listing.source_url}));
       d.sources=listingSources.length ? listingSources : [{label:`ibaity API · ${d.sampleCount}건`,url:sourceUrl}];
-      d.sourceNote=`ibaity 공개 client API에서 수집한 승인 매매 아파트의 등록 호가입니다. 실거래가가 아니며, 최근 ${summary.current_window_days||90}일 등록 매물 중 가격·면적이 확인된 ${d.sampleCount}건을 사용했습니다. 선수금·분할납부·보증인 교체·대출 승계 조건 매물은 가격 산정에서 제외했습니다. 다르 알살람과 비스마야는 현금·완납 확인 전 저가 조건부 매물을 보수적으로 제외합니다.`;
+      d.sourceNote=`ibaity 공개 client API에서 수집한 승인 매매 아파트의 등록 호가입니다. 실거래가가 아니며, 최근 ${summary.current_window_days||90}일 등록 매물 중 현금·완납이 원문에 명시되고 가격·면적이 확인된 ${d.sampleCount}건을 사용했습니다. 선수금·분할납부·보증인 교체·대출 승계 조건 매물은 가격 산정에서 제외했습니다. 다르 알살람과 비스마야는 현금·완납 확인 전 저가 조건부 매물을 보수적으로 제외합니다.`;
     });
     applyIbaityRegionPrices(snapshot);
     updateBismayahMarketLinks(snapshot);
@@ -2345,11 +2346,31 @@
     [100,120,140].forEach(area=>{
       const items=listings.filter(listing=>Number(listing.area_m2)===area).slice(0,12);
       const details=document.getElementById(`bismayah-links-${area}`);
-      if(!details||!items.length) return;
+      if(!details)return;
+      const market=details.closest('.unit-card')?.querySelector('.unit-price-block.market');
       const summary=details.querySelector('summary');
       const links=details.querySelector('.unit-source-links');
-      if(summary) summary.textContent=`Ibaity 시장 매물 원문 ${items.length}건 열기`;
-      if(links) links.innerHTML=items.map(listing=>`<a href="${listing.source_url}" target="_blank" rel="noopener">${Number(listing.price_iqd).toLocaleString('en-US')} IQD · ${listing.created_at?.slice(0,10)||''}</a>`).join('');
+      if(market){
+        const small=market.querySelector('.price-caption small');
+        const usd=market.querySelector('.price-primary .usd');
+        const iqd=market.querySelector('.price-secondary .iqd');
+        const total=market.querySelector('.unit-meta');
+        if(items.length){
+          const unit=median(items.map(item=>Number(item.price_per_m2_iqd)));
+          const amount=median(items.map(item=>Number(item.price_iqd)));
+          if(small)small.textContent=`현금·완납 명시 ${items.length}건`;
+          if(usd)usd.textContent=fmt(Math.round(unit/RATE));
+          if(iqd)iqd.textContent=fmt(Math.round(unit));
+          if(total)total.innerHTML=`대표 총액 <b>$${fmt(Math.round(amount/RATE))}</b> · ${fmt(Math.round(amount))} IQD`;
+        }else{
+          if(small)small.textContent='현금·완납 확인 표본 없음';
+          if(usd)usd.textContent='—';
+          if(iqd)iqd.textContent='미확인';
+          if(total)total.textContent='민간시장 호가 미확인';
+        }
+      }
+      if(summary)summary.textContent=items.length?`Ibaity 현금·완납 매물 원문 ${items.length}건 열기`:'현금·완납 매물 원문 없음';
+      if(links)links.innerHTML=items.map(listing=>`<a href="${listing.source_url}" target="_blank" rel="noopener">${Number(listing.price_iqd).toLocaleString('en-US')} IQD · ${listing.created_at?.slice(0,10)||''}</a>`).join('');
     });
   }
 
@@ -2377,7 +2398,7 @@
       d.sources=(snapshot.listings||[]).filter(listing=>sourceIds.has(listing.id)&&listing.source_url).slice(0,12).map(listing=>({
         label:`${listing.complex_name_ar||'Ibaity'} · ${listing.area_m2}m² / ${Number(listing.price_iqd).toLocaleString('en-US')} IQD`,url:listing.source_url
       }));
-      d.sourceNote=`최근 90일 등록된 Ibaity 승인 매매 아파트 중 현금·완납성 가격 표본 ${summary.sample_count}건을 사용했습니다. 지역 내 각 단지의 매물 단가 중앙값을 구한 뒤 단지를 동일 가중치로 다시 중앙값을 산출합니다. 표본 5건 미만은 참고값입니다. 실거래가가 아닙니다.`;
+      d.sourceNote=`최근 90일 등록된 Ibaity 승인 매매 아파트 중 원문에 현금·완납이 명시된 가격 표본 ${summary.sample_count}건을 사용했습니다. 지역 내 각 단지의 매물 단가 중앙값을 구한 뒤 단지를 동일 가중치로 다시 중앙값을 산출합니다. 표본 5건 미만은 참고값입니다. 실거래가가 아닙니다.`;
     });
     refreshOrderedRegions();
     refreshDistrictTierVisuals();

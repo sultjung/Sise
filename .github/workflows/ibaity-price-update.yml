@@ -6,6 +6,7 @@ on:
     paths:
       - "scripts/scrape_ibaity.py"
       - "scripts/region_stats.py"
+      - "scripts/sale_terms.py"
       - "data/governorate-history.json"
       - ".github/workflows/ibaity-price-update.yml"
   schedule:
