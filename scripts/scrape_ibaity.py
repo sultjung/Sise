@@ -21,6 +21,8 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
+from region_stats import summarize_region, region_quarters, append_region_history
+
 API_BASE = "https://v3.ibaity.com/api/client/Realestate"
 PAGE_SIZE = 10
 MAX_PAGES = 500
@@ -374,12 +376,15 @@ def main() -> int:
         "listing_count": len(records),
         "method": f"APPROVED, active SELL apartment listings; current median uses listings created in the last {CURRENT_WINDOW_DAYS} days; duplicate IDs removed",
         "by_complex": summarize(records),
+        "by_region": summarize_region([row for row in records if listing_is_recent(row.get("created_at"), dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=CURRENT_WINDOW_DAYS))]),
+        "by_region_quarter": region_quarters(records, observed_at),
         "listings": records,
     }
     OUT_PATH.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
     append_monthly_history(output)
+    append_region_history(output)
     print(f"[OK] {len(records)} valid listings from {pages} pages → {OUT_PATH}")
-    print(f"[OK] Monthly complex history appended for {observed_at} → {HISTORY_PATH}")
+    print(f"[OK] Monthly complex and regional history appended for {observed_at}")
     return 0
 
 

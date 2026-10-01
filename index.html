@@ -925,6 +925,7 @@
     if(item.sourceKind==='dual') return `<span class="badge dual">${compact?'공식+시장':`공식 + 매물 ${item.sampleCount}건`}</span>`;
     if(item.sourceKind==='official' || item.verified) return `<span class="badge verified">✓ ${compact?'공식':'공식가'}</span>`;
     if(item.sourceKind==='sample') return `<span class="badge sample">${compact?'중앙값':`매물 ${item.sampleCount}건`}</span>`;
+    if(item.sourceKind==='limited') return `<span class="badge single">${compact?'표본 부족':`표본 ${item.sampleCount}건 · 참고`}</span>`;
     if(item.sourceKind==='single') return `<span class="badge single">${compact?'1건':'단일 매물'}</span>`;
     if(item.sourceKind==='pending') return `<span class="badge pending">${compact?'수집 중':'표본 수집 중'}</span>`;
     if(item.sourceKind==='known') return `<span class="badge pending">${compact?'시세 미확인':'단지 정보 확인'}</span>`;
@@ -956,6 +957,14 @@
     return `인구 ${populationLabel(value)}`;
   }
   function tierForComplex(item){ if(!hasPrice(item)) return 'pending'; return item.iqd>=2300000 ? 'high' : item.iqd>=1600000 ? 'mid' : 'low'; }
+  function regionColor(item){
+    if(!hasPrice(item)) return '#C9CDD3';
+    const values=Object.values(districts).filter(hasPrice).map(d=>d.iqd);
+    const min=Math.min(...values),max=Math.max(...values);
+    const t=max===min ? 0.5 : (item.iqd-min)/(max-min);
+    const low=[255,216,179],high=[199,68,0];
+    return '#'+low.map((v,i)=>Math.round(v+(high[i]-v)*t).toString(16).padStart(2,'0')).join('');
+  }
   function tierForDistrict(item){
     if(!hasPrice(item)) return 'pending';
     const ranked=Object.values(districts).filter(hasPrice).sort((a,b)=>b.iqd-a.iqd);
@@ -1142,7 +1151,7 @@
       row.className = 'bar-row';
       row.innerHTML = `
         <div class="bar-label">${d.nameKr}<span class="en">${d.nameEn}</span></div>
-        <div class="bar-track"><div class="bar-fill ${(key==='bismayah'||key==='bismayah_complex')?'highlight':''}" style="width:${Math.round(d.iqd/max*100)}%"></div></div>
+        <div class="bar-track"><div class="bar-fill ${(key==='bismayah'||key==='bismayah_complex')?'highlight':''}" style="width:${Math.round(d.iqd/max*100)}%;${activeMode==='region'?`background:${regionColor(d)}`:''}"></div></div>
         <div class="bar-value ${d.sourceKind==='dual'?'dual':''}">${valueHtml}</div>
         <div>${sourceBadge(d,true)}</div>`;
       chartEl.appendChild(row);
@@ -1231,7 +1240,76 @@
     for(const alias of aliases){ if(values[alias]) return values[alias]; }
     return undefined;
   }
+  function regionalQuarterSeries(){
+    const snapshots=(regionHistory||[]).filter(row=>row.status==='verified_snapshot').sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+    const keys=new Set([
+      ...snapshots.flatMap(row=>Object.keys(row.by_quarter||{})),
+      ...Object.keys(ibaitySnapshot?.by_region_quarter||{})
+    ]);
+    return [...keys].filter(key=>/^\d{4}-q[1-4]$/.test(key)).sort().map(key=>{
+      const year=Number(key.slice(0,4)),quarter=Number(key.slice(-1));
+      const close=new Date(Date.UTC(year,quarter*3,1)).toISOString().slice(0,10);
+      const source=snapshots.find(row=>row.date>=close&&row.by_quarter?.[key]);
+      const by_region=source?.by_quarter?.[key]||ibaitySnapshot?.by_region_quarter?.[key]||{};
+      return {key,label:`${year}년 ${quarter}분기`,by_region,observed_at:source?.date||ibaitySnapshot?.updated_at};
+    });
+  }
+  function renderRegionTrend(){
+    const controls=document.getElementById('trend-controls'),holder=document.getElementById('trend-chart'),table=document.getElementById('comparison-table'),meta=document.getElementById('trend-meta');
+    const periods=regionalQuarterSeries();
+    const entries=Object.keys(districts).map(key=>({key,name:districts[key].nameKr}));
+    document.getElementById('trend-section-title').textContent='바그다드 지역별 시세 변화';
+    document.getElementById('trend-section-sub').textContent='DISTRICT APARTMENT PRICE TREND';
+    if(!periods.length){
+      controls.innerHTML='';
+      holder.innerHTML='<div class="trend-empty">지역별 분기 매물 원장을 불러오는 중입니다.</div>';
+      table.innerHTML='';
+      meta.textContent='Ibaity 승인 매매 아파트 · 분기별 단지 중앙값의 중앙값';
+      return;
+    }
+    if(selectedHistoryKey!=='all'&&!districts[selectedHistoryKey])selectedHistoryKey='all';
+    controls.innerHTML=`<div class="trend-toolbar"><div><button class="${selectedHistoryKey==='all'?'active':''}" data-history-key="all">전체 지역 비교</button>${entries.map(e=>`<button class="${selectedHistoryKey===e.key?'active':''}" data-history-key="${e.key}">${e.name}</button>`).join('')}</div><div class="trend-type"><button class="${selectedTrendType==='bar'?'active':''}" data-trend-type="bar">막대</button><button class="${selectedTrendType==='line'?'active':''}" data-trend-type="line">선</button><button class="${selectedTrendCurrency==='usd'?'active':''}" data-trend-currency="usd">USD</button><button class="${selectedTrendCurrency==='iqd'?'active':''}" data-trend-currency="iqd">IQD</button></div></div>`;
+    controls.querySelectorAll('[data-history-key]').forEach(button=>button.addEventListener('click',()=>{selectedHistoryKey=button.dataset.historyKey;renderTrend();}));
+    controls.querySelectorAll('[data-trend-type]').forEach(button=>button.addEventListener('click',()=>{selectedTrendType=button.dataset.trendType;renderTrend();}));
+    controls.querySelectorAll('[data-trend-currency]').forEach(button=>button.addEventListener('click',()=>{selectedTrendCurrency=button.dataset.trendCurrency;renderTrend();}));
+    const display=value=>selectedTrendCurrency==='usd'?Math.round(value/RATE):value;
+    const unit=selectedTrendCurrency==='usd'?'USD/m²':'IQD/m²';
+    const latest=periods.at(-1);
+    const current=ibaitySnapshot?.by_region||latest.by_region;
+    if(selectedHistoryKey==='all'){
+      const rows=entries.map(e=>({name:e.name,key:e.key,point:current[e.key]})).sort((a,b)=>(b.point?.price_per_m2_iqd||0)-(a.point?.price_per_m2_iqd||0));
+      const max=Math.max(...rows.map(r=>r.point?.price_per_m2_iqd||0),1);
+      const height=rows.length*34+30;
+      holder.innerHTML=`<svg viewBox="0 0 900 ${height}" role="img" aria-label="바그다드 지역별 현재 아파트 단가 비교">${rows.map((row,i)=>{
+        const y=12+i*34,value=row.point?.price_per_m2_iqd,sample=row.point?.sample_count||0;
+        const width=Number.isFinite(value)?Math.max(2,550*value/max):0;
+        const color=regionColor(districts[row.key]);
+        return `<text x="8" y="${y+15}" font-size="12" fill="#363B43">${row.name}</text>${width?`<rect x="190" y="${y}" width="${width}" height="20" rx="4" fill="${color}"><title>${row.name}: ${fmt(value)} IQD/m² · 표본 ${sample}건</title></rect>`:''}<text x="755" y="${y+15}" font-size="11" fill="#4B515A">${width?`${fmt(display(value))} · ${sample}건`:'미확인'}</text>`;
+      }).join('')}</svg>`;
+    }else{
+      const points=periods.map(p=>({label:p.label,key:p.key,value:p.by_region[selectedHistoryKey]?.price_per_m2_iqd,sample:p.by_region[selectedHistoryKey]?.sample_count||0}));
+      const valid=points.filter(p=>Number.isFinite(p.value));
+      if(!valid.length)holder.innerHTML='<div class="trend-empty">이 지역에는 확인된 분기별 아파트 매물이 없습니다.</div>';
+      else{
+        const W=900,H=260,P=50,vals=valid.map(p=>display(p.value)),min=Math.min(...vals),max=Math.max(...vals),span=Math.max(max-min,max*.06,1);
+        const xy=points.map((p,i)=>({x:P+(W-P*2)*(points.length===1?.5:i/(points.length-1)),y:Number.isFinite(p.value)?H-P-(display(p.value)-min+span*.12)/(span*1.24)*(H-P*2):null,...p}));
+        const color=regionColor(districts[selectedHistoryKey]);
+        const segments=[];let segment='';
+        xy.forEach(p=>{if(p.y===null){if(segment)segments.push(segment);segment='';return;}segment+=(segment?'L':'M')+`${p.x},${p.y} `;});
+        if(segment)segments.push(segment);
+        const lines=segments.map(segment=>`<path d="${segment}" fill="none" stroke="${color}" stroke-width="3"/>`).join('');
+        const marks=xy.map(p=>Number.isFinite(p.value)
+          ? `${selectedTrendType==='bar'?`<rect x="${p.x-22}" y="${p.y}" width="44" height="${H-P-p.y}" rx="4" fill="${color}"/>`:`<circle cx="${p.x}" cy="${p.y}" r="5" fill="${color}"/>`}<text x="${p.x}" y="${p.y-9}" text-anchor="middle" font-size="11" fill="#4B515A">${fmt(display(p.value))}</text>`
+          : `<text x="${p.x}" y="${H-P-15}" text-anchor="middle" font-size="11" fill="#9B9DA2">미확인</text>`).join('');
+        holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${districts[selectedHistoryKey].nameKr} 분기별 아파트 단가 변화"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${selectedTrendType==='line'?lines:''}${marks}${xy.map(p=>`<text x="${p.x}" y="${H-10}" text-anchor="middle" font-size="11" fill="#6B6D72">${p.label}</text>`).join('')}</svg>`;
+      }
+    }
+    table.innerHTML=`<table class="comparison-table"><thead><tr><th>지역</th>${periods.map(p=>`<th>${p.label}<br>${unit}</th>`).join('')}</tr></thead><tbody>${entries.map(e=>`<tr><td>${e.name}</td>${periods.map(p=>{const point=p.by_region[e.key];return `<td>${Number.isFinite(point?.price_per_m2_iqd)?fmt(display(point.price_per_m2_iqd)):'미확인'}<small>표본 ${point?.sample_count||0}건${point?.sample_count>0&&point.sample_count<5?' · 참고':''}</small></td>`;}).join('')}</tr>`).join('')}</tbody></table>`;
+    meta.textContent=`Ibaity 승인 매매 아파트 · 지역 내 단지별 매물 단가 중앙값의 중앙값 · 전체 지역 비교는 현재 최근 90일, 선택 지역은 분기별 · ${latest.label}까지 · 과거 기간은 ${latest.observed_at||'최신'} 활성 원장으로 확인된 매물 코호트 · 표본 5건 미만 참고 · 실거래가 아님`;
+  }
+
   function renderHistoryTrend(kind){
+    if(kind==='region')return renderRegionTrend();
     const controls=document.getElementById('trend-controls'),holder=document.getElementById('trend-chart'),table=document.getElementById('comparison-table'),meta=document.getElementById('trend-meta');
     const national=kind==='national';
     const regionPeriods=governorateHistory?.periods?.some(period=>Number.isFinite(period.values?.baghdad?.avg_price_per_m2_iqd))?governorateHistory.periods:baghdadRegionalHistory.periods;
@@ -1383,11 +1461,11 @@
     const priceLine=d.sourceKind==='dual'
       ? `<br>공식 $${fmt(d.officialUsd)} / ${fmt(d.officialIqd)} IQD per m²<br>시장 $${fmt(usdOf(d))} / ${fmt(d.iqd)} IQD per m²`
       : `<br>$${fmt(usdOf(d))} / ${fmt(d.iqd)} IQD per m²`;
-    return `<b>${d.nameKr} · ${d.nameEn}</b>${d.complex?`<br>${d.complex}`:''}${priceLine}${d.sourceKind==='single'?'<br>단일 공개 매물':'<br>✓ 공개 원문 기반'}`;
+    return `<b>${d.nameKr} · ${d.nameEn}</b>${d.complex?`<br>${d.complex}`:''}${priceLine}${d.sampleCount<5?'<br>표본 부족 · 참고값':'<br>표본 '+d.sampleCount+'건 · 단지별 중앙값'}`;
   }
 
   Object.entries(districts).forEach(([key,d])=>{
-    const poly = L.polygon(d.coords,{color:'#fff',weight:1.5,fillColor:tierColor[tierForDistrict(d)],fillOpacity:.62})
+    const poly = L.polygon(d.coords,{color:'#fff',weight:1.5,fillColor:regionColor(d),fillOpacity:.62})
       .addTo(map).bindTooltip(districtTooltip(d),{sticky:true});
     poly._regionTooltip = districtTooltip(d);
     poly.on('click',()=>{ if(activeMode==='region') selectDistrict(key); });
@@ -1558,7 +1636,7 @@
     calloutSets[mode].anchors[key]=anchor;
   }
 
-  Object.entries(districts).forEach(([key,d])=>addCallout('region',key,d,tierColor[tierForDistrict(d)]));
+  Object.entries(districts).forEach(([key,d])=>addCallout('region',key,d,regionColor(d)));
   Object.entries(complexes).forEach(([key,d])=>addCallout('complex',key,d,tierColor[tierForComplex(d)]));
 
   function rectAt(x,y,width,height,gap=0){
@@ -2123,8 +2201,8 @@
         if(!poly.getTooltip()) poly.bindTooltip(poly._regionTooltip,{sticky:true});
       });
       viewTitle.textContent='바그다드 지역별 비교';viewSub.textContent='BAGHDAD DISTRICTS';
-      viewNote.textContent='지도/리스트 클릭 시 서로 연동됩니다 · 지도는 마우스 휠로 확대·축소';
-      listPanelTitle.textContent='검증된 지역 평균';listPanelCount.textContent=`${orderedRegionKeys.length} VERIFIED`;mapPanelCount.textContent='실제 경계 기반';
+      viewNote.textContent='Ibaity 승인 아파트 매물 단가 · 단지별 중앙값의 중앙값 · 표본 5건 미만 참고 · 회색은 미확인';
+      listPanelTitle.textContent='지역별 아파트 매물 시세';listPanelCount.textContent=`${orderedRegionKeys.filter(k=>hasPrice(districts[k])).length} / ${orderedRegionKeys.length} 확인`;mapPanelCount.textContent='실제 경계 기반';
       chartTitle.textContent='지역별 m² 단가 비교';
       map.fitBounds(fullBounds,{padding:[24,24]});
     }else{
@@ -2170,8 +2248,9 @@
 
   function refreshDistrictTierVisuals(){
     Object.entries(districts).forEach(([key,d])=>{
-      const color=tierColor[tierForDistrict(d)];
+      const color=regionColor(d);
       polyLayers[key]?.setStyle({fillColor:color});
+      calloutSets.region.anchors[key]?.setStyle({color});
       const label=document.querySelector(`#lbl-region-${key}`);
       if(label) label.style.setProperty('--pin-color',color);
     });
@@ -2183,14 +2262,14 @@
       const d=districts[key];
       const value=summary && summary.price_per_m2_iqd;
       if(!d || !Number.isFinite(value) || summary.sample_count<1) return;
-      d.iqd=value;
+      d.iqd=value;d.verified=false;
       d.sampleCount=summary.sample_count;
       d.checked=snapshot.updated_at;
       d.sourceKind=key==='bismayah' ? 'dual' : (summary.sample_count===1 ? 'single' : 'sample');
       d.propertyType=summary.property_type || '아파트';
       if(summary.listing_sources?.length) d.sources=summary.listing_sources.map((url,i)=>({label:`9월 확인 매물 ${i+1}`,url}));
       d.source=`${snapshot.source} · ${snapshot.updated_at} · 매물 ${summary.sample_count}건 중앙값`;
-      if(!calloutSets.region.labels[key]) addCallout('region',key,d,tierColor[tierForDistrict(d)]);
+      if(!calloutSets.region.labels[key]) addCallout('region',key,d,regionColor(d));
     });
     refreshOrderedRegions();
     refreshDistrictTierVisuals();
@@ -2266,59 +2345,30 @@
   }
 
   function applyIbaityRegionPrices(snapshot){
-    const summariesByKey={};
-    const summariesById={};
-    Object.values(snapshot.by_complex||{}).forEach(summary=>{
-      if(summary.complex_key==='dar_alsalam'||summary.complex_key==='bismayah_complex'){
-        const eligible=(snapshot.listings||[]).filter(listing=>listing.complex_key===summary.complex_key&&isPriceEligibleListing(listing)&&Number.isFinite(Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd)));
-        const values=eligible.map(listing=>Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd));
-        summary={...summary,median_price_per_m2_iqd:median(values),sample_count:values.length,listing_ids:eligible.map(listing=>listing.id)};
+    Object.entries(districts).forEach(([key,d])=>{
+      const summary=snapshot.by_region?.[key];
+      const value=summary?.price_per_m2_iqd;
+      if(!Number.isFinite(value)||!(summary.sample_count>0)){
+        d.iqd=null;d.sampleCount=0;d.sourceKind='pending';d.verified=false;
+        d.complex='최근 90일 아파트 매물 표본 없음';
+        d.propertyType='아파트 매매';
+        d.source='Ibaity 승인 매물 · 지역 표본 미확인';
+        d.sources=[];
+        return;
       }
-      if(summary.complex_id) summariesById[summary.complex_id]=summary;
-      const key=summary.complex_key;
-      if(!key || !Number.isFinite(summary.median_price_per_m2_iqd) || !(summary.sample_count>0)) return;
-      if(!summariesByKey[key] || summary.sample_count>summariesByKey[key].sample_count) summariesByKey[key]=summary;
-    });
-    const districtGroups={...complexKeysByDistrict};
-    Object.entries(additionalComplexIdsByDistrict).forEach(([districtKey,ids])=>{
-      districtGroups[districtKey]=[...(districtGroups[districtKey]||[]),...ids.map(id=>({complexId:id}))];
-    });
-    Object.entries(districtGroups).forEach(([districtKey,complexKeys])=>{
-      const d=districts[districtKey];
-      if(!d) return;
-      const included=complexKeys.map(group=>{
-        const key=typeof group==='string'?group:null;
-        const summary=key?summariesByKey[key]:summariesById[group.complexId];
-        return {key,summary};
-      }).filter(x=>x.summary);
-      const hasObservedListings=complexKeys.some(group=>{
-        const summary=typeof group==='string'?summariesByKey[group]:summariesById[group.complexId];
-        return summary&&summary.all_sample_count>0;
-      });
-      if(!included.length){
-        d.iqd=null;d.sampleCount=0;d.sourceKind='pending';
-        d.propertyType='아파트';d.complex='아파트 단지 매물 미확인';
-        d.source=hasObservedListings?'단지 매물은 확인되었으나 최근 90일 매물 없음':'현재 수집 데이터에서 아파트 단지 매물 미확인';
-        d.priceMethod=hasObservedListings?'최근 90일 공개 매물 없음':'아파트 단지 표본 없음';
-        d.sources=[];return;
-      }
-      const complexPrices=included.map(x=>x.summary.median_price_per_m2_iqd).sort((a,b)=>a-b);
-      const middle=Math.floor(complexPrices.length/2);
-      const regionalMedian=complexPrices.length%2 ? complexPrices[middle] : Math.round((complexPrices[middle-1]+complexPrices[middle])/2);
-      const listingCount=included.reduce((sum,x)=>sum+(x.summary.sample_count||0),0);
-      d.iqd=regionalMedian;
-      d.sampleCount=listingCount;
-      d.sourceKind=included.length===1&&listingCount===1?'single':'sample';
-      d.complex=`확인 단지 ${included.length}곳 · 최근 매물 ${listingCount}건`;
-      d.propertyType='아파트';
+      d.iqd=value;
+      d.sampleCount=summary.sample_count;
+      d.sourceKind=d.sampleCount<5?'limited':'sample';
+      d.complex=`확인 단지 ${summary.complex_count}곳 · 매물 ${summary.sample_count}건`;
+      d.propertyType='아파트 매매';
       d.checked=snapshot.updated_at;
-      d.priceMethod=`단지별 중앙값의 중앙값 · 최근 ${snapshot.current_window_days||90}일`;
-      d.source=`ibaity 공개 매물 · 단지 ${included.length}곳 · 최근 매물 ${listingCount}건 · 단지 중앙값의 중앙값`;
-      const sourceIds=new Set(included.flatMap(x=>x.summary.listing_ids||[]));
+      d.priceMethod='단지별 매물 단가 중앙값의 중앙값 · 최근 90일';
+      d.source=`Ibaity 승인 매매 아파트 · 단지 ${summary.complex_count}곳 · 표본 ${summary.sample_count}건 · 단지별 중앙값의 중앙값`;
+      const sourceIds=new Set(summary.listing_ids||[]);
       d.sources=(snapshot.listings||[]).filter(listing=>sourceIds.has(listing.id)&&listing.source_url).slice(0,12).map(listing=>({
-        label:`${listing.complex_name_ar||listing.complex_key||'Ibaity'} · ${listing.area_m2}m² / ${Number(listing.price_iqd).toLocaleString('en-US')} IQD`,url:listing.source_url
+        label:`${listing.complex_name_ar||'Ibaity'} · ${listing.area_m2}m² / ${Number(listing.price_iqd).toLocaleString('en-US')} IQD`,url:listing.source_url
       }));
-      d.sourceNote=`지역 대표값은 ${included.length}개 단지의 최근 ${snapshot.current_window_days||90}일 단지별 중앙값을 동일 가중치로 다시 계산한 중앙값입니다. 전체 매물 통합 중앙값이 아니며, 실제 거래가가 아닌 공개 매도 호가입니다.`;
+      d.sourceNote=`최근 90일 등록된 Ibaity 승인 매매 아파트 중 현금·완납성 가격 표본 ${summary.sample_count}건을 사용했습니다. 지역 내 각 단지의 매물 단가 중앙값을 구한 뒤 단지를 동일 가중치로 다시 중앙값을 산출합니다. 표본 5건 미만은 참고값입니다. 실거래가가 아닙니다.`;
     });
     refreshOrderedRegions();
     refreshDistrictTierVisuals();
@@ -2442,14 +2492,13 @@
       if(Number.isFinite(row.unit)) districtGroups[district].units.push(row.unit);
       districtGroups[district].sampleCount+=row.listingCount;
     });
-    const districtHeaders=['보고 기간','대상','주거용 평균(IQD/m²)','주거용 평균(USD/m²)','최저(IQD/m²)','최고(IQD/m²)','표본 수(건)','출처/산출 기준'];
-    const areaHistory=governorateHistory?.periods?.some(period=>Number.isFinite(period.values?.baghdad?.avg_price_per_m2_iqd))?governorateHistory.periods:baghdadRegionalHistory.periods;
-    const districtRows=areaHistory.map(period=>{
-      const value=period.values?.baghdad;
-      return [excelValue(period.label), '바그다드 전체', excelValue(value?.avg_price_per_m2_iqd), excelValue(Number.isFinite(value?.avg_price_per_m2_iqd)?Math.round(value.avg_price_per_m2_iqd/RATE):null), excelValue(value?.min_price_per_m2_iqd), excelValue(value?.max_price_per_m2_iqd), excelValue(value?.sample_count), 'Ibaity 공개 주거용 통계 보고서 평균 · 아파트/주택 혼합 가능 · 실거래가 아님'];
+    const districtHeaders=['지역','현재 단가(IQD/m²)','현재 단가(USD/m²)','표본 수(건)','단지 수(곳)','최저 단지 중앙값(IQD/m²)','최고 단지 중앙값(IQD/m²)','산출 기준'];
+    const districtRows=Object.keys(districts).map(key=>{
+      const value=ibaitySnapshot?.by_region?.[key];
+      return [districts[key].nameKr,excelValue(value?.price_per_m2_iqd),excelValue(Number.isFinite(value?.price_per_m2_iqd)?Math.round(value.price_per_m2_iqd/RATE):null),value?.sample_count||0,value?.complex_count||0,excelValue(value?.min_price_per_m2_iqd),excelValue(value?.max_price_per_m2_iqd),'최근 90일 Ibaity 승인 매매 아파트 · 단지별 중앙값의 중앙값 · 5건 미만 참고 · 실거래가 아님'];
     });
     const districtSheet=XLSX.utils.aoa_to_sheet([districtHeaders,...districtRows]);
-    applyExcelSheetStyle(districtSheet,0,[20,22,22,22,18,18,14,66],{2:'#,##0',3:'#,##0',4:'#,##0',5:'#,##0'});
+    applyExcelSheetStyle(districtSheet,0,[22,22,22,16,16,24,24,75],{1:'#,##0',2:'#,##0',5:'#,##0',6:'#,##0'});
 
     // Keep the downloadable workbook on the same dated raw-ledger basis as
     // the on-screen quarterly comparison.  This makes it possible to audit
@@ -2473,20 +2522,19 @@
       });
     const quarterlySheet=XLSX.utils.aoa_to_sheet([quarterlyHeaders,...quarterlyRows]);
     applyExcelSheetStyle(quarterlySheet,0,[24,20,16,20,16,20,16,20,16,34],{1:'#,##0',3:'#,##0',5:'#,##0',7:'#,##0'});
-    const regionalPeriods=governorateHistory?.periods?.some(period=>Number.isFinite(period.values?.baghdad?.avg_price_per_m2_iqd))?governorateHistory.periods:baghdadRegionalHistory.periods;
-    const regionTrendHeaders=['보고 기간','대상','평균(IQD/m²)','평균(USD/m²)','최저(IQD/m²)','최고(IQD/m²)','표본 수(건)','전기 대비(%)','출처/비고'];
-    const regionTrendRows=regionalPeriods.map(period=>{
-      const value=period.values?.baghdad;
-      return [excelValue(period.label),'바그다드 전체',excelValue(value?.avg_price_per_m2_iqd),excelValue(Number.isFinite(value?.avg_price_per_m2_iqd)?Math.round(value.avg_price_per_m2_iqd/RATE):null),excelValue(value?.min_price_per_m2_iqd),excelValue(value?.max_price_per_m2_iqd),excelValue(value?.sample_count),excelValue(value?.change_percent),'Ibaity 주거용 통계 보고서 평균 · 주택/아파트 혼합 가능 · 실거래가 아님'];
-    });
+    const regionTrendHeaders=['분기','지역','단가(IQD/m²)','단가(USD/m²)','표본 수(건)','단지 수(곳)','원장 관측일','산출 기준'];
+    const regionTrendRows=regionalQuarterSeries().flatMap(period=>Object.keys(districts).map(key=>{
+      const value=period.by_region[key];
+      return [period.label,districts[key].nameKr,excelValue(value?.price_per_m2_iqd),excelValue(Number.isFinite(value?.price_per_m2_iqd)?Math.round(value.price_per_m2_iqd/RATE):null),value?.sample_count||0,value?.complex_count||0,period.observed_at||'','등록 분기 기준 Ibaity 승인 매매 아파트 · 단지별 중앙값의 중앙값 · 5건 미만 참고'];
+    }));
     const regionTrendSheet=XLSX.utils.aoa_to_sheet([regionTrendHeaders,...regionTrendRows]);
-    applyExcelSheetStyle(regionTrendSheet,0,[20,20,18,18,18,18,14,16,68],{2:'#,##0',3:'#,##0',4:'#,##0',5:'#,##0',7:'0.00'});
+    applyExcelSheetStyle(regionTrendSheet,0,[18,22,22,22,16,16,18,75],{2:'#,##0',3:'#,##0'});
     const workbook=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook,complexSheet,'단지별 리스트');
     XLSX.utils.book_append_sheet(workbook,regionSheet,'단지별 평단가');
-    XLSX.utils.book_append_sheet(workbook,districtSheet,'Ibaity 주거용 시계열');
+    XLSX.utils.book_append_sheet(workbook,districtSheet,'지역별 현재 시세');
     XLSX.utils.book_append_sheet(workbook,quarterlySheet,'단지별 분기 중위값');
-    XLSX.utils.book_append_sheet(workbook,regionTrendSheet,'지역 시세 그래프 원자료');
+    XLSX.utils.book_append_sheet(workbook,regionTrendSheet,'지역별 분기 추이');
     const updatedAt=ibaitySnapshot?.updated_at||new Date().toISOString().slice(0,10);
     XLSX.writeFile(workbook,`sise-단지별-지역별-${updatedAt}.xlsx`);
   }
@@ -2516,6 +2564,9 @@
   renderList();renderChart();renderTrend();updateLegend();scheduleCalloutLayout();
   fetch(`./data/complex-history.json?v=${Date.now()}`,{cache:'no-store'})
     .then(r=>r.ok?r.json():[]).then(rows=>{ trendHistory=Array.isArray(rows)?rows:[]; renderTrend(); })
+    .catch(()=>renderTrend());
+  fetch(`./data/region-history.json?v=${Date.now()}`,{cache:'no-store'})
+    .then(r=>r.ok?r.json():[]).then(rows=>{regionHistory=Array.isArray(rows)?rows:[];renderTrend();})
     .catch(()=>renderTrend());
   fetch(`./data/governorate-history.json?v=${Date.now()}`,{cache:'no-store'})
     .then(r=>r.ok?r.json():null).then(data=>{ governorateHistory=data; renderTrend(); })
