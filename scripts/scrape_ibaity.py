@@ -264,23 +264,42 @@ def append_monthly_history(snapshot: dict[str, Any]) -> None:
     history = [row for row in history if not str(row.get("date", "")).startswith(month_key)]
     cutoff = dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=CURRENT_WINDOW_DAYS)
     monthly: dict[str, Any] = {}
+    observed_month = dt.date.fromisoformat(observed_at)
+    current_quarter_start_month = ((observed_month.month - 1) // 3) * 3 + 1
+    quarter_start_month = current_quarter_start_month - 3
+    quarter_year = observed_month.year
+    if quarter_start_month < 1:
+        quarter_start_month += 12
+        quarter_year -= 1
+    quarter_start = dt.date(quarter_year, quarter_start_month, 1)
+    quarter_key = f"{quarter_year}-q{((quarter_start_month - 1) // 3) + 1}"
+    quarterly: dict[str, Any] = {}
     for key in sorted({str(row.get("complex_key")) for row in snapshot["listings"] if row.get("complex_key")}):
-        items = [
+        eligible = [
             row for row in snapshot["listings"]
-            if row.get("complex_key") == key
-            and row.get("price_eligible", True)
-            and row.get("created_at")
-            and listing_is_recent(row.get("created_at"), cutoff)
+            if row.get("complex_key") == key and row.get("price_eligible", True)
         ]
         if key == "dar_alsalam":
-            items = [row for row in items if int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) >= DAR_ALSALAM_CASH_MIN_UNIT_IQD]
+            eligible = [row for row in eligible if int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) >= DAR_ALSALAM_CASH_MIN_UNIT_IQD]
         if key == "bismayah_complex":
-            items = [row for row in items if int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) >= BISMAYAH_CASH_MIN_UNIT_IQD]
-        values = [int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) for row in items]
-        values = [value for value in values if value > 0]
+            eligible = [row for row in eligible if int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) >= BISMAYAH_CASH_MIN_UNIT_IQD]
+        recent_items = [row for row in eligible if row.get("created_at") and listing_is_recent(row.get("created_at"), cutoff)]
+        recent_values = [int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) for row in recent_items]
+        recent_values = [value for value in recent_values if value > 0]
         monthly[key] = {
-            "price_per_m2_iqd": round(statistics.median(values)) if values else None,
-            "sample_count": len(values),
+            "price_per_m2_iqd": round(statistics.median(recent_values)) if recent_values else None,
+            "sample_count": len(recent_values),
+        }
+
+        quarter_items = [
+            row for row in eligible
+            if row.get("created_at") and quarter_start.isoformat() <= str(row["created_at"])[:10] < observed_at
+        ]
+        quarter_values = [int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) for row in quarter_items]
+        quarter_values = [value for value in quarter_values if value > 0]
+        quarterly[key] = {
+            "price_per_m2_iqd": round(statistics.median(quarter_values)) if quarter_values else None,
+            "sample_count": len(quarter_values),
         }
     history.append({
         "date": observed_at,
@@ -288,6 +307,8 @@ def append_monthly_history(snapshot: dict[str, Any]) -> None:
         "source": "ibaity.com 승인 활성 매매 아파트 공개 client API",
         "method": f"수집일 기준 최근 {CURRENT_WINDOW_DAYS}일 등록 매물의 단지별 m²당 호가 중앙값; 표본 수 병기",
         "by_complex": monthly,
+        "closed_quarter": quarter_key,
+        "by_quarter": {quarter_key: quarterly},
     })
     history.sort(key=lambda row: str(row.get("date", "")))
     HISTORY_PATH.write_text(json.dumps(history, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

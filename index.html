@@ -1195,15 +1195,12 @@
         const points=snapshots.map(row=>row.by_complex?.[complexKey]).filter(point=>point&&Number.isFinite(Number(point.price_per_m2_iqd))&&Number(point.sample_count)>0);
         return {period:period.key,label:period.label,value:points.length?median(points.map(point=>Number(point.price_per_m2_iqd))):null,sample:points.reduce((sum,point)=>sum+Number(point.sample_count||0),0)};
       }
-      if(period.key==='2026-q3'){
-        const listings=(ibaitySnapshot?.listings||[]).filter(listing=>listing.complex_key===complexKey && isPriceEligibleListing(listing) && Number.isFinite(Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd)) && /^2026-(07|08|09)-/.test(String(listing.created_at||'')));
-        const values=listings.map(listing=>Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd));
-        return {period:period.key,label:period.label,value:median(values),sample:values.length};
-      }
-      const year='2026';
-      const snapshots=trendHistory.filter(row=>row.status==='verified_snapshot'&&String(row.date||'').startsWith(year+'-')&&period.months.includes(Number(String(row.date||'').slice(5,7))));
-      const points=snapshots.map(row=>row.by_complex?.[complexKey]).filter(point=>point&&Number.isFinite(Number(point.price_per_m2_iqd))&&Number(point.sample_count)>0);
-      return {period:period.key,label:period.label,value:points.length?median(points.map(point=>Number(point.price_per_m2_iqd))):null,sample:points.reduce((sum,point)=>sum+Number(point.sample_count||0),0)};
+      const quarterEnd={"2026-q1":"2026-04-01","2026-q2":"2026-07-01","2026-q3":"2026-10-01"}[period.key];
+      const snapshots=trendHistory
+        .filter(row=>row.status==='verified_snapshot'&&quarterEnd&&String(row.date||'')>=quarterEnd&&row.by_quarter?.[period.key])
+        .sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+      const point=snapshots[0]?.by_quarter?.[period.key]?.[complexKey];
+      return {period:period.key,label:period.label,value:point&&Number(point.sample_count)>0?Number(point.price_per_m2_iqd):null,sample:Number(point?.sample_count||0)};
     });
   }
   function historyTrendPoints(key, periods, valueOf){
