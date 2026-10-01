@@ -18,16 +18,27 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Inspect detailed public listing terms
+      - name: Inspect all public list API descriptions
         run: |
           PYTHONPATH=scripts python - <<'PY'
-          from scrape_ibaity import fetch_page
-          for page in (1, 32):
-              rows=fetch_page(page)
-              print("PAGE",page,"COUNT",len(rows))
-              if rows:
-                  row=next((x for x in rows if x.get("id")=="86BCD7"),rows[0])
-                  print("ID",row.get("id"),"KEYS",sorted(row.keys()))
-                  for key in ("description","details","content","title","price"):
-                      print(key,repr(row.get(key))[:500])
+          from scrape_ibaity import fetch_page, clean_listing
+          from audit_ibaity_terms import FINANCING, CASH
+          import re
+          records=[]
+          for page in range(1,100):
+              payload=fetch_page(page)
+              for item in payload:
+                  cleaned=clean_listing(item,"2026-10-01")
+                  if cleaned:
+                      records.append((item,cleaned))
+              if len(payload)<10:break
+          counts={}
+          for item,row in records:
+              desc=str(item.get("description") or "")
+              markers=sorted(set(m.group(0).lower() for m in FINANCING.finditer(desc)))
+              status="finance" if markers else "cash" if CASH.search(desc) else "unspecified" if desc.strip() else "missing"
+              counts[status]=counts.get(status,0)+1
+              if row["price_eligible"] and status in ("finance","missing"):
+                  print("FLAG",row["id"],status,",".join(markers)[:90],row["complex_key"],row["complex_name_ar"],row["price_iqd"])
+          print("TOTAL",len(records),"COUNTS",counts)
           PY
