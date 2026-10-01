@@ -2297,10 +2297,12 @@
     if(bismayahDate) bismayahDate.textContent=`MARKET DATA · ${String(snapshot.updated_at||'미확인').replaceAll('-','.')}`;
     const query=new URLSearchParams(snapshot.query||{});
     const sourceUrl=snapshot.api ? `${snapshot.api}?${query.toString()}` : 'https://ibaity.com/realestate?offerType=SELL&cityIds=G76HDC&categoryId=C8D46D&searchCountry=IQ&currency=IQD';
+    const seenComplexes=new Set();
     Object.values(snapshot.by_complex).forEach(summary=>{
       const key=summary.complex_key;
       const d=key ? complexes[key] : null;
       if(!d) return;
+      seenComplexes.add(key);
       const eligibleIds=new Set((summary.listing_ids||[]).filter(id=>!excludedFinancingListingIds[key]?.has(String(id))));
       const eligibleListings=(snapshot.listings||[]).filter(listing=>listing.complex_key===key && eligibleIds.has(String(listing.id)) && isPriceEligibleListing(listing) && Number.isFinite(Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd)));
       const eligibleValues=eligibleListings.map(listing=>Number(listing.price_per_m2_iqd||listing.calculated_price_per_m2_iqd));
@@ -2333,6 +2335,16 @@
         .map((listing,index)=>({label:`ibaity · ${listing.area_m2}m² / ${Number(listing.price_iqd).toLocaleString('en-US')} IQD`,url:listing.source_url}));
       d.sources=listingSources.length ? listingSources : [{label:`ibaity API · ${d.sampleCount}건`,url:sourceUrl}];
       d.sourceNote=`ibaity 공개 client API에서 수집한 승인 매매 아파트의 등록 호가입니다. 실거래가가 아니며, 최근 ${summary.current_window_days||90}일 등록 매물 중 현금·완납이 원문에 명시되고 가격·면적이 확인된 ${d.sampleCount}건을 사용했습니다. 선수금·분할납부·보증인 교체·대출 승계 조건 매물은 가격 산정에서 제외했습니다. 다르 알살람과 비스마야는 현금·완납 확인 전 저가 조건부 매물을 보수적으로 제외합니다.`;
+    });
+    // Complexes absent from this month's API must not retain embedded reference prices.
+    Object.entries(complexes).forEach(([key,d])=>{
+      if(seenComplexes.has(key)) return;
+      d.iqd=d.officialIqd||null;
+      d.sampleCount=0;
+      d.sourceKind=d.officialIqd?'official':'pending';
+      d.priceMethod=d.officialIqd?'공식 분양가 기준 · 민간시장 표본 없음':'최근 현금·완납 매물 표본 없음';
+      d.sources=[];
+      d.sourceNote='현재 원장에 가격을 확인할 수 있는 매물이 없습니다.';
     });
     applyIbaityRegionPrices(snapshot);
     updateBismayahMarketLinks(snapshot);
@@ -2405,10 +2417,24 @@
   }
 
   function applyDataQualityGate(){
-    Object.values(complexes).forEach(c=>{if(c.iqd!==null){if(c.sourceKind!=='dual')c.sourceKind='pending';c.priceMethod=`${c.checked||'기준일'} 공개 매물 호가 · 원문 재검증 중`;c.sourceNote='표시값은 이전 기준일의 공개 매물 호가 중앙값입니다. 현재 링크 상태와 가격·면적 동시 표기를 재확인 중이며, 검증 완료 전에는 잠정 참고값으로 해석해야 합니다.';}});
-    Object.values(districts).forEach(d=>{if(d.iqd!==null&&d.sourceKind!=='official'&&d.sourceKind!=='dual'){d.sourceKind='pending';d.source=`${d.source||'대표 단지 공개 매물 호가'} · 원문 재검증 중`;}});
+    Object.values(complexes).forEach(c=>{
+      if(c.officialIqd){
+        c.iqd=c.officialIqd;c.sourceKind='official';
+        c.priceMethod='공식 분양가 기준 · 민간시장 표본 확인 중';
+      }else{
+        c.iqd=null;c.sourceKind='pending';
+        c.priceMethod='최신 현금·완납 매물 표본 확인 중';
+      }
+      c.sampleCount=0;c.sources=[];
+      c.sourceNote='최신 현금·완납 매물 원장이 로드된 뒤에만 민간시장 호가를 표시합니다.';
+    });
+    Object.values(districts).forEach(d=>{
+      if(d.sourceKind==='official') return;
+      d.iqd=null;d.sampleCount=0;d.sourceKind='pending';d.sources=[];
+      d.source='최신 현금·완납 매물 표본 확인 중';
+    });
     refreshOrderedRegions();
-    document.querySelectorAll('.unit-price-block.market .price-caption small').forEach(el=>{el.textContent='잠정 참고값 · 재검증 중';});
+    updateBismayahMarketLinks({by_complex:{},listings:[]});
     document.querySelectorAll('.unit-sources').forEach(el=>{el.open=false;});
   }
   refreshComplexOrdering();
