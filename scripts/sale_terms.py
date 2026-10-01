@@ -1,8 +1,8 @@
 """Conservative sale-term classification for Ibaity public listing descriptions.
 
-Only descriptions that explicitly state cash or full settlement qualify for
-price statistics. Financing language always takes precedence, including when
-an advertised amount is a total price rather than merely the down payment.
+Descriptions are classified independently of eligibility. Explicit financing
+language takes precedence; listings without stated payment terms can be used
+as asking-price samples, while known financing cases are excluded by ID.
 The description itself is not stored in the published snapshot.
 """
 from __future__ import annotations

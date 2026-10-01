@@ -52,16 +52,8 @@ FINANCING_EXCLUDED_IDS = {
     "86F1D7",  # 65M IQD
 }
 
-# A Bismayah listing is included only when its amount is consistent with a
-# settled cash-sale price.  The public list API does not expose the detail
-# page's financing text, so the low-price conditional listings are kept in
-# the raw snapshot but conservatively excluded from statistics.
-BISMAYAH_CASH_MIN_UNIT_IQD = 925000
-
-# Dar Al Salam's low advertised amounts commonly represent an upfront amount
-# or a remaining installment/loan obligation. Keep only the high-price band
-# consistent with a full cash settlement until detail-page terms are exposed.
-DAR_ALSALAM_CASH_MIN_UNIT_IQD = 1800000
+# Price alone is not proof of financing. Listings with no payment terms remain
+# eligible unless the listing ID or wording confirms a conditional obligation.
 
 COMPLEX_KEY_BY_AR = {
     "المنصور ستي": "mansour_city",
@@ -148,17 +140,9 @@ def clean_listing(item: dict[str, Any], observed_at: str) -> dict[str, Any] | No
     images = item.get("images") or []
     listing_id = str(item.get("id") or "")
     complex_key = COMPLEX_KEY_BY_AR.get(complex_info.get("name")) or COMPLEX_KEY_BY_PROVIDER_NAME.get(str(complex_info.get("name") or "").strip().lower())
-    is_bismayah_conditional = complex_key == "bismayah_complex" and calculated < BISMAYAH_CASH_MIN_UNIT_IQD
-    is_dar_alsalam_conditional = complex_key == "dar_alsalam" and calculated < DAR_ALSALAM_CASH_MIN_UNIT_IQD
     sale_terms_status = classify_sale_terms(item.get("description"))
-    is_excluded = (listing_id in FINANCING_EXCLUDED_IDS or is_bismayah_conditional
-                   or is_dar_alsalam_conditional or sale_terms_status != "cash")
-    if listing_id in FINANCING_EXCLUDED_IDS or sale_terms_status == "finance":
-        exclusion_reason = "대출·잔여 할부·선납 등 조건부 거래 문구 확인"
-    elif is_bismayah_conditional or is_dar_alsalam_conditional:
-        exclusion_reason = "현금 완납 금액으로 보기 어려운 가격대"
-    else:
-        exclusion_reason = "원문에서 현금·완납 조건 미확인"
+    is_excluded = listing_id in FINANCING_EXCLUDED_IDS or sale_terms_status == "finance"
+    exclusion_reason = "대출·잔여 할부·선납 등 조건부 거래 확인" if is_excluded else None
     return {
         "id": listing_id,
         "observed_at": observed_at,
@@ -183,7 +167,7 @@ def clean_listing(item: dict[str, Any], observed_at: str) -> dict[str, Any] | No
         "source_api_url": api_url(1),
         "sale_terms_status": sale_terms_status,
         "price_eligible": not is_excluded,
-        "price_exclusion_reason": exclusion_reason if is_excluded else None,
+        "price_exclusion_reason": exclusion_reason,
     }
 
 
@@ -289,11 +273,6 @@ def append_monthly_history(snapshot: dict[str, Any]) -> None:
             row for row in snapshot["listings"]
             if row.get("complex_key") == key and row.get("price_eligible", True)
         ]
-        if key == "dar_alsalam":
-            eligible = [row for row in eligible if int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) >= DAR_ALSALAM_CASH_MIN_UNIT_IQD]
-        if key == "bismayah_complex":
-            eligible = [row for row in eligible if int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0) >= BISMAYAH_CASH_MIN_UNIT_IQD]
-
         recent_values = [
             int(row.get("price_per_m2_iqd") or row.get("calculated_price_per_m2_iqd") or 0)
             for row in eligible
@@ -390,7 +369,7 @@ def main() -> int:
         "query": PARAMS,
         "pages_collected": pages,
         "listing_count": len(records),
-        "method": f"APPROVED, active SELL apartments; only descriptions explicitly stating cash or fully paid and without financing terms; recent {CURRENT_WINDOW_DAYS} days",
+        "method": f"APPROVED, active SELL apartments; exclude confirmed financing or installment terms; include unspecified and missing payment terms; recent {CURRENT_WINDOW_DAYS} days",
         "sale_terms_counts": {status: sum(row["sale_terms_status"] == status for row in records) for status in ("cash", "finance", "unspecified", "missing")},
         "by_complex": summarize(records),
         "by_region": summarize_region([row for row in records if listing_is_recent(row.get("created_at"), dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=CURRENT_WINDOW_DAYS))]),
