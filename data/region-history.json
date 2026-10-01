@@ -2,58 +2,19 @@
   {
     "date": "2026-10-01",
     "status": "verified_snapshot",
-    "method_version": "district-subdistrict-v2",
+    "method_version": "cash-description-v3",
     "source": "ibaity.com 승인 활성 매매 아파트",
-    "method": "지역명 또는 위치가 확인된 단지의 매물 m² 단가 중앙값의 중앙값; 조건부 가격 제외; 표본 수 병기",
+    "method": "지역명 또는 위치가 확인된 단지의 매물 m² 단가 중앙값의 중앙값; 원문에서 현금·완납이 명시된 가격만 사용; 표본 수 병기",
     "by_region": {
       "mansour": {
-        "price_per_m2_iqd": 2232143,
-        "sample_count": 41,
-        "complex_count": 5,
-        "min_price_per_m2_iqd": 1350000,
-        "max_price_per_m2_iqd": 3229167,
+        "price_per_m2_iqd": 2301042,
+        "sample_count": 2,
+        "complex_count": 2,
+        "min_price_per_m2_iqd": 2232143,
+        "max_price_per_m2_iqd": 2369942,
         "listing_ids": [
-          "DD6JFG",
-          "86CF07",
-          "86CE97",
-          "6DFGG8",
-          "24463F",
-          "6GC1A8",
-          "78GB20",
-          "CI43FD",
-          "GDFJF6",
-          "78D2H0",
-          "DC25DG",
-          "B062BH",
-          "IF2EAC",
-          "CIFA0D",
-          "07841B",
-          "GDC576",
-          "F24B2I",
-          "786J60",
-          "86G127",
-          "DCIHBG",
-          "6GDAH8",
-          "0783HB",
-          "786170",
-          "GDCHD6",
-          "IF272C",
-          "2496JF",
-          "F248JI",
-          "HB7HJE",
-          "495HA2",
-          "GDFJE6",
-          "HB8I0E",
-          "CI414D",
-          "CI41ED",
-          "DC21CG",
-          "HB83CE",
-          "GD2JI6",
-          "DCIA2G",
-          "GDI9F6",
-          "86D1F7",
           "HBG7JE",
-          "CFC64D"
+          "6DFGG8"
         ]
       },
       "jadriya": {
@@ -81,25 +42,20 @@
         "listing_ids": []
       },
       "yarmouk": {
-        "price_per_m2_iqd": 2100000,
-        "sample_count": 1,
-        "complex_count": 1,
-        "min_price_per_m2_iqd": 2100000,
-        "max_price_per_m2_iqd": 2100000,
-        "listing_ids": [
-          "78GIJ0"
-        ]
+        "price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complex_count": 0,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "listing_ids": []
       },
       "kadhimiya": {
-        "price_per_m2_iqd": 2475000,
-        "sample_count": 2,
-        "complex_count": 2,
-        "min_price_per_m2_iqd": 2400000,
-        "max_price_per_m2_iqd": 2550000,
-        "listing_ids": [
-          "IF9G4C",
-          "B70A4H"
-        ]
+        "price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complex_count": 0,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "listing_ids": []
       },
       "zayouna": {
         "price_per_m2_iqd": null,
@@ -110,116 +66,44 @@
         "listing_ids": []
       },
       "newbaghdad": {
-        "price_per_m2_iqd": 1031250,
-        "sample_count": 2,
-        "complex_count": 1,
-        "min_price_per_m2_iqd": 587500,
-        "max_price_per_m2_iqd": 1475000,
-        "listing_ids": [
-          "DC268G",
-          "86BCD7"
-        ]
+        "price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complex_count": 0,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "listing_ids": []
       },
       "amiriya": {
-        "price_per_m2_iqd": 1618678,
-        "sample_count": 23,
+        "price_per_m2_iqd": 1638137,
+        "sample_count": 5,
         "complex_count": 2,
-        "min_price_per_m2_iqd": 1368421,
-        "max_price_per_m2_iqd": 1950000,
+        "min_price_per_m2_iqd": 1421053,
+        "max_price_per_m2_iqd": 1818182,
         "listing_ids": [
-          "DCCB3G",
-          "CI2B1D",
-          "6GI9J8",
-          "243HDF",
-          "F2JEDI",
-          "86CJG7",
-          "GDF546",
-          "GDFB16",
-          "495D62",
-          "6GIHB8",
           "DCF96G",
-          "CI2E0D",
-          "07691B",
-          "78GJE0",
-          "IF4HDC",
-          "243A6F",
-          "78D450",
           "78D4B0",
-          "86C127",
-          "GDFE36",
-          "IF90EC",
-          "86C0J7",
-          "DI4ICG"
+          "243HDF",
+          "GDFB16",
+          "495D62"
         ]
       },
       "saydiya": {
-        "price_per_m2_iqd": 1896552,
-        "sample_count": 14,
-        "complex_count": 1,
-        "min_price_per_m2_iqd": 1833333,
-        "max_price_per_m2_iqd": 1929825,
-        "listing_ids": [
-          "6G67D8",
-          "6GC1E8",
-          "GDF4C6",
-          "495A52",
-          "DC294G",
-          "6GI228",
-          "6GI248",
-          "07GC2B",
-          "GDF416",
-          "IF93BC",
-          "F2J58I",
-          "B06D1H",
-          "B065GH",
-          "86CB97"
-        ]
+        "price_per_m2_iqd": null,
+        "sample_count": 0,
+        "complex_count": 0,
+        "min_price_per_m2_iqd": null,
+        "max_price_per_m2_iqd": null,
+        "listing_ids": []
       },
       "jihad": {
-        "price_per_m2_iqd": 1780105,
-        "sample_count": 40,
+        "price_per_m2_iqd": 1721450,
+        "sample_count": 4,
         "complex_count": 1,
-        "min_price_per_m2_iqd": 1361257,
-        "max_price_per_m2_iqd": 2714286,
+        "min_price_per_m2_iqd": 1701571,
+        "max_price_per_m2_iqd": 1824645,
         "listing_ids": [
-          "00HJ0B",
-          "CICG4D",
-          "786210",
-          "F24ACI",
-          "49J772",
           "86D287",
           "HB7DBE",
-          "86D2G7",
-          "493EA2",
-          "GDIA86",
-          "IF40IC",
-          "24J84F",
-          "F2974I",
-          "86D037",
-          "78DD50",
-          "07GI4B",
-          "78DFE0",
-          "86C4G7",
-          "07GF9B",
-          "86C9D7",
-          "78D910",
-          "78DAD0",
-          "GD25H6",
-          "245BDF",
-          "78C9B0",
-          "B0G4BH",
-          "DC4ACG",
-          "HB627E",
-          "CI9E9D",
-          "GD2146",
-          "DC4A5G",
-          "6GF538",
-          "CI9EHD",
-          "07D93B",
-          "78CJ10",
-          "78C370",
-          "B0G90H",
-          "491G72",
           "GD4I76",
           "F432EI"
         ]
@@ -233,24 +117,14 @@
         "listing_ids": []
       },
       "bismayah": {
-        "price_per_m2_iqd": 1155000,
-        "sample_count": 12,
+        "price_per_m2_iqd": 1151428,
+        "sample_count": 2,
         "complex_count": 1,
-        "min_price_per_m2_iqd": 958333,
-        "max_price_per_m2_iqd": 1250000,
+        "min_price_per_m2_iqd": 1142857,
+        "max_price_per_m2_iqd": 1160000,
         "listing_ids": [
           "GD4956",
-          "49A7E2",
-          "6G25J8",
-          "2410DF",
-          "B0D9BH",
-          "IF3B5C",
-          "49A8H2",
-          "86F1I7",
-          "6G2HA8",
-          "6G2HE8",
-          "CIJ77D",
-          "07C1AB"
+          "CIJ77D"
         ]
       }
     },
@@ -321,14 +195,12 @@
           "listing_ids": []
         },
         "amiriya": {
-          "price_per_m2_iqd": 1500000,
-          "sample_count": 1,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 1500000,
-          "max_price_per_m2_iqd": 1500000,
-          "listing_ids": [
-            "I186AC"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "saydiya": {
           "price_per_m2_iqd": null,
@@ -355,51 +227,23 @@
           "listing_ids": []
         },
         "bismayah": {
-          "price_per_m2_iqd": 1083334,
-          "sample_count": 2,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 1050000,
-          "max_price_per_m2_iqd": 1116667,
-          "listing_ids": [
-            "721510",
-            "72A770"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         }
       },
       "2025-q4": {
         "mansour": {
-          "price_per_m2_iqd": 2016476,
-          "sample_count": 26,
-          "complex_count": 4,
-          "min_price_per_m2_iqd": 1700000,
-          "max_price_per_m2_iqd": 2763158,
+          "price_per_m2_iqd": 2000000,
+          "sample_count": 1,
+          "complex_count": 1,
+          "min_price_per_m2_iqd": 2000000,
+          "max_price_per_m2_iqd": 2000000,
           "listing_ids": [
-            "8FAAD7",
-            "4AGGE2",
-            "CJ74CD",
-            "7IE1E0",
-            "I3G13C",
-            "HD777E",
-            "C3E86D",
-            "0IJAEB",
-            "0IJEHB",
-            "6417B8",
-            "7F57I0",
-            "7I11B0",
-            "21D66F",
-            "D983AG",
-            "I3DE5C",
-            "D96HFG",
-            "C32FED",
-            "G91016",
-            "0I9AHB",
-            "6963G8",
-            "C5F7JD",
-            "7FG6B0",
-            "641708",
-            "7F5780",
-            "2A823F",
-            "4E0E12"
+            "G91016"
           ]
         },
         "jadriya": {
@@ -427,46 +271,28 @@
           "listing_ids": []
         },
         "yarmouk": {
-          "price_per_m2_iqd": 2522568,
-          "sample_count": 8,
-          "complex_count": 2,
-          "min_price_per_m2_iqd": 1818182,
-          "max_price_per_m2_iqd": 2928571,
-          "listing_ids": [
-            "62HF68",
-            "7IAC20",
-            "I3663C",
-            "4ACCE2",
-            "D9773G",
-            "7IH2D0",
-            "I3DBIC",
-            "I5212C"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "kadhimiya": {
-          "price_per_m2_iqd": 2120386,
-          "sample_count": 6,
-          "complex_count": 4,
-          "min_price_per_m2_iqd": 1520000,
-          "max_price_per_m2_iqd": 2550000,
-          "listing_ids": [
-            "I5445C",
-            "DJE74G",
-            "G9FDI6",
-            "8489A7",
-            "BI659H",
-            "GJ4HB6"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "zayouna": {
-          "price_per_m2_iqd": 1273885,
-          "sample_count": 1,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 1273885,
-          "max_price_per_m2_iqd": 1273885,
-          "listing_ids": [
-            "692G28"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "newbaghdad": {
           "price_per_m2_iqd": null,
@@ -477,17 +303,13 @@
           "listing_ids": []
         },
         "amiriya": {
-          "price_per_m2_iqd": 1360746,
-          "sample_count": 5,
-          "complex_count": 2,
-          "min_price_per_m2_iqd": 1233333,
+          "price_per_m2_iqd": 1527778,
+          "sample_count": 1,
+          "complex_count": 1,
+          "min_price_per_m2_iqd": 1527778,
           "max_price_per_m2_iqd": 1527778,
           "listing_ids": [
-            "62H2G8",
-            "2A346F",
-            "7FA3J0",
-            "HC899E",
-            "7FC260"
+            "62H2G8"
           ]
         },
         "saydiya": {
@@ -499,17 +321,12 @@
           "listing_ids": []
         },
         "jihad": {
-          "price_per_m2_iqd": 1807242,
-          "sample_count": 4,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 1650000,
-          "max_price_per_m2_iqd": 1895735,
-          "listing_ids": [
-            "C34I1D",
-            "0I9DIB",
-            "7FJH70",
-            "G90A16"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "sadrcity": {
           "price_per_m2_iqd": null,
@@ -530,25 +347,13 @@
       },
       "2026-q1": {
         "mansour": {
-          "price_per_m2_iqd": 1937946,
-          "sample_count": 13,
-          "complex_count": 4,
+          "price_per_m2_iqd": 1650000,
+          "sample_count": 1,
+          "complex_count": 1,
           "min_price_per_m2_iqd": 1650000,
-          "max_price_per_m2_iqd": 2812500,
+          "max_price_per_m2_iqd": 1650000,
           "listing_ids": [
-            "8C49G7",
-            "0GF29B",
-            "B6149H",
-            "8II8B7",
-            "G4DFJ6",
-            "7I8DE0",
-            "62G2E8",
-            "HGBDCE",
-            "7D24H0",
-            "G28I86",
-            "25I34F",
-            "0C7IHB",
-            "21452F"
+            "8C49G7"
           ]
         },
         "jadriya": {
@@ -576,28 +381,22 @@
           "listing_ids": []
         },
         "yarmouk": {
-          "price_per_m2_iqd": 1946428,
-          "sample_count": 4,
+          "price_per_m2_iqd": 1892857,
+          "sample_count": 1,
           "complex_count": 1,
-          "min_price_per_m2_iqd": 1886503,
-          "max_price_per_m2_iqd": 2153846,
+          "min_price_per_m2_iqd": 1892857,
+          "max_price_per_m2_iqd": 1892857,
           "listing_ids": [
-            "45CBF2",
-            "GF0196",
-            "H6A8DE",
-            "I3F9AC"
+            "GF0196"
           ]
         },
         "kadhimiya": {
-          "price_per_m2_iqd": 2600000,
-          "sample_count": 2,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 2500000,
-          "max_price_per_m2_iqd": 2700000,
-          "listing_ids": [
-            "B64G4H",
-            "6FB1I8"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "zayouna": {
           "price_per_m2_iqd": null,
@@ -616,38 +415,31 @@
           "listing_ids": []
         },
         "amiriya": {
-          "price_per_m2_iqd": 1192724,
-          "sample_count": 5,
-          "complex_count": 2,
-          "min_price_per_m2_iqd": 871560,
+          "price_per_m2_iqd": 1500000,
+          "sample_count": 2,
+          "complex_count": 1,
+          "min_price_per_m2_iqd": 1472222,
           "max_price_per_m2_iqd": 1527778,
           "listing_ids": [
             "B61F2H",
-            "BD0G8H",
-            "HGB6GE",
-            "62GFE8",
-            "D4D30G"
+            "BD0G8H"
           ]
         },
         "saydiya": {
-          "price_per_m2_iqd": 1986301,
-          "sample_count": 1,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 1986301,
-          "max_price_per_m2_iqd": 1986301,
-          "listing_ids": [
-            "D27J5G"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "jihad": {
-          "price_per_m2_iqd": 1787879,
-          "sample_count": 1,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 1787879,
-          "max_price_per_m2_iqd": 1787879,
-          "listing_ids": [
-            "0C7DAB"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "sadrcity": {
           "price_per_m2_iqd": null,
@@ -692,14 +484,12 @@
           "listing_ids": []
         },
         "karrada": {
-          "price_per_m2_iqd": 1454545,
-          "sample_count": 1,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 1454545,
-          "max_price_per_m2_iqd": 1454545,
-          "listing_ids": [
-            "F4121I"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "yarmouk": {
           "price_per_m2_iqd": null,
@@ -742,25 +532,20 @@
           "listing_ids": []
         },
         "saydiya": {
-          "price_per_m2_iqd": 1369863,
-          "sample_count": 1,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 1369863,
-          "max_price_per_m2_iqd": 1369863,
-          "listing_ids": [
-            "8GEDI7"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "jihad": {
-          "price_per_m2_iqd": 1806283,
-          "sample_count": 2,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 1806283,
-          "max_price_per_m2_iqd": 1806283,
-          "listing_ids": [
-            "I211HC",
-            "I2EB9C"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "sadrcity": {
           "price_per_m2_iqd": null,
@@ -771,66 +556,26 @@
           "listing_ids": []
         },
         "bismayah": {
-          "price_per_m2_iqd": 1085000,
-          "sample_count": 2,
+          "price_per_m2_iqd": 1170000,
+          "sample_count": 1,
           "complex_count": 1,
-          "min_price_per_m2_iqd": 1000000,
+          "min_price_per_m2_iqd": 1170000,
           "max_price_per_m2_iqd": 1170000,
           "listing_ids": [
-            "6D72E8",
-            "GC85E6"
+            "6D72E8"
           ]
         }
       },
       "2026-q3": {
         "mansour": {
-          "price_per_m2_iqd": 2232143,
-          "sample_count": 41,
-          "complex_count": 5,
-          "min_price_per_m2_iqd": 1350000,
-          "max_price_per_m2_iqd": 3229167,
+          "price_per_m2_iqd": 2301042,
+          "sample_count": 2,
+          "complex_count": 2,
+          "min_price_per_m2_iqd": 2232143,
+          "max_price_per_m2_iqd": 2369942,
           "listing_ids": [
-            "DD6JFG",
-            "86CF07",
-            "86CE97",
-            "6DFGG8",
-            "24463F",
-            "6GC1A8",
-            "78GB20",
-            "CI43FD",
-            "GDFJF6",
-            "78D2H0",
-            "DC25DG",
-            "B062BH",
-            "IF2EAC",
-            "CIFA0D",
-            "07841B",
-            "GDC576",
-            "F24B2I",
-            "786J60",
-            "86G127",
-            "DCIHBG",
-            "6GDAH8",
-            "0783HB",
-            "786170",
-            "GDCHD6",
-            "IF272C",
-            "2496JF",
-            "F248JI",
-            "HB7HJE",
-            "495HA2",
-            "GDFJE6",
-            "HB8I0E",
-            "CI414D",
-            "CI41ED",
-            "DC21CG",
-            "HB83CE",
-            "GD2JI6",
-            "DCIA2G",
-            "GDI9F6",
-            "86D1F7",
             "HBG7JE",
-            "CFC64D"
+            "6DFGG8"
           ]
         },
         "jadriya": {
@@ -858,25 +603,20 @@
           "listing_ids": []
         },
         "yarmouk": {
-          "price_per_m2_iqd": 2100000,
-          "sample_count": 1,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 2100000,
-          "max_price_per_m2_iqd": 2100000,
-          "listing_ids": [
-            "78GIJ0"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "kadhimiya": {
-          "price_per_m2_iqd": 2475000,
-          "sample_count": 2,
-          "complex_count": 2,
-          "min_price_per_m2_iqd": 2400000,
-          "max_price_per_m2_iqd": 2550000,
-          "listing_ids": [
-            "IF9G4C",
-            "B70A4H"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "zayouna": {
           "price_per_m2_iqd": null,
@@ -887,116 +627,44 @@
           "listing_ids": []
         },
         "newbaghdad": {
-          "price_per_m2_iqd": 1031250,
-          "sample_count": 2,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 587500,
-          "max_price_per_m2_iqd": 1475000,
-          "listing_ids": [
-            "DC268G",
-            "86BCD7"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "amiriya": {
-          "price_per_m2_iqd": 1618678,
-          "sample_count": 23,
+          "price_per_m2_iqd": 1638137,
+          "sample_count": 5,
           "complex_count": 2,
-          "min_price_per_m2_iqd": 1368421,
-          "max_price_per_m2_iqd": 1950000,
+          "min_price_per_m2_iqd": 1421053,
+          "max_price_per_m2_iqd": 1818182,
           "listing_ids": [
-            "DCCB3G",
-            "CI2B1D",
-            "6GI9J8",
-            "243HDF",
-            "F2JEDI",
-            "86CJG7",
-            "GDF546",
-            "GDFB16",
-            "495D62",
-            "6GIHB8",
             "DCF96G",
-            "CI2E0D",
-            "07691B",
-            "78GJE0",
-            "IF4HDC",
-            "243A6F",
-            "78D450",
             "78D4B0",
-            "86C127",
-            "GDFE36",
-            "IF90EC",
-            "86C0J7",
-            "DI4ICG"
+            "243HDF",
+            "GDFB16",
+            "495D62"
           ]
         },
         "saydiya": {
-          "price_per_m2_iqd": 1896552,
-          "sample_count": 14,
-          "complex_count": 1,
-          "min_price_per_m2_iqd": 1833333,
-          "max_price_per_m2_iqd": 1929825,
-          "listing_ids": [
-            "6G67D8",
-            "6GC1E8",
-            "GDF4C6",
-            "495A52",
-            "DC294G",
-            "6GI228",
-            "6GI248",
-            "07GC2B",
-            "GDF416",
-            "IF93BC",
-            "F2J58I",
-            "B06D1H",
-            "B065GH",
-            "86CB97"
-          ]
+          "price_per_m2_iqd": null,
+          "sample_count": 0,
+          "complex_count": 0,
+          "min_price_per_m2_iqd": null,
+          "max_price_per_m2_iqd": null,
+          "listing_ids": []
         },
         "jihad": {
-          "price_per_m2_iqd": 1780105,
-          "sample_count": 40,
+          "price_per_m2_iqd": 1721450,
+          "sample_count": 4,
           "complex_count": 1,
-          "min_price_per_m2_iqd": 1361257,
-          "max_price_per_m2_iqd": 2714286,
+          "min_price_per_m2_iqd": 1701571,
+          "max_price_per_m2_iqd": 1824645,
           "listing_ids": [
-            "00HJ0B",
-            "CICG4D",
-            "786210",
-            "F24ACI",
-            "49J772",
             "86D287",
             "HB7DBE",
-            "86D2G7",
-            "493EA2",
-            "GDIA86",
-            "IF40IC",
-            "24J84F",
-            "F2974I",
-            "86D037",
-            "78DD50",
-            "07GI4B",
-            "78DFE0",
-            "86C4G7",
-            "07GF9B",
-            "86C9D7",
-            "78D910",
-            "78DAD0",
-            "GD25H6",
-            "245BDF",
-            "78C9B0",
-            "B0G4BH",
-            "DC4ACG",
-            "HB627E",
-            "CI9E9D",
-            "GD2146",
-            "DC4A5G",
-            "6GF538",
-            "CI9EHD",
-            "07D93B",
-            "78CJ10",
-            "78C370",
-            "B0G90H",
-            "491G72",
             "GD4I76",
             "F432EI"
           ]
@@ -1010,24 +678,14 @@
           "listing_ids": []
         },
         "bismayah": {
-          "price_per_m2_iqd": 1155000,
-          "sample_count": 12,
+          "price_per_m2_iqd": 1151428,
+          "sample_count": 2,
           "complex_count": 1,
-          "min_price_per_m2_iqd": 958333,
-          "max_price_per_m2_iqd": 1250000,
+          "min_price_per_m2_iqd": 1142857,
+          "max_price_per_m2_iqd": 1160000,
           "listing_ids": [
             "GD4956",
-            "49A7E2",
-            "6G25J8",
-            "2410DF",
-            "B0D9BH",
-            "IF3B5C",
-            "49A8H2",
-            "86F1I7",
-            "6G2HA8",
-            "6G2HE8",
-            "CIJ77D",
-            "07C1AB"
+            "CIJ77D"
           ]
         }
       }
