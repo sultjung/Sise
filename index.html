@@ -1155,6 +1155,10 @@
       .filter(key=>Number.isFinite(Number(complexes[key].iqd)))
       .sort((a,b)=>complexes[b].iqd-complexes[a].iqd || complexes[a].nameKr.localeCompare(complexes[b].nameKr,'ko'));
   }
+  function trendComplexLabel(key){
+    const shortNames={millennium:'밀레니엄',al_wud:'알와드',bismayah_complex:'비스마야'};
+    return shortNames[key]||complexes[key].nameKr;
+  }
   function renderComparisonTable(){
     const el=document.getElementById('comparison-table');
     if(!el) return;
@@ -1177,7 +1181,7 @@
     const rows=keys.map(k=>{
       const points=quarterlyTrendPoints(k);
       const cells=points.map(point=>Number.isFinite(point.value)?`${fmt(displayValue(point.value))}<small>표본 ${point.sample}건</small>`:'미확인').join('</td><td>');
-      return `<tr class="trend-complex-row" data-trend-key="${k}"><td>${complexes[k].nameKr}<small>클릭하여 상세보기</small></td><td>${cells}</td></tr>`;
+      return `<tr class="trend-complex-row" data-trend-key="${k}"><td>${trendComplexLabel(k)}<small>클릭하여 상세보기</small></td><td>${cells}</td></tr>`;
     }).join('');
     el.innerHTML=`<table class="comparison-table"><thead><tr><th>단지</th>${periodLabels.map(label=>`<th>${label}<br>${unit}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table><div class="trend-meta">※ 2025년 연간 및 2026년 분기별 공개 매물 ㎡당 호가 중위값입니다. 표본이 없는 기간은 미확인으로 표시하며, 단지는 최신 확인 단가가 높은 순으로 정렬합니다.</div>`;
     el.querySelectorAll('[data-trend-key]').forEach(row=>row.addEventListener('click',()=>{selectedTrendKey=row.dataset.trendKey;renderTrend();}));
@@ -1281,12 +1285,12 @@
     renderComparisonTable();
     const seriesKeys=trendOrderedComplexKeys();
     if(selectedTrendKey!=='all'&&!seriesKeys.includes(selectedTrendKey)) selectedTrendKey=seriesKeys[0];
-    controls.innerHTML=`<div class="trend-toolbar"><div><button class="${selectedTrendKey==='all'?'active':''}" data-trend-key="all">전체 단지 비교</button>${seriesKeys.map(k=>`<button class="${k===selectedTrendKey?'active':''}" data-trend-key="${k}">${complexes[k].nameKr}</button>`).join('')}</div><div class="trend-type"><button class="${selectedTrendType==='bar'?'active':''}" data-trend-type="bar">막대</button><button class="${selectedTrendType==='line'?'active':''}" data-trend-type="line">선</button><button class="${selectedTrendCurrency==='usd'?'active':''}" data-trend-currency="usd">USD</button><button class="${selectedTrendCurrency==='iqd'?'active':''}" data-trend-currency="iqd">IQD</button></div></div>`;
+    controls.innerHTML=`<div class="trend-toolbar"><div><button class="${selectedTrendKey==='all'?'active':''}" data-trend-key="all">전체 단지 비교</button>${seriesKeys.map(k=>`<button class="${k===selectedTrendKey?'active':''}" data-trend-key="${k}">${trendComplexLabel(k)}</button>`).join('')}</div><div class="trend-type"><button class="${selectedTrendType==='bar'?'active':''}" data-trend-type="bar">막대</button><button class="${selectedTrendType==='line'?'active':''}" data-trend-type="line">선</button><button class="${selectedTrendCurrency==='usd'?'active':''}" data-trend-currency="usd">USD</button><button class="${selectedTrendCurrency==='iqd'?'active':''}" data-trend-currency="iqd">IQD</button></div></div>`;
     controls.querySelectorAll('[data-trend-key]').forEach(b=>b.addEventListener('click',()=>{selectedTrendKey=b.dataset.trendKey;renderTrend();}));
     controls.querySelectorAll('[data-trend-type]').forEach(b=>b.addEventListener('click',()=>{selectedTrendType=b.dataset.trendType;renderTrend();}));
     controls.querySelectorAll('[data-trend-currency]').forEach(b=>b.addEventListener('click',()=>{selectedTrendCurrency=b.dataset.trendCurrency;renderTrend();}));
     if(selectedTrendKey==='all'){
-      const latestDate=ibaitySnapshot?.updated_at||trendHistory.at(-1)?.date||'미확인'; const rows=seriesKeys.map(k=>{const point=quarterlyTrendPoints(k).find(p=>p.period==='2026-q3');return {key:k,name:complexes[k].nameKr,price_per_m2_iqd:point?.value,sample_count:point?.sample};}).filter(r=>Number.isFinite(r.price_per_m2_iqd));
+      const latestDate=ibaitySnapshot?.updated_at||trendHistory.at(-1)?.date||'미확인'; const rows=seriesKeys.map(k=>{const point=quarterlyTrendPoints(k).find(p=>p.period==='2026-q3');return {key:k,name:trendComplexLabel(k),price_per_m2_iqd:point?.value,sample_count:point?.sample};}).filter(r=>Number.isFinite(r.price_per_m2_iqd));
       if(!rows.length){holder.innerHTML='<div class="trend-empty">표시할 월말 단지 시세가 없습니다.</div>';return;}
       const W=900,H=285,P=42,max=Math.max(...rows.map(r=>selectedTrendCurrency==='usd'?r.price_per_m2_iqd/RATE:r.price_per_m2_iqd)); const bw=Math.min(70,(W-P*2)/rows.length*.62);
       holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="전체 단지 시세 비교"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${rows.map((r,i)=>{const display=selectedTrendCurrency==='usd'?r.price_per_m2_iqd/RATE:r.price_per_m2_iqd;const x=P+(W-P*2)*(i+.5)/rows.length,h=(H-P-48)*display/max,y=H-P-h,isBismayah=r.key==='bismayah_complex',fill=isBismayah?'#FF6100':'#AEB3BB',stroke=isBismayah?'#FF6100':'#9BA1AA',label=isBismayah?'#9E3500':'#4B515A';return `<rect x="${x-bw/2}" y="${y}" width="${bw}" height="${h}" rx="5" fill="${fill}" stroke="${stroke}"><title>${r.name}: ${fmt(r.price_per_m2_iqd)} IQD/m² / $${fmt(Math.round(r.price_per_m2_iqd/RATE))} · 표본 ${r.sample_count||'-'}건</title></rect><text x="${x}" y="${y-10}" text-anchor="middle" font-size="10" font-weight="700" fill="${label}">${selectedTrendCurrency==='usd'?'$'+fmt(Math.round(display)) : fmt(display)+' IQD'}</text><text x="${x}" y="${H-18}" text-anchor="middle" font-size="10" font-weight="${isBismayah?'700':'400'}" fill="${label}">${r.name}</text>`}).join('')}</svg>`;
