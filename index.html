@@ -1842,7 +1842,7 @@
     const amenity=String(tags.amenity||'').toLowerCase();
     const level=String(tags['school:level']||tags.education||'').toLowerCase();
     if(['hospital','clinic','doctors'].includes(amenity)) return 'hospital';
-    if(['university','college'].includes(amenity)||/جامعة|كلية|university|college/.test(name.toLowerCase())) return 'university';
+    if(['university','college'].includes(amenity)||/جامعة|جامعه|university|university college/i.test(name)) return 'university';
     if(/ابتدائية|ابتدائي|primary|elementary|basic/.test((name+' '+level).toLowerCase())) return 'primary';
     if(/متوسطة|متوسط|intermediate|middle/.test((name+' '+level).toLowerCase())) return 'middle';
     if(/اعدادية|إعدادية|ثانوية|ثانوي|secondary|high school|preparatory/.test((name+' '+level).toLowerCase())) return 'high';
@@ -1873,6 +1873,73 @@
     const latinRaw=raw&&!/[\\u0600-\\u06FF]/.test(raw)?raw:'';
     const fallback={primary:'Primary School',middle:'Middle School',high:'High School',university:'University',unknown:'School',hospital:'Hospital'};
     return english||latinRaw||arabicToLatin(raw)||fallback[type]||'Education Facility';
+  }
+  // One canonical English institution name per university. Department and
+  // faculty POIs inherit the parent name, then lose to its main campus marker.
+  const universityNames=[
+    [/جامعة ابن سينا|جامعه ابن سينا|ibn sina university/i,'Ibn Sina University for Medical and Pharmaceutical Sciences'],
+    [/جامعة تكنولوجيا المعلومات والاتصالات|جامعة تكنلوجيا المعلومات والاتصالات/i,'University of Information Technology and Communications'],
+    [/جامعة الدفاع للدراسات العسكرية|iraqi defense university/i,'Iraqi Defense University for Military Studies'],
+    [/الجامعة الامريكية|american university of iraq|american university in baghdad/i,'American University of Iraq, Baghdad'],
+    [/جامعة النهرين|al.?nahrain university|nahrain university|nahreen university/i,'Al-Nahrain University'],
+    [/الجامعة المستنصرية|الجامعه المستنصريه|المستنصرية|al.?mustansiriyah university|mustansiriya university/i,'Mustansiriyah University'],
+    [/الجامعة العراقية|al.?iraqia university|iraqi university|al.?iraqi university/i,'Al-Iraqia University'],
+    [/جامعة بغداد|baghdad university|university of baghdad/i,'University of Baghdad'],
+    [/الجامعة التقنية الوسطى|middle technical university/i,'Middle Technical University'],
+    [/الجامعة التكنولوجية|university of technology/i,'University of Technology'],
+    [/جامعة المشرق|mashreq university|almashreq university/i,'Mashreq University'],
+    [/جامعة البيان|albayan university|al bayan university/i,'Al-Bayan University'],
+    [/جامعة الشعب/i,'Al-Shaab University'],
+    [/جامعة كلكامش|كلكامش الجامعة/i,'Gilgamesh University'],
+    [/جامعة أوروك|جامعة اوروك|جامعه اوروك|uruk university/i,'Uruk University'],
+    [/جامعة التراث|كلية التراث الجامعة|al.?turath university/i,'Al-Turath University'],
+    [/جامعة الفراهيدي|al.?farahidi university/i,'Al-Farahidi University'],
+    [/جامعة اشور|كلية آشور الجامعة|ashur university/i,'Ashur University'],
+    [/جامعة الامام الكاظم|جامعة الإمام الكاظم/i,'Imam Al-Kadhim University'],
+    [/كلية الامام الاعظم الجامعة|كلية الأمام الاعظم الجامعة/i,'Imam Al-Azam University College'],
+    [/جامعة المصطفى الامين/i,'Al-Mustafa Al-Amin University'],
+    [/جامعة المصطفى العالمية/i,'Al-Mustafa International University'],
+    [/كلية المصطفى الجامعة|almustafa university college/i,'Al-Mustafa University College'],
+    [/جامعة الأمين|جامعة الامين|al.?ameen university/i,'Al-Ameen University'],
+    [/جامعة البكر/i,'Al-Bakr University'],
+    [/جامعة الكرخ للعلوم|al.?karkh.*university/i,'Al-Karkh University of Science'],
+    [/كلية المنصور الجامعة/i,'Al-Mansour University College'],
+    [/كلية الرافدين الجامعة|al.?rafidain university/i,'Al-Rafidain University College'],
+    [/كلي[ةه] الرشيد الجامعه/i,'Al-Rasheed University College'],
+    [/كلية ابن خلدون الجامعة/i,'Ibn Khaldun University College'],
+    [/كلية المدائن الجامعة|al.?mada.in university college/i,'Al-Madain University College'],
+    [/كلية الشرق الأوسط الجامعة/i,'Middle East University College'],
+    [/كلية الهادي الجامعة|كلية الهادي/i,'Al-Hadi University College'],
+    [/كلية الباني الجامعة/i,'Al-Bani University College'],
+    [/كلية النسور الجامعة|al.?nisour university college/i,'Al-Nisour University College'],
+    [/كلية الامال|كلية الآمال/i,'Al-Amal University College'],
+    [/كلية الحكمة الجامعة/i,'Al-Hikma University College'],
+    [/كلية اليرموك الجامعة/i,'Al-Yarmouk University College'],
+    [/كلية الإسراء الجامعة|كلية الأسراء ألجامعة|كلية الاسراء الجامعة|al.?esraa university/i,'Al-Esraa University'],
+    [/كلية النخبة الجامعة/i,'Al-Nukhba University College'],
+    [/كلية بغداد للعلوم الطبية الجامعة/i,'Baghdad University College of Medical Sciences'],
+    [/كلية اصول الدين الجامعة|كلية أصول الدين الجامعة/i,'Usul Al-Din University College'],
+    [/كلية الفارابي.*الجامعة|al farabi university/i,'Al-Farabi University'],
+    [/مدينة العلم الجامعة|medinat al alam university/i,'Madinat Al-Ilm University']
+  ];
+  function universityName(tags={}){
+    const raw=[tags.name,tags['name:ar'],tags['name:en'],tags['official_name:en'],tags.operator].filter(Boolean).join(' ');
+    if(/مدرسة|school|مستشفى|hospital|المدخل|باب الخلفي|back door|مركز تدريب|training center|المركز الاكاديمي|academic center|المجمع العلمي|academy of science/i.test(raw)) return null;
+    for(const [pattern,name] of universityNames) if(pattern.test(raw)) return name;
+    const english=String(tags['name:en']||tags['official_name:en']||tags.name||'').trim();
+    if(!/[\u0600-\u06FF]/.test(english)&&/\b(university|university college)\b/i.test(english)){
+      const parent=english.split(/\s*[-–/,]\s*(?=(college|faculty|department|school|building|campus)\b)/i)[0].trim();
+      return parent.replace(/\s+/g,' ');
+    }
+    return null;
+  }
+  function universityPriority(element){
+    const tags=element.tags||{},raw=String(tags.name||'');
+    return (tags.amenity==='university'?5:0)
+      + (/^\s*(جامعة|جامعه|الجامعة|الجامعه)/.test(raw)?6:0)
+      + (/^\s*كلية.+الجامعة(?:\s|$)/.test(raw)?4:0)
+      + (tags['name:en']?2:0)
+      - (/كلية|كليه|قسم|faculty|department|college of|بناية|مبنى|فرع|بوابة|مدخل/i.test(raw)?5:0);
   }
   function clearEducationLayers(){
     Object.values(educationLayers).forEach(layer=>layer.clearLayers());
@@ -1962,24 +2029,9 @@
         saveEducationCache(activeMode,bounds,requestedTypes,elements);
       }
       clearEducationLayers();
-      const parentUniversities=elements.map(element=>{
-        const tags=element.tags||{},type=classifyEducation(tags);
-        const name=educationName(tags,type);
+      const universities=new Map(),seen=new Set();
+      const addMarker=(element,type,displayName)=>{
         const lat=Number(element.lat??element.center?.lat),lng=Number(element.lon??element.center?.lon);
-        return {type,name,lat,lng};
-      }).filter(item=>item.type==='university'&&/university|جامعة/.test(item.name.toLowerCase())&&!/college|faculty|department/.test(item.name.toLowerCase()));
-      const seen=new Set();
-      elements.forEach(element=>{
-        const tags=element.tags||{},type=classifyEducation(tags);
-        if(!type) return;
-        const lat=Number(element.lat??element.center?.lat),lng=Number(element.lon??element.center?.lon);
-        if(!Number.isFinite(lat)||!Number.isFinite(lng)) return;
-        const displayName=educationName(tags,type);
-        const normalizedName=displayName.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-        const key=`${type}|${normalizedName||element.id}`;
-        if(seen.has(key)) return;
-        if(type==='university'&&/college|faculty|department/.test(displayName.toLowerCase())&&parentUniversities.some(parent=>Math.abs(parent.lat-lat)<.06&&Math.abs(parent.lng-lng)<.08)) return;
-        seen.add(key);
         const marker=L.marker([lat,lng],{pane:'educationPane',icon:L.divIcon({
           className:'facility-marker',
           html:educationIconSvg(type,'map'),
@@ -1989,7 +2041,27 @@
         marker.bindPopup(`<div class="education-popup"><b>${escapeEducationText(displayName)}</b><span>${type==='unknown'?'School (level unknown)':type==='hospital'?'Hospital':educationTypes[type].label}</span></div>`,{closeButton:true,autoPan:false});
         marker.on('click',event=>L.DomEvent.stopPropagation(event));
         marker.addTo(educationLayers[type]);
+      };
+      elements.forEach(element=>{
+        const tags=element.tags||{},type=classifyEducation(tags);
+        if(!type) return;
+        const lat=Number(element.lat??element.center?.lat),lng=Number(element.lon??element.center?.lon);
+        if(!Number.isFinite(lat)||!Number.isFinite(lng)) return;
+        if(type==='university'){
+          const name=universityName(tags);
+          if(!name) return; // Faculty/department POI without a confirmed parent.
+          const existing=universities.get(name);
+          const priority=universityPriority(element);
+          if(!existing||priority>existing.priority) universities.set(name,{element,priority});
+          return;
+        }
+        const displayName=educationName(tags,type);
+        const key=`${type}|${displayName.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()||element.id}`;
+        if(seen.has(key)) return;
+        seen.add(key);
+        addMarker(element,type,displayName);
       });
+      universities.forEach(({element},name)=>addMarker(element,'university',name));
       educationLoadedMode=activeMode;
       educationLoadedTypes=requestedTypesKey;
       educationLoadedBounds=bounds;
