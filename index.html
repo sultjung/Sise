@@ -2356,7 +2356,7 @@
         d.sources=[];
         return;
       }
-      d.iqd=value;
+      d.iqd=value;d.verified=false;
       d.sampleCount=summary.sample_count;
       d.sourceKind=d.sampleCount<5?'limited':'sample';
       d.complex=`확인 단지 ${summary.complex_count}곳 · 매물 ${summary.sample_count}건`;
