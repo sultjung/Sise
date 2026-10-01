@@ -1255,58 +1255,67 @@
     });
   }
   function renderRegionTrend(){
-    const controls=document.getElementById('trend-controls'),holder=document.getElementById('trend-chart'),table=document.getElementById('comparison-table'),meta=document.getElementById('trend-meta');
-    const periods=regionalQuarterSeries();
-    const entries=Object.keys(districts).map(key=>({key,name:districts[key].nameKr}));
-    document.getElementById('trend-section-title').textContent='바그다드 지역별 시세 변화';
-    document.getElementById('trend-section-sub').textContent='DISTRICT APARTMENT PRICE TREND';
-    if(!periods.length){
-      controls.innerHTML='';
-      holder.innerHTML='<div class="trend-empty">지역별 분기 매물 원장을 불러오는 중입니다.</div>';
-      table.innerHTML='';
-      meta.textContent='Ibaity 승인 매매 아파트 · 분기별 단지 중앙값의 중앙값';
-      return;
-    }
-    if(selectedHistoryKey!=='all'&&!districts[selectedHistoryKey])selectedHistoryKey='all';
-    controls.innerHTML=`<div class="trend-toolbar"><div><button class="${selectedHistoryKey==='all'?'active':''}" data-history-key="all">전체 지역 비교</button>${entries.map(e=>`<button class="${selectedHistoryKey===e.key?'active':''}" data-history-key="${e.key}">${e.name}</button>`).join('')}</div><div class="trend-type"><button class="${selectedTrendType==='bar'?'active':''}" data-trend-type="bar">막대</button><button class="${selectedTrendType==='line'?'active':''}" data-trend-type="line">선</button><button class="${selectedTrendCurrency==='usd'?'active':''}" data-trend-currency="usd">USD</button><button class="${selectedTrendCurrency==='iqd'?'active':''}" data-trend-currency="iqd">IQD</button></div></div>`;
-    controls.querySelectorAll('[data-history-key]').forEach(button=>button.addEventListener('click',()=>{selectedHistoryKey=button.dataset.historyKey;renderTrend();}));
-    controls.querySelectorAll('[data-trend-type]').forEach(button=>button.addEventListener('click',()=>{selectedTrendType=button.dataset.trendType;renderTrend();}));
-    controls.querySelectorAll('[data-trend-currency]').forEach(button=>button.addEventListener('click',()=>{selectedTrendCurrency=button.dataset.trendCurrency;renderTrend();}));
-    const display=value=>selectedTrendCurrency==='usd'?Math.round(value/RATE):value;
-    const unit=selectedTrendCurrency==='usd'?'USD/m²':'IQD/m²';
-    const latest=periods.at(-1);
-    const current=ibaitySnapshot?.by_region||latest.by_region;
-    if(selectedHistoryKey==='all'){
-      const rows=entries.map(e=>({name:e.name,key:e.key,point:current[e.key]})).sort((a,b)=>(b.point?.price_per_m2_iqd||0)-(a.point?.price_per_m2_iqd||0));
-      const max=Math.max(...rows.map(r=>r.point?.price_per_m2_iqd||0),1);
-      const height=rows.length*34+30;
-      holder.innerHTML=`<svg viewBox="0 0 900 ${height}" role="img" aria-label="바그다드 지역별 현재 아파트 단가 비교">${rows.map((row,i)=>{
-        const y=12+i*34,value=row.point?.price_per_m2_iqd,sample=row.point?.sample_count||0;
-        const width=Number.isFinite(value)?Math.max(2,550*value/max):0;
-        const color=regionColor(districts[row.key]);
-        return `<text x="8" y="${y+15}" font-size="12" fill="#363B43">${row.name}</text>${width?`<rect x="190" y="${y}" width="${width}" height="20" rx="4" fill="${color}"><title>${row.name}: ${fmt(value)} IQD/m² · 표본 ${sample}건</title></rect>`:''}<text x="755" y="${y+15}" font-size="11" fill="#4B515A">${width?`${fmt(display(value))} · ${sample}건`:'미확인'}</text>`;
-      }).join('')}</svg>`;
-    }else{
-      const points=periods.map(p=>({label:p.label,key:p.key,value:p.by_region[selectedHistoryKey]?.price_per_m2_iqd,sample:p.by_region[selectedHistoryKey]?.sample_count||0}));
-      const valid=points.filter(p=>Number.isFinite(p.value));
-      if(!valid.length)holder.innerHTML='<div class="trend-empty">이 지역에는 확인된 분기별 아파트 매물이 없습니다.</div>';
-      else{
-        const W=900,H=260,P=50,vals=valid.map(p=>display(p.value)),min=Math.min(...vals),max=Math.max(...vals),span=Math.max(max-min,max*.06,1);
-        const xy=points.map((p,i)=>({x:P+(W-P*2)*(points.length===1?.5:i/(points.length-1)),y:Number.isFinite(p.value)?H-P-(display(p.value)-min+span*.12)/(span*1.24)*(H-P*2):null,...p}));
-        const color=regionColor(districts[selectedHistoryKey]);
-        const segments=[];let segment='';
-        xy.forEach(p=>{if(p.y===null){if(segment)segments.push(segment);segment='';return;}segment+=(segment?'L':'M')+`${p.x},${p.y} `;});
-        if(segment)segments.push(segment);
-        const lines=segments.map(segment=>`<path d="${segment}" fill="none" stroke="${color}" stroke-width="3"/>`).join('');
-        const marks=xy.map(p=>Number.isFinite(p.value)
-          ? `${selectedTrendType==='bar'?`<rect x="${p.x-22}" y="${p.y}" width="44" height="${H-P-p.y}" rx="4" fill="${color}"/>`:`<circle cx="${p.x}" cy="${p.y}" r="5" fill="${color}"/>`}<text x="${p.x}" y="${p.y-9}" text-anchor="middle" font-size="11" fill="#4B515A">${fmt(display(p.value))}</text>`
-          : `<text x="${p.x}" y="${H-P-15}" text-anchor="middle" font-size="11" fill="#9B9DA2">미확인</text>`).join('');
-        holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${districts[selectedHistoryKey].nameKr} 분기별 아파트 단가 변화"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${selectedTrendType==='line'?lines:''}${marks}${xy.map(p=>`<text x="${p.x}" y="${H-10}" text-anchor="middle" font-size="11" fill="#6B6D72">${p.label}</text>`).join('')}</svg>`;
-      }
-    }
-    table.innerHTML=`<table class="comparison-table"><thead><tr><th>지역</th>${periods.map(p=>`<th>${p.label}<br>${unit}</th>`).join('')}</tr></thead><tbody>${entries.map(e=>`<tr><td>${e.name}</td>${periods.map(p=>{const point=p.by_region[e.key];return `<td>${Number.isFinite(point?.price_per_m2_iqd)?fmt(display(point.price_per_m2_iqd)):'미확인'}<small>표본 ${point?.sample_count||0}건${point?.sample_count>0&&point.sample_count<5?' · 참고':''}</small></td>`;}).join('')}</tr>`).join('')}</tbody></table>`;
-    meta.textContent=`Ibaity 승인 매매 아파트 · 지역 내 단지별 매물 단가 중앙값의 중앙값 · 전체 지역 비교는 현재 최근 90일, 선택 지역은 분기별 · ${latest.label}까지 · 과거 기간은 ${latest.observed_at||'최신'} 활성 원장으로 확인된 매물 코호트 · 표본 5건 미만 참고 · 실거래가 아님`;
+  const controls=document.getElementById('trend-controls'),holder=document.getElementById('trend-chart'),table=document.getElementById('comparison-table'),meta=document.getElementById('trend-meta');
+  const periods=regionalQuarterSeries();
+  const entries=Object.keys(districts).map(key=>({key,name:districts[key].nameKr}));
+  const latest=periods.at(-1);
+  const current=ibaitySnapshot?.by_region||latest?.by_region||{};
+  const sorted=entries.sort((a,b)=>(current[b.key]?.price_per_m2_iqd||0)-(current[a.key]?.price_per_m2_iqd||0)||a.name.localeCompare(b.name,'ko'));
+  const display=value=>selectedTrendCurrency==='usd'?Math.round(value/RATE):Math.round(value);
+  const unit=selectedTrendCurrency==='usd'?'USD/m²':'IQD/m²';
+  document.getElementById('trend-section-title').textContent='지역별 아파트 시세 추이';
+  document.getElementById('trend-section-sub').textContent='DISTRICT PRICE TREND';
+  if(selectedHistoryKey!=='all'&&!districts[selectedHistoryKey]) selectedHistoryKey='all';
+  controls.innerHTML=`<div class="trend-toolbar"><div><button class="${selectedHistoryKey==='all'?'active':''}" data-history-key="all">전체 지역 비교</button>${sorted.map(e=>`<button class="${selectedHistoryKey===e.key?'active':''}" data-history-key="${e.key}">${e.name}</button>`).join('')}</div><div class="trend-type"><button class="${selectedTrendType==='bar'?'active':''}" data-trend-type="bar">막대</button><button class="${selectedTrendType==='line'?'active':''}" data-trend-type="line">선</button><button class="${selectedTrendCurrency==='usd'?'active':''}" data-trend-currency="usd">USD</button><button class="${selectedTrendCurrency==='iqd'?'active':''}" data-trend-currency="iqd">IQD</button></div></div>`;
+  controls.querySelectorAll('[data-history-key]').forEach(button=>button.addEventListener('click',()=>{selectedHistoryKey=button.dataset.historyKey;renderTrend();}));
+  controls.querySelectorAll('[data-trend-type]').forEach(button=>button.addEventListener('click',()=>{selectedTrendType=button.dataset.trendType;renderTrend();}));
+  controls.querySelectorAll('[data-trend-currency]').forEach(button=>button.addEventListener('click',()=>{selectedTrendCurrency=button.dataset.trendCurrency;renderTrend();}));
+  if(!periods.length){
+    holder.innerHTML='<div class="trend-empty">지역별 분기 매물 원장을 불러오는 중입니다.</div>';
+    table.innerHTML='';
+    meta.textContent='Ibaity 승인 매매 아파트 · 단지별 매물 단가 중앙값의 중앙값';
+    return;
   }
+  if(selectedHistoryKey==='all'){
+    const rows=sorted.filter(e=>Number.isFinite(current[e.key]?.price_per_m2_iqd));
+    if(!rows.length) holder.innerHTML='<div class="trend-empty">확인된 지역별 아파트 시세가 없습니다.</div>';
+    else{
+      const W=900,H=285,P=42,max=Math.max(...rows.map(e=>display(current[e.key].price_per_m2_iqd)),1),bw=Math.min(70,(W-P*2)/rows.length*.62);
+      holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="전체 지역 시세 비교"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${rows.map((e,i)=>{
+        const point=current[e.key],value=display(point.price_per_m2_iqd),x=P+(W-P*2)*(i+.5)/rows.length,h=(H-P-48)*value/max,y=H-P-h,highlight=e.key==='bismayah',fill=highlight?'#FF6100':'#AEB3BB',ink=highlight?'#9E3500':'#4B515A';
+        return `<rect x="${x-bw/2}" y="${y}" width="${bw}" height="${h}" rx="5" fill="${fill}"><title>${e.name}: ${fmt(point.price_per_m2_iqd)} IQD/m² · 표본 ${point.sample_count}건</title></rect><text x="${x}" y="${y-10}" text-anchor="middle" font-size="10" font-weight="700" fill="${ink}">${selectedTrendCurrency==='usd'?'$':''}${fmt(value)}</text><text x="${x}" y="${H-18}" text-anchor="middle" font-size="10" font-weight="${highlight?'700':'400'}" fill="${ink}">${e.name}</text>`;
+      }).join('')}</svg>`;
+    }
+    table.innerHTML=`<table class="comparison-table"><thead><tr><th>지역</th>${periods.map(p=>`<th>${p.label}<br>${unit}</th>`).join('')}</tr></thead><tbody>${sorted.map(e=>`<tr class="trend-complex-row" data-history-row="${e.key}"><td>${e.name}<small>클릭하여 상세보기</small></td>${periods.map(p=>{const point=p.by_region[e.key];return `<td>${Number.isFinite(point?.price_per_m2_iqd)?`${fmt(display(point.price_per_m2_iqd))}<small>표본 ${point.sample_count}건${point.sample_count<5?' · 참고':''}</small>`:'미확인'}</td>`;}).join('')}</tr>`).join('')}</tbody></table><div class="trend-meta">※ 분기별 Ibaity 승인 아파트 매물 호가입니다. 표본이 없는 기간은 미확인으로 표시하며, 지역은 현재 단가가 높은 순으로 정렬합니다.</div>`;
+    table.querySelectorAll('[data-history-row]').forEach(row=>row.addEventListener('click',()=>{selectedHistoryKey=row.dataset.historyRow;renderTrend();}));
+    meta.textContent=`현재 최근 90일 · ${ibaitySnapshot?.updated_at||latest.observed_at||'최신'} 기준 · ${unit} · 지역 내 단지별 매물 단가 중앙값의 중앙값 · 비스마야 강조 · 표본 5건 미만 참고 · 실거래가 아님`;
+    return;
+  }
+  const region=districts[selectedHistoryKey];
+  const points=periods.map(p=>({label:p.label,value:p.by_region[selectedHistoryKey]?.price_per_m2_iqd,sample:p.by_region[selectedHistoryKey]?.sample_count||0}));
+  const values=points.filter(p=>Number.isFinite(p.value)).map(p=>display(p.value));
+  if(!values.length) holder.innerHTML='<div class="trend-empty">이 지역에는 확인된 분기별 아파트 매물이 없습니다.</div>';
+  else{
+    const min=Math.min(...values),max=Math.max(...values),range=Math.max(max-min,max*.03,1),W=900,H=205,P=36;
+    const xy=points.map((p,i)=>{const value=Number.isFinite(p.value)?display(p.value):null;return {...p,x:P+(W-P*2)*(points.length===1?.5:i/(points.length-1)),y:value===null?H-P-10:H-P-(value-(min-range*.25))/(range*1.5)*(H-P*2),display:value};});
+    const label=p=>p.label.replace('년 ','·').replace('분기','Q');
+    const segments=[];let segment='';
+    for(const p of xy){if(!Number.isFinite(p.value)){if(segment)segments.push(segment);segment='';continue;}segment+=(segment?' L':'M')+`${p.x.toFixed(1)},${p.y.toFixed(1)}`;}
+    if(segment)segments.push(segment);
+    const series=selectedTrendType==='bar'
+      ? xy.map(p=>Number.isFinite(p.value)?`<rect x="${p.x-28}" y="${p.y}" width="56" height="${Math.max(2,H-P-p.y)}" rx="5" fill="#FF6100"><title>${p.label}: ${fmt(p.value)} IQD/m² · 표본 ${p.sample}건</title></rect><text x="${p.x}" y="${p.y-10}" text-anchor="middle" font-size="12" font-weight="700" fill="#9E3500">${selectedTrendCurrency==='usd'?'$':''}${fmt(p.display)}</text>`:`<text x="${p.x}" y="${H-P-10}" text-anchor="middle" font-size="11" fill="#9B9DA2">미확인</text>`).join('')
+      : segments.map(path=>`<path d="${path}" fill="none" stroke="#FF6100" stroke-width="3"/>`).join('')+xy.map(p=>Number.isFinite(p.value)?`<circle cx="${p.x}" cy="${p.y}" r="5" fill="#FF6100"><title>${p.label}: ${fmt(p.value)} IQD/m² · 표본 ${p.sample}건</title></circle><text x="${p.x}" y="${p.y-12}" text-anchor="middle" font-size="12" font-weight="700" fill="#9E3500">${selectedTrendCurrency==='usd'?'$':''}${fmt(p.display)}</text>`:`<text x="${p.x}" y="${H-P-10}" text-anchor="middle" font-size="11" fill="#9B9DA2">미확인</text>`).join('');
+    holder.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${region.nameKr} 분기별 아파트 시세 추이"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#D9DADD"/>${series}${xy.map(p=>`<text x="${p.x}" y="${H-12}" text-anchor="middle" font-size="10" fill="#6B6D72">${label(p)}</text>`).join('')}</svg>`;
+  }
+  const rows=points.map((point,index)=>{
+    const previous=points.slice(0,index).reverse().find(p=>Number.isFinite(p.value));
+    const change=Number.isFinite(point.value)&&previous?point.value-previous.value:null;
+    const changeText=change===null?'—':`${change>0?'+':''}${fmt(display(change))} ${unit} (${change>0?'+':''}${(change/previous.value*100).toFixed(1)}%)`;
+    return `<tr><td>${point.label}</td><td>${point.sample||'—'}건${point.sample>0&&point.sample<5?' · 참고':''}</td><td>${Number.isFinite(point.value)?fmt(display(point.value)):'미확인'}</td><td>${changeText}</td></tr>`;
+  }).join('');
+  table.innerHTML=`<table class="comparison-table"><thead><tr><th>기간</th><th>표본</th><th>${unit}</th><th>직전 확인기간 대비</th></tr></thead><tbody>${rows}</tbody></table><div class="trend-meta">※ ${region.nameKr}의 분기별 아파트 매물 ㎡당 호가입니다. 표본이 없는 기간은 미확인으로 표시합니다.</div>`;
+  meta.textContent=`${region.nameKr} · Ibaity 승인 매매 아파트 · 단지별 매물 단가 중앙값의 중앙값 · 과거 기간은 ${latest.observed_at||'최신'} 활성 원장 기준 · 표본 5건 미만 참고 · 실거래가 아님`;
+}
 
   function renderHistoryTrend(kind){
     if(kind==='region')return renderRegionTrend();
