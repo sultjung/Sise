@@ -19,4 +19,15 @@ jobs:
         with:
           python-version: "3.12"
       - name: Inspect detailed public listing terms
-        run: python scripts/audit_ibaity_terms.py
+        run: |
+          PYTHONPATH=scripts python - <<'PY'
+          from scrape_ibaity import fetch_page
+          for page in (1, 32):
+              rows=fetch_page(page)
+              print("PAGE",page,"COUNT",len(rows))
+              if rows:
+                  row=next((x for x in rows if x.get("id")=="86BCD7"),rows[0])
+                  print("ID",row.get("id"),"KEYS",sorted(row.keys()))
+                  for key in ("description","details","content","title","price"):
+                      print(key,repr(row.get(key))[:500])
+          PY
