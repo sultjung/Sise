@@ -1233,10 +1233,7 @@
   function renderHistoryTrend(kind){
     const controls=document.getElementById('trend-controls'),holder=document.getElementById('trend-chart'),table=document.getElementById('comparison-table'),meta=document.getElementById('trend-meta');
     const national=kind==='national';
-    const regionPeriods=(governorateHistory?.periods||[]).map(period=>({
-      key:period.key,label:period.label,period,
-      value:period.values?.baghdad,
-    }));
+    const regionPeriods=governorateHistory?.periods||[];
     const periods=national?(governorateHistory?.periods||[]):regionPeriods;
     const entries=national?nationalGovernorates.map(d=>({key:d.key,name:d.nameKr})): [{key:'baghdad',name:'바그다드'}];
     document.getElementById('trend-section-title').textContent=national?'이라크 전체 주별 시세 변화':'바그다드 지역별 시세 변화';
