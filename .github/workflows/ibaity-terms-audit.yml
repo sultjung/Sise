@@ -38,6 +38,8 @@ jobs:
               markers=sorted(set(m.group(0).lower() for m in FINANCING.finditer(desc)))
               status="finance" if markers else "cash" if CASH.search(desc) else "unspecified" if desc.strip() else "missing"
               counts[status]=counts.get(status,0)+1
+              if status == "cash":
+                  print("CASH",row["id"],row["complex_key"],row["complex_name_ar"],row["price_iqd"])
               if row["price_eligible"] and status in ("finance","missing"):
                   print("FLAG",row["id"],status,",".join(markers)[:90],row["complex_key"],row["complex_name_ar"],row["price_iqd"])
           print("TOTAL",len(records),"COUNTS",counts)
