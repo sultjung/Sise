@@ -91,7 +91,7 @@
     "date": "2026-10-01",
     "status": "verified_snapshot",
     "source": "ibaity.com 승인 활성 매매 아파트 공개 client API",
-    "method": "수집일 기준 최근 90일 등록 매물의 단지별 m²당 호가 중앙값; 표본 수 병기",
+    "method": "현재 활성 원장에서 최근 90일 단지별 중앙값 및 등록일 기준 과거 연·분기 코호트를 산출; 표본 수 병기",
     "by_complex": {
       "al_wud": {
         "price_per_m2_iqd": 1526316,
@@ -193,12 +193,152 @@
           "price_per_m2_iqd": 1955077,
           "sample_count": 8
         },
-        "yamama_city": {
-          "price_per_m2_iqd": null,
-          "sample_count": 0
-        },
         "yarmouk_compound": {
           "price_per_m2_iqd": 2100000,
+          "sample_count": 1
+        }
+      },
+      "2026-q1": {
+        "al_wud": {
+          "price_per_m2_iqd": 1513889,
+          "sample_count": 4
+        },
+        "dar_alsalam": {
+          "price_per_m2_iqd": 2059701,
+          "sample_count": 1
+        },
+        "iraq_gate": {
+          "price_per_m2_iqd": 2335526,
+          "sample_count": 7
+        },
+        "jawahir_dijla": {
+          "price_per_m2_iqd": 2600000,
+          "sample_count": 2
+        },
+        "mansour_city": {
+          "price_per_m2_iqd": 1650000,
+          "sample_count": 1
+        },
+        "nasim_city": {
+          "price_per_m2_iqd": 1787879,
+          "sample_count": 1
+        },
+        "palm_towers": {
+          "price_per_m2_iqd": 2075893,
+          "sample_count": 4
+        },
+        "royal_city": {
+          "price_per_m2_iqd": 1800000,
+          "sample_count": 1
+        }
+      },
+      "2025-q4": {
+        "al_wud": {
+          "price_per_m2_iqd": 1488158,
+          "sample_count": 4
+        },
+        "dar_alsalam": {
+          "price_per_m2_iqd": 2262858,
+          "sample_count": 2
+        },
+        "iraq_gate": {
+          "price_per_m2_iqd": 2631579,
+          "sample_count": 11
+        },
+        "jawahir_dijla": {
+          "price_per_m2_iqd": 2550000,
+          "sample_count": 1
+        },
+        "mansour_city": {
+          "price_per_m2_iqd": 1923077,
+          "sample_count": 4
+        },
+        "nasim_city": {
+          "price_per_m2_iqd": 1807242,
+          "sample_count": 4
+        },
+        "palm_towers": {
+          "price_per_m2_iqd": 2053571,
+          "sample_count": 1
+        },
+        "royal_city": {
+          "price_per_m2_iqd": 1979382,
+          "sample_count": 10
+        },
+        "yamama_city": {
+          "price_per_m2_iqd": 2136874,
+          "sample_count": 2
+        },
+        "yarmouk_compound": {
+          "price_per_m2_iqd": 2928571,
+          "sample_count": 1
+        }
+      },
+      "2025-q3": {
+        "al_wud": {
+          "price_per_m2_iqd": 1500000,
+          "sample_count": 1
+        },
+        "bismayah_complex": {
+          "price_per_m2_iqd": 1083334,
+          "sample_count": 2
+        }
+      },
+      "2026-q2": {
+        "bismayah_complex": {
+          "price_per_m2_iqd": 1085000,
+          "sample_count": 2
+        },
+        "nasim_city": {
+          "price_per_m2_iqd": 1806283,
+          "sample_count": 2
+        }
+      }
+    },
+    "by_year": {
+      "2025": {
+        "al_wud": {
+          "price_per_m2_iqd": 1500000,
+          "sample_count": 5
+        },
+        "bismayah_complex": {
+          "price_per_m2_iqd": 1083334,
+          "sample_count": 2
+        },
+        "dar_alsalam": {
+          "price_per_m2_iqd": 2262858,
+          "sample_count": 2
+        },
+        "iraq_gate": {
+          "price_per_m2_iqd": 2631579,
+          "sample_count": 11
+        },
+        "jawahir_dijla": {
+          "price_per_m2_iqd": 2550000,
+          "sample_count": 1
+        },
+        "mansour_city": {
+          "price_per_m2_iqd": 1923077,
+          "sample_count": 4
+        },
+        "nasim_city": {
+          "price_per_m2_iqd": 1807242,
+          "sample_count": 4
+        },
+        "palm_towers": {
+          "price_per_m2_iqd": 2053571,
+          "sample_count": 1
+        },
+        "royal_city": {
+          "price_per_m2_iqd": 1979382,
+          "sample_count": 10
+        },
+        "yamama_city": {
+          "price_per_m2_iqd": 2136874,
+          "sample_count": 2
+        },
+        "yarmouk_compound": {
+          "price_per_m2_iqd": 2928571,
           "sample_count": 1
         }
       }
