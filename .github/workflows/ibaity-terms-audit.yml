@@ -1,0 +1,22 @@
+name: Audit Ibaity sale terms
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/audit_ibaity_terms.py"
+      - ".github/workflows/ibaity-terms-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Inspect detailed public listing terms
+        run: python scripts/audit_ibaity_terms.py
